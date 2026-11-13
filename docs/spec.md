@@ -78,8 +78,9 @@ Plan (tracked in issue 2):
 
 1. Hand-write or generate a `script.json` of about 400 words: two characters
    discuss what RAG is, retrieval, then generation.
-2. Voices: edge-tts with two voices (Kokoro as fallback if offline is needed).
-3. Images: 6-10 simple original character/diagram scenes.
+2. Voices: Kokoro running locally, two voices.
+3. Images: 6-10 original scenes drawn with SVG/code: two robot characters
+   and simple diagrams.
 4. Assembly with ffmpeg first (fewer dependencies), subtitles per sentence.
 5. One command renders the MP4 locally.
 
@@ -88,17 +89,20 @@ any long video is made.
 
 ## Tool choices and reasons
 
-- **edge-tts / Kokoro**: free; edge-tts is quick to start, Kokoro runs locally.
-  Trade-off: edge-tts needs network access.
+- **Kokoro (local)**: free, runs offline, Apache-2.0 licence, so the voice is
+  safe to publish later. edge-tts is not used: it needs network access and is
+  an unofficial client of an online service.
+- **SVG/code scenes first**: free, consistent from scene to scene, and
+  renderable in CI. A local image model may come later if the machine has a
+  GPU; a paid image service only after a cost estimate and Nghiep's yes.
 - **ffmpeg first, Remotion later**: ffmpeg is enough for Ken Burns, titles and
   subtitles in the trial; Remotion becomes worth it when animated diagrams
   (format 3) need reusable components.
 - **JSON script as the single source**: one file drives video, blog post and
   short post, and is easy to review and diff.
 
-## Open questions for Nghiep
+## Decisions (Nghiep, 2026-11-13)
 
-- Character style: anime-style or robot first?
-- Image source for scenes: local model, hand-made SVG, or a paid service (cost
-  estimate to follow before any use)?
-- Confirm edge-tts is acceptable for the trial, given it needs network.
+- Character style: **robots first** (two original robot characters).
+- Scene images: **SVG/code drawn**, no image model for the trial.
+- Voice: **Kokoro, local**; edge-tts is not used.
