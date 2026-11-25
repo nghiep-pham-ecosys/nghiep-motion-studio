@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nghiep-motion-studio"
+version = "0.1.0"
+description = "Scene-based explainer video pipeline: scenes.json to 1080p mp4 with ffmpeg"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = ["jsonschema>=4.10"]
+
+[project.scripts]
+motion-studio = "motion_studio.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+motion_studio = ["schema/*.json"]

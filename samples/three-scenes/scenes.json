@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "title": {
+    "en": "How this pipeline works",
+    "vi": "Dây chuyền này hoạt động thế nào"
+  },
+  "languages": ["en", "vi"],
+  "scenes": [
+    {
+      "id": "intro",
+      "chapter": {"en": "Intro", "vi": "Mở đầu"},
+      "narration": {
+        "en": "This short sample shows how one scenes file becomes a video.",
+        "vi": "Đoạn mẫu ngắn này cho thấy một tệp cảnh trở thành video như thế nào."
+      },
+      "duration_s": 3,
+      "visual": {
+        "kind": "title",
+        "text": {
+          "en": "How this pipeline works",
+          "vi": "Dây chuyền này\nhoạt động thế nào"
+        },
+        "background": "#0f172a",
+        "color": "#f8fafc"
+      }
+    },
+    {
+      "id": "pipeline",
+      "chapter": {"en": "Pipeline", "vi": "Dây chuyền"},
+      "narration": {
+        "en": "Each scene has narration per language, a visual and a duration. ffmpeg turns them into one mp4.",
+        "vi": "Mỗi cảnh có lời dẫn theo từng ngôn ngữ, một hình minh hoạ và thời lượng. ffmpeg ghép chúng thành một tệp mp4."
+      },
+      "duration_s": 4,
+      "visual": {"kind": "image", "src": "assets/pipeline.svg", "motion": "zoom-in", "background": "#0f172a"}
+    },
+    {
+      "id": "robot",
+      "chapter": {"en": "Pipeline", "vi": "Dây chuyền"},
+      "narration": {
+        "en": "Visuals are shared, so English and Vietnamese videos come from the same file.",
+        "vi": "Hình ảnh dùng chung, nên video tiếng Anh và tiếng Việt đến từ cùng một tệp."
+      },
+      "duration_s": 3,
+      "visual": {"kind": "image", "src": "assets/robot.svg", "background": "#1f2937"}
+    }
+  ]
+}

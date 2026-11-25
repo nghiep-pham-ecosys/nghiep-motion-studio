@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <rect width="1600" height="900" fill="#0f172a"/>
+  <g font-family="DejaVu Sans, sans-serif" font-size="44" fill="#e2e8f0" text-anchor="middle">
+    <rect x="80" y="370" width="360" height="160" rx="24" fill="#1e3a8a"/>
+    <text x="260" y="465">scenes.json</text>
+    <rect x="620" y="370" width="360" height="160" rx="24" fill="#065f46"/>
+    <text x="800" y="465">ffmpeg</text>
+    <rect x="1160" y="370" width="360" height="160" rx="24" fill="#7c2d12"/>
+    <text x="1340" y="465">mp4</text>
+  </g>
+  <g stroke="#f59e0b" stroke-width="10" fill="#f59e0b">
+    <line x1="450" y1="450" x2="590" y2="450"/>
+    <polygon points="610,450 580,430 580,470"/>
+    <line x1="990" y1="450" x2="1130" y2="450"/>
+    <polygon points="1150,450 1120,430 1120,470"/>
+  </g>
+</svg>
