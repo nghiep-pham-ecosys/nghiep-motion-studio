@@ -19,9 +19,7 @@
         "text": {
           "en": "How this pipeline works",
           "vi": "Dây chuyền này\nhoạt động thế nào"
-        },
-        "background": "#0f172a",
-        "color": "#f8fafc"
+        }
       }
     },
     {
@@ -32,7 +30,7 @@
         "vi": "Mỗi cảnh có lời dẫn theo từng ngôn ngữ, một hình minh hoạ và thời lượng. ffmpeg ghép chúng thành một tệp mp4."
       },
       "duration_s": 4,
-      "visual": {"kind": "image", "src": "assets/pipeline.svg", "motion": "zoom-in", "background": "#0f172a"}
+      "visual": {"kind": "image", "src": "assets/pipeline.svg", "motion": "zoom-in"}
     },
     {
       "id": "robot",
@@ -42,7 +40,7 @@
         "vi": "Hình ảnh dùng chung, nên video tiếng Anh và tiếng Việt đến từ cùng một tệp."
       },
       "duration_s": 3,
-      "visual": {"kind": "image", "src": "assets/robot.svg", "background": "#1f2937"}
+      "visual": {"kind": "image", "src": "assets/robot.svg"}
     }
   ]
 }

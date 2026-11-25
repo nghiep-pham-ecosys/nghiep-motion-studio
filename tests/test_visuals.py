@@ -39,6 +39,7 @@ from motion_studio.visuals import (  # noqa: E402
 )
 from motion_studio.visuals.manim_ce import manim_command  # noqa: E402
 from motion_studio.visuals.vhs import wrap_tape  # noqa: E402
+from motion_studio.theme import LIGHT  # noqa: E402
 
 SAMPLE = ROOT / "samples" / "visuals" / "scenes.json"
 REQUIRE_FFMPEG = os.environ.get("MOTION_STUDIO_REQUIRE_FFMPEG") == "1"
@@ -414,7 +415,19 @@ class AdapterRenderTest(unittest.TestCase):
         self.assertEqual(int(video["nb_read_frames"]), sum(t.frames for t in result.timeline))
         clips = list((self.base / "cache").glob("*.mp4"))
         self.assertEqual(len(clips), 1, clips)
+        self.assert_light_corner(self.base / "out.mp4")
         return info, result
+
+    def assert_light_corner(self, path: Path) -> None:
+        """The clip's frame edge is the light theme background (Manim background, VHS terminal colours)."""
+        raw = subprocess.run(
+            ["ffmpeg", "-hide_banner", "-loglevel", "error", "-ss", "0.3", "-i", str(path),
+             "-vf", "scale=in_color_matrix=bt709:in_range=tv,format=rgb24,crop=2:2:4:4", "-frames:v", "1", "-f", "rawvideo", "-"],
+            capture_output=True, check=True,
+        ).stdout
+        want = tuple(int(LIGHT.background[i : i + 2], 16) for i in (1, 3, 5))
+        got = tuple(raw[:3])
+        self.assertTrue(all(abs(a - b) <= 6 for a, b in zip(got, want)), f"corner {got}, expected about {want}")
 
     def test_diagram(self):
         self.need("diagram")

@@ -314,6 +314,11 @@ class Scenes:
     def fps(self) -> int:
         return int(self.doc.get("output", {}).get("fps", DEFAULT_FPS))
 
+    @property
+    def theme(self) -> str | None:
+        """The theme named in the file (None: the default)."""
+        return self.doc.get("theme")
+
     def resolve(self, rel: str) -> Path:
         return (self.base_dir / rel).resolve()
 

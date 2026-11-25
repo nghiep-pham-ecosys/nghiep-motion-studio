@@ -12,6 +12,7 @@ from . import __version__
 from .render import RenderError, RenderOptions, plan, render, with_generated_visuals
 from .schema import Scenes, ScenesError, load, load_schema
 from .subtitles import DEFAULT_MODEL as DEFAULT_WHISPER_MODEL
+from .theme import THEMES
 from .visuals import GENERATED_KINDS, VisualError, missing_tools
 
 REF_ENV = "MOTION_STUDIO_REF_WAV"
@@ -64,7 +65,7 @@ def _cmd_render(args: argparse.Namespace) -> int:
         return 2
     try:
         opts = RenderOptions(
-            preset=args.preset, crf=args.crf, jobs=args.jobs, font=args.font,
+            preset=args.preset, crf=args.crf, jobs=args.jobs, font=args.font, theme=args.theme,
             visuals_dir=args.visuals_dir, rebuild_visuals=args.rebuild_visuals,
         )
     except ValueError as exc:
@@ -85,12 +86,14 @@ def _cmd_render(args: argparse.Namespace) -> int:
         if args.subtitles == "none":
             for suffix in (".srt", ".burned.mp4"):  # files from an earlier render no longer match this video
                 output.with_suffix(suffix).unlink(missing_ok=True)
-        elif not _render_subtitles(args, output, lines, result.width, result.height):
+        elif not _render_subtitles(args, output, lines, result.width, result.height, args.theme or scenes.theme):
             return 1
     return 0
 
 
-def _render_subtitles(args: argparse.Namespace, output: Path, lines: list | None, width: int, height: int) -> bool:
+def _render_subtitles(
+    args: argparse.Namespace, output: Path, lines: list | None, width: int, height: int, theme: str | None = None
+) -> bool:
     """Write the SRT (and the burned copy) for one render. False only when a requested burn failed."""
     from .subtitles import SubtitleError, burn, sidecar, write_srt
 
@@ -105,7 +108,7 @@ def _render_subtitles(args: argparse.Namespace, output: Path, lines: list | None
         srt, cues = write_srt(output, lines, width, height)
         print(f"OK   {srt} ({len(cues)} cue(s))")
         if args.subtitles == "burn":
-            burned = burn(output, srt, preset=args.preset, crf=args.crf, font=args.font)
+            burned = burn(output, srt, preset=args.preset, crf=args.crf, font=args.font, theme=theme)
             print(f"OK   {burned} (subtitles burned in)")
     except (SubtitleError, OSError) as exc:
         print(f"FAIL {exc}", file=sys.stderr)
@@ -208,7 +211,7 @@ def _cmd_visuals(args: argparse.Namespace) -> int:
     if unknown:
         print(f"FAIL language(s) {', '.join(unknown)} not in {args.file} (has {', '.join(scenes.languages)})", file=sys.stderr)
         return 2
-    opts = RenderOptions(jobs=args.jobs, visuals_dir=args.visuals_dir, rebuild_visuals=args.rebuild)
+    opts = RenderOptions(jobs=args.jobs, visuals_dir=args.visuals_dir, rebuild_visuals=args.rebuild, theme=args.theme)
     for lang in langs:
         try:
             built, timeline = with_generated_visuals(scenes, lang, plan(scenes, lang, opts), opts)
@@ -277,7 +280,8 @@ def _cmd_subtitles(args: argparse.Namespace) -> int:
         srt, cues = write_srt(video, lines, w, h)
         print(f"OK   {srt} ({len(cues)} cue(s))")
         if args.burn:
-            print(f"OK   {burn(video, srt)} (subtitles burned in)")
+            theme = args.theme or (load(args.scenes).theme if args.scenes else None)
+            print(f"OK   {burn(video, srt, theme=theme)} (subtitles burned in)")
         if args.check_drift:
             if words is not None:
                 print("NOTE drift after --align compares the cues with the words they were aligned from "
@@ -324,7 +328,8 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--preset", default="medium", help="x264 preset (default: medium)")
     r.add_argument("--crf", type=_crf, default=20, help="x264 quality, lower is better (default: 20)")
     r.add_argument("--jobs", type=_non_negative, default=0, help="parallel scene encodes (default: automatic)")
-    r.add_argument("--font", default="DejaVu Sans", help="fontconfig font name for title cards")
+    r.add_argument("--font", help="fontconfig font name for title cards and subtitles (default: the theme's)")
+    r.add_argument("--theme", choices=sorted(THEMES), help="colours and fonts (default: the file's theme, else light)")
     r.add_argument("--visuals-dir", type=Path, help="cache for generated clips (default: <scenes dir>/.cache/visuals)")
     r.add_argument("--rebuild-visuals", action="store_true", help="build generated clips even when cached")
     r.add_argument("--subtitles", choices=["none", "srt", "burn"], default="srt",
@@ -358,6 +363,7 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--jobs", type=_non_negative, default=0, help="parallel builds (default: 1)")
     g.add_argument("--visuals-dir", type=Path, help="cache for generated clips (default: <scenes dir>/.cache/visuals)")
     g.add_argument("--rebuild", action="store_true", help="build clips even when cached")
+    g.add_argument("--theme", choices=sorted(THEMES), help="colours and fonts (default: the file's theme, else light)")
     g.set_defaults(func=_cmd_visuals)
 
     st = sub.add_parser("subtitles", help="make the SRT of a rendered video, burn it in, or check its drift with faster-whisper")
@@ -366,6 +372,8 @@ def build_parser() -> argparse.ArgumentParser:
     st.add_argument("--scenes", help="scenes.json with the narration (needed by --align)")
     st.add_argument("--align", action="store_true", help="time the narration lines from faster-whisper word timestamps")
     st.add_argument("--burn", action="store_true", help="also write <name>.<lang>.burned.mp4")
+    st.add_argument("--theme", choices=sorted(THEMES),
+                    help="subtitle box colours for --burn (default: the theme of --scenes, else light)")
     st.add_argument("--check-drift", action="store_true",
                     help="compare cue starts with faster-whisper word starts; exit 1 when the drift gate fails (writes .drift.json)")
     st.add_argument("--model", default=DEFAULT_WHISPER_MODEL, help=f"faster-whisper model (default: {DEFAULT_WHISPER_MODEL})")

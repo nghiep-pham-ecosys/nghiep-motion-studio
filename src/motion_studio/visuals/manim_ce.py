@@ -5,7 +5,9 @@ variable (a command such as ``/path/.venv/bin/python -m manim``), the current
 Python interpreter (``python -m manim``) or a ``manim`` executable on PATH.
 
 The ``diagram`` and ``code`` kinds run the templates in ``templates/`` with a
-JSON spec, so a scenes.json can ask for them with data only. The ``manim``
+JSON spec, so a scenes.json can ask for them with data only. Every Manim
+run gets the theme as JSON at the path in ``MOTION_STUDIO_THEME`` (see
+``theme.py``); the templates take all their colours and fonts from it. The ``manim``
 kind runs a script from the repository: treat it as code, only from trusted
 files.
 """
@@ -21,6 +23,7 @@ import sys
 from functools import lru_cache
 from pathlib import Path
 
+from ..theme import ENV_VAR as THEME_ENV
 from .base import Adapter, BuildRequest, VisualError, run_tool
 
 TEMPLATES = Path(__file__).resolve().parent / "templates"
@@ -72,10 +75,13 @@ def render_manim(
         encoding="utf-8",
     )
     media = work / "media"
+    theme_path = work / "theme.json"
+    theme_path.write_text(req.theme.json(), encoding="utf-8")
     env = dict(os.environ)
     env.update({
         "MOTION_STUDIO_TARGET_S": f"{req.target_s:.6f}",
         "MOTION_STUDIO_LANG": req.lang,
+        THEME_ENV: str(theme_path),
         "PYTHONWARNINGS": "ignore",
     })
     if spec is not None:
@@ -110,8 +116,9 @@ class ManimAdapter(_ManimBase):
     """``{"kind": "manim", "src": "diagrams/flow.py", "scene": "Flow"}``: a custom Manim scene.
 
     The script runs with its own folder as the working directory and can read
-    ``MOTION_STUDIO_TARGET_S`` (the scene's planned length) and
-    ``MOTION_STUDIO_LANG``. The clip is not cut: a scene lasts at least as long as it.
+    ``MOTION_STUDIO_TARGET_S`` (the scene's planned length),
+    ``MOTION_STUDIO_LANG`` and ``MOTION_STUDIO_THEME`` (the path of the theme
+    JSON). The clip is not cut: a scene lasts at least as long as it.
     """
 
     kind = "manim"
@@ -151,7 +158,8 @@ class DiagramAdapter(_ManimBase):
 class CodeAdapter(_ManimBase):
     """``{"kind": "code", "src": "code/rag.py", "highlight": [[1, 3]]}``: code written line by line, then highlighted.
 
-    Built with Manim's ``Code`` mobject (syntax colours from Pygments) instead
+    Built with Manim's ``Code`` mobject (syntax colours from the theme, or a
+    Pygments style named by ``style``) instead
     of Motion Canvas: Motion Canvas renders through a browser editor and needs
     a Node project per video, which is too heavy for an automated pipeline.
     """
@@ -179,7 +187,7 @@ class CodeAdapter(_ManimBase):
             "code": body.lstrip("\n") + "\n",
             "first_line": skipped + 1,
             "language": v.get("language") or CODE_LANGUAGES.get(src.suffix.lower()),
-            "style": v.get("style", "monokai"),
+            "style": v.get("style"),  # None: the theme's code colours
             "highlight": [[max(a - skipped, 1), b - skipped] for a, b in v.get("highlight", [])],
             "title": v.get("title"),
         }

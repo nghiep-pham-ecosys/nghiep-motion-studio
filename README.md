@@ -22,6 +22,10 @@ python3 -m unittest discover -s tests
 Without installing: `PYTHONPATH=src python3 -m motion_studio ...`, or `just ci`
 and `just sample`.
 
+Frames and visuals use the light theme by default; set `"theme": "dark"` in
+`scenes.json` or pass `--theme dark` for the dark one (see "Theme" in
+[docs/spec.md](docs/spec.md)).
+
 Generated visuals (optional, free tools):
 
 ```sh
