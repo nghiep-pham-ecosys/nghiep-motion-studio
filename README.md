@@ -3,7 +3,9 @@
 An automated pipeline for long-form explainer videos (English and Vietnamese)
 for the lab-to-prod content lab. Design: [docs/spec.md](docs/spec.md).
 
-Status: in progress. Built: the `scenes.json` schema and the ffmpeg renderer.
+Status: in progress. Built: the `scenes.json` schema, the ffmpeg renderer and
+local TTS narration (Kokoro for English, VieNeu-TTS for Vietnamese and a
+cloned voice; see [docs/voices.md](docs/voices.md)).
 
 ## Quick start
 
