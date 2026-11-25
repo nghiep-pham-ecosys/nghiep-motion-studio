@@ -1,7 +1,8 @@
 # Spec: long-form explainer video pipeline
 
 Status: in progress. Built so far: the `scenes.json` schema and the ffmpeg
-renderer (step 4, issue 6). Everything else is planned.
+renderer (step 4, issue 6) and the voice step with per-line timing (step 3,
+issue 7). Everything else is planned.
 
 ## Goal
 
@@ -32,7 +33,7 @@ Vietnamese videos come from the same file and differ only in voice and text.
 |---|------|-----------------|-----------------|--------|
 | 1 | Script | topic + outline -> `scenes.json` (EN + VI narration) | LLM inside the Claude subscription (offline/mock mode in tests) | planned |
 | 2 | Visuals | `scenes.json` -> one image or clip per scene | Manim (maths, diagrams), Motion Canvas (titles, animated code), VHS (terminal recordings), SVG/code-drawn images | planned |
-| 3 | Voice | narration per language -> WAV per scene, written into `audio` | EN: Kokoro-82M (local); VI: a local Vietnamese TTS model (candidate chosen after a listening test; licence *(verify)*) | planned |
+| 3 | Voice | narration per language -> WAV per scene, written into `audio`, plus per-line timing | EN: Kokoro-82M; VI: VieNeu-TTS v3 Turbo presets or a clone of the author's own voice (all local; licences in `docs/voices.md`) | **built** (`motion-studio narrate`, `just voices`) |
 | 4 | Assembly | `scenes.json` + visuals + audio -> 1080p MP4 per language | ffmpeg (title cards, fit and Ken Burns on images, clips, frame-exact audio) | **built** (`motion-studio render`) |
 | 5 | Subtitles | MP4 audio + narration -> SRT per language | local speech-to-text alignment | planned |
 | 6 | Quality gate | MP4 -> pass/fail | ffprobe checks: duration, loudness, sync, black frames | planned |
@@ -171,3 +172,13 @@ any long video is made.
 - Voice: Kokoro for English; a local Vietnamese TTS model for Vietnamese.
 - Visuals: Manim, Motion Canvas and VHS clips plus SVG/code-drawn images.
 - Assembly: ffmpeg (Remotion is dropped).
+
+## Decisions (2026-11-25, voice step)
+
+- Vietnamese TTS: VieNeu-TTS v3 Turbo, the only local Vietnamese model found
+  whose licence and model card allow a monetised channel. F5-TTS, viXTTS, MMS
+  and the other options checked are non-commercial (see `docs/voices.md`).
+- The cloned voice is made from a local reference clip of the author's own
+  voice; the clip stays outside the repo. The final VI voice is chosen by ear
+  on the comparison page.
+- Every video description discloses the AI-generated narration.

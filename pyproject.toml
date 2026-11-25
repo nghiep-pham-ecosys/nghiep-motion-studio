@@ -10,6 +10,18 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = ["jsonschema>=4.10"]
 
+[project.optional-dependencies]
+# Local TTS engines. Install torch first from the PyTorch CUDA index (see `just tts-setup` and docs/voices.md).
+tts = [
+    "kokoro==0.9.4",
+    "misaki[en]==0.9.4",
+    "vieneu==3.8.4",
+    "transformers==4.57.6",
+    "soundfile>=0.12",
+    "numpy>=1.26",
+    "faster-whisper==1.2.1",
+]
+
 [project.scripts]
 motion-studio = "motion_studio.cli:main"
 
