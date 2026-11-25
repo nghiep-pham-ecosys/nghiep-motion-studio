@@ -6,7 +6,7 @@ renderer then places that clip like any ``video`` visual.
 
 Clips are cached by content: the key covers the adapter and tool versions,
 the visual (with its text resolved to one language), the output size, frame
-rate, background and target length, and the bytes of every input file (the
+rate, background, theme and target length, and the bytes of every input file (the
 source and any built-in template). A changed input gives a new key, so a
 stale clip is not reused. Files a source pulls in by itself (a module a
 Manim script imports, a file a tape reads) are not tracked: rebuild with
@@ -22,6 +22,8 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
+from ..theme import LIGHT, Theme
 
 
 class VisualError(RuntimeError):
@@ -41,6 +43,7 @@ class BuildRequest:
     fps: int
     background: str
     target_s: float  # the scene's planned length; templates fit their motion inside it
+    theme: Theme = LIGHT  # colours and fonts of the clip
 
     def source(self) -> Path | None:
         """The visual's source file, if it has one."""
@@ -82,6 +85,7 @@ class Adapter:
             "visual": req.visual,
             "size": [req.width, req.height, req.fps],
             "background": req.background,
+            "theme": req.theme.as_dict(),
             "target_s": round(req.target_s, 6) if (self.paced or self.reads_run) else None,
             "lang": req.lang if self.reads_run else None,
             "inputs": [_file_digest(p) for p in self.inputs(req)],

@@ -2,11 +2,23 @@
 
 A custom Manim scene can read MOTION_STUDIO_TARGET_S (the scene's planned
 length) to pace itself; if the clip is longer, the renderer stretches the scene.
+It takes its colours from the theme JSON at MOTION_STUDIO_THEME, so it follows
+the video's light or dark theme.
 """
 
+import json
 import os
 
 from manim import UP, Axes, Create, Dot, FadeIn, MoveAlongPath, Scene, Text, TracedPath, config
+
+
+def theme():
+    path = os.environ.get("MOTION_STUDIO_THEME")
+    if path:
+        with open(path, encoding="utf-8") as fh:
+            return json.load(fh)
+    # Run by hand without the renderer: the light theme's colours.
+    return {"text": "#0f172a", "muted": "#475569", "accent": "#b45309", "palette": ["#0284c7"], "font": "DejaVu Sans"}
 
 
 def loss(x):
@@ -16,15 +28,16 @@ def loss(x):
 class Descent(Scene):
     def construct(self):
         target = float(os.environ.get("MOTION_STUDIO_TARGET_S", "5"))
+        t = theme()
         axes = Axes(
             x_range=[-3, 5, 1], y_range=[0, 5, 1], x_length=10, y_length=5.5, tips=False,
-            axis_config={"color": "#94a3b8"},
+            axis_config={"color": t["muted"]},
         )
-        curve = axes.plot(loss, x_range=[-2.6, 4.6], color="#38bdf8", stroke_width=6)
-        title = Text("loss", font="DejaVu Sans", font_size=34, color="#f8fafc").next_to(axes, UP, buff=0.2)
+        curve = axes.plot(loss, x_range=[-2.6, 4.6], color=t["palette"][0], stroke_width=6)
+        title = Text("loss", font=t["font"], font_size=34, color=t["text"]).next_to(axes, UP, buff=0.2)
         path = axes.plot(loss, x_range=[-2.4, 1.5])
-        ball = Dot(axes.c2p(-2.4, loss(-2.4)), radius=0.14, color="#fde047")
-        trail = TracedPath(ball.get_center, stroke_color="#fde047", stroke_width=4)
+        ball = Dot(axes.c2p(-2.4, loss(-2.4)), radius=0.14, color=t["accent"])
+        trail = TracedPath(ball.get_center, stroke_color=t["accent"], stroke_width=4)
 
         self.play(Create(axes), FadeIn(title), run_time=0.8)
         self.play(Create(curve), run_time=1.0)

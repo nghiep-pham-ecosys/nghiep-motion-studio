@@ -8,6 +8,9 @@ writes a JSON spec and passes its path in ``MOTION_STUDIO_SPEC``:
      "edges": [{"from": "a", "to": "b", "label": "..." | null}],
      "steps": [["a"], ["b", "c"]]}
 
+Colours and fonts come from the theme JSON at ``MOTION_STUDIO_THEME``: node
+colours cycle through its ``palette`` unless a node sets ``color``.
+
 Labels arrive already resolved to one language. Nodes appear step by step;
 an edge appears with the step that shows both of its ends. Then a light
 pulse runs along the edges in order, and the last frame holds. All motion
@@ -37,18 +40,22 @@ from manim import (
     config,
 )
 
-FONT = "DejaVu Sans"
-TEXT = "#f8fafc"
-MUTED = "#cbd5e1"
-PULSE = "#fde047"
-PALETTE = ["#38bdf8", "#a78bfa", "#34d399", "#fb923c", "#f472b6", "#facc15"]
 STEP_S = 1.2  # pacing when no target length is given
 MIN_HOLD_S = 0.4
 
 
-def _load() -> dict:
-    with open(os.environ["MOTION_STUDIO_SPEC"], encoding="utf-8") as fh:
+def _load(var: str) -> dict:
+    with open(os.environ[var], encoding="utf-8") as fh:
         return json.load(fh)
+
+
+THEME = _load("MOTION_STUDIO_THEME")
+FONT = THEME["font"]
+TEXT = THEME["text"]
+MUTED = THEME["muted"]
+PULSE = THEME["accent"]
+PALETTE = THEME["palette"]
+NODE_FILL = THEME["node_fill_opacity"]
 
 
 def _fit_text(text: str, max_w: float, max_h: float, size: float, color: str = TEXT) -> Text:
@@ -80,7 +87,7 @@ def _border_point(center: np.ndarray, half_w: float, half_h: float, toward: np.n
 
 class DiagramScene(Scene):
     def construct(self) -> None:
-        spec = _load()
+        spec = _load("MOTION_STUDIO_SPEC")
         fw, fh = config.frame_width, config.frame_height
         top = fh / 2 - 0.4
         title = None
@@ -107,7 +114,7 @@ class DiagramScene(Scene):
             color = node.get("color") or PALETTE[i % len(PALETTE)]
             rect = RoundedRectangle(
                 width=box_w, height=box_h, corner_radius=min(0.2, box_h / 4),
-                stroke_color=color, stroke_width=4, fill_color=color, fill_opacity=0.16,
+                stroke_color=color, stroke_width=4, fill_color=color, fill_opacity=NODE_FILL,
             ).move_to(center)
             label = Text(node["label"], font=FONT, font_size=30, color=TEXT).move_to(center)
             boxes[node["id"]] = VGroup(rect, label)

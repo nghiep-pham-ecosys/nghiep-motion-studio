@@ -81,6 +81,26 @@ dropped; `start_s` must be inside the clip; a short clip holds its last frame
 unless `loop` is true, and a loop repeats from `start_s`), plus the generated
 kinds below.
 
+### Theme
+
+One theme sets every colour and font: the frame background (title cards,
+image pads, Manim and VHS backgrounds), title text, diagram node colours and
+labels, code token colours, the VHS terminal palette and the burned-in
+subtitle box. The themes live in `src/motion_studio/theme.py`: `light`
+(the default: slate-50 background, slate-900 text) and `dark` (slate-900
+background, slate-50 text). A scenes.json picks one with the top-level
+`"theme": "light" | "dark"`; `render --theme` and `visuals --theme` override
+it. A visual's own `background` (and a title card's `color`) still wins.
+
+Every text colour meets WCAG 2.x AA (at least 4.5:1) against what it is drawn
+on, with tinted surfaces composited first: node labels on their 16 % node
+fill, code tokens and line numbers on the code window and inside the 12 %
+highlight fill, the 16 ANSI terminal colours on the terminal background, and
+subtitle text on its translucent box over a black, a white and the theme
+frame. Node strokes, arrows and the accent reach at least 3:1 (WCAG 1.4.11).
+`tests/test_theme.py` checks every pair. Lines dimmed by a code highlight are
+deliberately below that while the highlight lasts.
+
 ### Generated visuals
 
 A generated visual is built into an mp4 clip at the output size and frame
@@ -90,9 +110,9 @@ rate, then placed like a `video` visual. A working example of each kind is in
 | Kind | Tool | The scene gives | Timing | Example |
 |------|------|-----------------|--------|---------|
 | `diagram` | Manim CE (built-in template) | `nodes` on a grid (`id`, `label`, `col` 0-7, `row` 0-5, optional `color`), `edges` (`from`, `to`, optional `label`), optional `steps` (node ids revealed together) and `title` | fits the scene: nodes appear step by step, each edge with the step that shows both ends, then a pulse runs along the edges | `{"kind": "diagram", "nodes": [...], "edges": [...]}` |
-| `code` | Manim CE `Code` mobject (built-in template; Pygments colours) | `src` (a code file, at most 40 lines), optional `language`, `style`, `title`, `highlight` (`[first, last]` line ranges) | fits the scene: lines are written one by one, then each range is framed while the rest dims | `{"kind": "code", "src": "code/rag.py", "highlight": [[1, 5]]}` |
-| `manim` | Manim CE | `src` (a `.py` file) and `scene` (the Scene class) | its own length; the scene is stretched so the clip is never cut. The script may read `MOTION_STUDIO_TARGET_S` and `MOTION_STUDIO_LANG` | `{"kind": "manim", "src": "manim/descent.py", "scene": "Descent"}` |
-| `terminal` | VHS (with ttyd and Chrome or Chromium) | `src` (a `.tape` file without `Output`, `Set Width`, `Set Height` or `Set Framerate`: the renderer sets them) | its own length; the scene is stretched so the recording is never cut | `{"kind": "terminal", "src": "tapes/demo.tape"}` |
+| `code` | Manim CE `Code` mobject (built-in template; theme colours, or the Pygments style named by `style`) | `src` (a code file, at most 40 lines), optional `language`, `style`, `title`, `highlight` (`[first, last]` line ranges) | fits the scene: lines are written one by one, then each range is framed while the rest dims | `{"kind": "code", "src": "code/rag.py", "highlight": [[1, 5]]}` |
+| `manim` | Manim CE | `src` (a `.py` file) and `scene` (the Scene class) | its own length; the scene is stretched so the clip is never cut. The script may read `MOTION_STUDIO_TARGET_S`, `MOTION_STUDIO_LANG` and `MOTION_STUDIO_THEME` (path of the theme JSON) | `{"kind": "manim", "src": "manim/descent.py", "scene": "Descent"}` |
+| `terminal` | VHS (with ttyd and Chrome or Chromium) | `src` (a `.tape` file without `Output`, `Set Width`, `Set Height` or `Set Framerate`: the renderer sets them, plus the theme's colours unless the tape has `Set Theme`) | its own length; the scene is stretched so the recording is never cut | `{"kind": "terminal", "src": "tapes/demo.tape"}` |
 
 All kinds take an optional `background`; `manim` and `terminal` also take
 `loop`. `title` and every `label` are one string for all languages or text per
@@ -108,7 +128,7 @@ lines of a code file are not shown, but line numbers still match the file.
 Clips are cached in `<scenes dir>/.cache/visuals/` (gitignored; change it with
 `--visuals-dir`). The cache key covers the adapter and tool versions, the
 visual with its text in one language, the output size, frame rate,
-background, the target length (for the kinds that fit the scene, and for
+background, theme, the target length (for the kinds that fit the scene, and for
 `manim`, whose script can read it), the language (for `manim`) and the bytes
 of the source file and of the built-in template. Files a source loads by
 itself (a module a Manim script imports) are not tracked: use
@@ -246,8 +266,10 @@ any long video is made.
 
 `render` writes `<name>.<lang>.srt` from the narration timing by default
 (`--subtitles none|srt|burn`); `burn` also writes `<name>.<lang>.burned.mp4`
-with the text drawn in by libass (portrait frames get larger text, 20
-characters per row, placed above the Shorts buttons). No model is needed:
+with the text drawn in by libass on a translucent box in the theme's
+subtitle colours (portrait frames get larger text, 20 characters per row,
+placed above the Shorts buttons; `subtitles --burn` takes the theme from
+`--theme` or `--scenes`, else light). No model is needed:
 each narration line is trimmed to the speech in the rendered audio (10 ms
 energy frames) and a long line is split at its nearest real pause.
 `motion-studio subtitles <video> [--burn] [--align --scenes scenes.json]

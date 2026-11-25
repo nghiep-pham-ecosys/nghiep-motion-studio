@@ -14,6 +14,10 @@ How it works:
 4. The segments are joined with the concat demuxer (video copied, not
    re-encoded) and the audio is encoded once to AAC.
 
+Colours and fonts come from the theme (``theme.py``): the file's ``theme``
+field, or ``RenderOptions.theme`` when set. A visual's own ``background`` or
+``color`` wins over the theme.
+
 Pictures are composed in RGB (so pad and text colours are exact and
 transparent image areas show the scene background) and converted to BT.709
 limited-range YUV once, at the end of each scene's filter chain.
@@ -37,11 +41,11 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .schema import Scenes
+from .theme import Theme, get_theme
 from .visuals import GENERATED_KINDS, build_visuals, default_cache_dir
 
 SAMPLE_RATE = 48000
 ZOOM = 1.15  # how far the camera moves in on an image with motion
-DEFAULT_BACKGROUND = "#101828"
 LANG_639_2 = {"en": "eng", "vi": "vie", "fr": "fra", "de": "deu", "es": "spa", "ja": "jpn", "zh": "zho"}
 _FONT_FORBIDDEN = set(":'\\,;[]=")
 _BT709_OUT = ["-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-color_range", "tv"]
@@ -57,7 +61,8 @@ class RenderOptions:
     crf: int = 20
     audio_bitrate: str = "192k"
     tail_s: float = 0.5
-    font: str = "DejaVu Sans"
+    font: str | None = None  # title-card font; None = the theme's
+    theme: str | None = None  # overrides the scenes file's theme when set
     jobs: int = 0  # parallel scene encodes; 0 = automatic
     ffmpeg: str = "ffmpeg"
     ffprobe: str = "ffprobe"
@@ -66,12 +71,14 @@ class RenderOptions:
     rebuild_visuals: bool = False  # build generated clips even when cached
 
     def __post_init__(self) -> None:
-        if not self.font or any(c in _FONT_FORBIDDEN for c in self.font):
+        if self.font is not None and (not self.font or any(c in _FONT_FORBIDDEN for c in self.font)):
             raise ValueError(
                 f"font name {self.font!r} must be non-empty and avoid the characters {''.join(sorted(_FONT_FORBIDDEN))}"
             )
         if not (isinstance(self.tail_s, (int, float)) and math.isfinite(self.tail_s) and self.tail_s >= 0):
             raise ValueError("tail_s must be a finite number >= 0")
+        if self.theme is not None:
+            get_theme(self.theme)  # raises ValueError for an unknown name
         if self.jobs < 0:
             raise ValueError("jobs must be >= 0 (0 = automatic)")
         if not 0 <= self.crf <= 51:
@@ -218,6 +225,11 @@ def plan(
     return timeline
 
 
+def resolve_theme(scenes: Scenes, opts: RenderOptions) -> Theme:
+    """The theme of a render: ``opts.theme`` when set, else the file's, else light."""
+    return get_theme(opts.theme or scenes.theme)
+
+
 def _hex(color: str) -> str:
     return "0x" + color.lstrip("#")
 
@@ -264,7 +276,8 @@ def scene_video_job(
     w, h, fps, n = scenes.width, scenes.height, scenes.fps, timing.frames
     visual = scene["visual"]
     kind = visual["kind"]
-    background = visual.get("background", DEFAULT_BACKGROUND)
+    theme = resolve_theme(scenes, opts)
+    background = visual.get("background", theme.background)
     head = [opts.ffmpeg, "-hide_banner", "-nostdin", "-loglevel", "error", "-y"]
     job = SceneJob(cmd=list(head))
     cmd = job.cmd
@@ -274,8 +287,8 @@ def scene_video_job(
         size = max(12, h // 12)
         cmd += ["-f", "lavfi", "-i", f"color=c={_hex(background)}:s={w}x{h}:r={fps}"]
         vf = (
-            f"format=rgb24,drawtext=textfile={text_name}:font={opts.font}:fontsize={size}:"
-            f"fontcolor={_hex(visual.get('color', '#ffffff'))}:line_spacing={size // 3}:text_align=C:"
+            f"format=rgb24,drawtext=textfile={text_name}:font={opts.font or theme.font}:fontsize={size}:"
+            f"fontcolor={_hex(visual.get('color', theme.text))}:line_spacing={size // 3}:text_align=C:"
             f"x=(w-text_w)/2:y=(h-text_h)/2:expansion=none:fix_bounds=1"
         )
     elif kind == "image":
@@ -462,12 +475,14 @@ def with_generated_visuals(
     """
     if not any(s["visual"]["kind"] in GENERATED_KINDS for s in scenes.scenes):
         return scenes, timeline
+    theme = resolve_theme(scenes, opts)
     built, _ = build_visuals(
         scenes,
         lang,
         {t.id: t.duration_s for t in timeline},
         Path(opts.visuals_dir) if opts.visuals_dir is not None else default_cache_dir(scenes),
-        default_background=DEFAULT_BACKGROUND,
+        default_background=theme.background,
+        theme=theme,
         clip_length=lambda p: probe_duration(p, opts.ffprobe),
         jobs=opts.jobs or 1,  # one Manim/VHS build at a time unless --jobs asks for more (each uses ~0.5-1 GB)
         rebuild=opts.rebuild_visuals,

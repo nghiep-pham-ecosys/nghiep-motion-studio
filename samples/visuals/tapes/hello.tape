@@ -1,8 +1,8 @@
-# A short terminal demo. The renderer sets Output, Width, Height and Framerate.
+# A short terminal demo. The renderer sets Output, Width, Height and Framerate,
+# and the theme's terminal colours (a `Set Theme` line here would override them).
 Set Shell bash
 Set Padding 40
 Set TypingSpeed 60ms
-Set Theme "Dracula"
 
 Type "echo 'Hello from a terminal recording'"
 Enter

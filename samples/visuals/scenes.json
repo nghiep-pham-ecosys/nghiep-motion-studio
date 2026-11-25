@@ -54,7 +54,7 @@
         "vi": "Bản ghi dòng lệnh do VHS tạo từ một tệp tape."
       },
       "duration_s": 3,
-      "visual": {"kind": "terminal", "src": "tapes/hello.tape", "background": "#282a36"}
+      "visual": {"kind": "terminal", "src": "tapes/hello.tape"}
     },
     {
       "id": "manim",

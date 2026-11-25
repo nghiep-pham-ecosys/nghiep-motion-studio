@@ -37,6 +37,8 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
+from .theme import Theme, ass_colour, get_theme
+
 MAX_DRIFT_S = 0.2  # the quality gate (see DriftReport)
 MAX_P90_S = 0.35  # a looser limit on the 90th percentile: catches a misplaced scene, tolerates single-word noise
 DEFAULT_MODEL = "base"  # the smallest model that met MAX_DRIFT_S on the sample (docs/spec.md, "Subtitles")
@@ -561,17 +563,22 @@ def write_srt(video: Path, lines: list[dict[str, Any]], width_px: int, height_px
     return path, cues
 
 
-def burn_cmd(video: Path, srt_name: str, out: Path, width_px: int, height_px: int, *, font: str = "DejaVu Sans",
-             preset: str = "medium", crf: int = 20, ffmpeg: str = "ffmpeg") -> list[str]:
+def burn_cmd(video: Path, srt_name: str, out: Path, width_px: int, height_px: int, *, font: str | None = None,
+             theme: Theme | str | None = None, preset: str = "medium", crf: int = 20, ffmpeg: str = "ffmpeg") -> list[str]:
     """ffmpeg command that draws ``srt_name`` (a file in the working folder) into the picture.
 
     libass scales SRT text to a 288-line canvas, so the size below follows the
-    frame height; portrait frames get a smaller size and narrower rows.
+    frame height; portrait frames get a smaller size and narrower rows. Text
+    sits on a translucent box in the theme's subtitle colours (BorderStyle 3:
+    libass fills the box with OutlineColour), so it stays readable on any frame.
     """
+    theme = theme if isinstance(theme, Theme) else get_theme(theme)
     portrait = height_px > width_px
+    box = ass_colour(theme.subtitle_box, theme.subtitle_box_opacity)
     style = ",".join([
-        f"FontName={font}", f"FontSize={14 if portrait else 18}", "PrimaryColour=&H00FFFFFF", "OutlineColour=&H00101010",
-        "BackColour=&H80000000", "BorderStyle=1", "Outline=1.6", "Shadow=0.6", "Alignment=2",
+        f"FontName={font or theme.font}", f"FontSize={14 if portrait else 18}",
+        f"PrimaryColour={ass_colour(theme.subtitle_text)}", f"OutlineColour={box}", f"BackColour={box}",
+        "BorderStyle=3", "Outline=2", "Shadow=0", "Alignment=2",
         f"MarginV={70 if portrait else 18}", "WrapStyle=2",
     ])
     return [

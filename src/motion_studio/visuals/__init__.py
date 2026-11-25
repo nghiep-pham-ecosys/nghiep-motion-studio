@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 from ..schema import Scenes
+from ..theme import LIGHT, Theme
 from .base import Adapter, BuildRequest, VisualError
 from .manim_ce import CodeAdapter, DiagramAdapter, ManimAdapter
 from .vhs import TerminalAdapter
@@ -73,6 +74,7 @@ def build_visuals(
     clip_length: Callable[[Path], float],
     jobs: int = 1,
     rebuild: bool = False,
+    theme: Theme = LIGHT,
 ) -> tuple[Scenes, list[BuiltVisual]]:
     """Build every generated visual for ``lang`` and return scenes that point at the clips.
 
@@ -99,6 +101,7 @@ def build_visuals(
             fps=scenes.fps,
             background=visual.get("background", default_background),
             target_s=float(targets[scene["id"]]),
+            theme=theme,
         )
         out = Path(cache_dir) / f"{adapter.kind}-{adapter.cache_key(req)}.mp4"
         per_scene.append((i, adapter, req, out))

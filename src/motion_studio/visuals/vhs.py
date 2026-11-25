@@ -6,8 +6,9 @@ screen. The tape runs real commands with its own folder as the working
 directory: treat it as code, only from trusted files.
 
 The renderer owns the output: a tape must not set ``Output``, ``Set Width``,
-``Set Height`` or ``Set Framerate``; the adapter adds them (and a font size
-scaled to the frame unless the tape sets one).
+``Set Height`` or ``Set Framerate``; the adapter adds them, plus a font size
+scaled to the frame and the theme's terminal colours (``Set Theme``) unless
+the tape sets its own.
 
 VHS needs ``vhs``, ``ttyd`` and ``ffmpeg`` on PATH (``just vhs-install``
 fetches the first two from their GitHub releases, checked by sha256) and a
@@ -24,11 +25,13 @@ from functools import lru_cache
 from pathlib import Path
 
 from ..schema import tape_owned_lines
+from ..theme import LIGHT, Theme
 from .base import Adapter, BuildRequest, VisualError, run_tool
 
 # The names go-rod (the browser driver inside VHS) looks up on PATH.
 BROWSERS = ("chrome", "google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "microsoft-edge")
 _FONT_SIZE = re.compile(r"^\s*Set\s+FontSize\b", re.IGNORECASE)
+_THEME = re.compile(r"^\s*Set\s+Theme\b", re.IGNORECASE)
 
 
 def vhs_command() -> str | None:
@@ -51,8 +54,8 @@ def _vhs_version(cmd: str) -> str:
         return "unknown"
 
 
-def wrap_tape(tape: str, out: Path, width: int, height: int, fps: int) -> str:
-    """Return ``tape`` with the renderer's Output and size settings in front.
+def wrap_tape(tape: str, out: Path, width: int, height: int, fps: int, theme: Theme = LIGHT) -> str:
+    """Return ``tape`` with the renderer's Output, size and theme settings in front.
 
     Raises VisualError if the tape sets what the renderer owns.
     """
@@ -69,6 +72,8 @@ def wrap_tape(tape: str, out: Path, width: int, height: int, fps: int) -> str:
     ]
     if not any(_FONT_SIZE.match(line) for line in tape.splitlines()):
         head.append(f"Set FontSize {max(12, height // 30)}")
+    if not any(_THEME.match(line) for line in tape.splitlines()):
+        head.append(f"Set Theme {theme.vhs_theme()}")
     return "\n".join(head) + "\n\n" + tape.rstrip("\n") + "\n"
 
 
@@ -105,7 +110,7 @@ class TerminalAdapter(Adapter):
             raise VisualError(f"scene {req.scene_id!r}: cannot read {req.visual['src']}: {exc}") from exc
         clip = work / "clip.mp4"
         try:
-            wrapped = wrap_tape(tape, clip, req.width, req.height, req.fps)
+            wrapped = wrap_tape(tape, clip, req.width, req.height, req.fps, req.theme)
         except VisualError as exc:
             raise VisualError(f"scene {req.scene_id!r}: {req.visual['src']}: {exc}") from exc
         wrapped_path = work / "scene.tape"
