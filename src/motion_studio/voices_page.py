@@ -142,17 +142,21 @@ def run_candidates(candidates: list[Candidate], out_dir: Path, sentences: dict[s
     """Synthesise every test line with every candidate. Errors are recorded, not raised.
 
     Candidates with the same ``share`` key use one adapter; if building it fails,
-    the error is recorded for each of them and the build is not retried. Each
-    candidate first speaks one untimed warm-up line, so the real-time factor
-    leaves out model loading, downloads and GPU warm-up.
+    the error is recorded for each of them and the build is not retried. An
+    adapter is closed after the last candidate that shares it, so only one model
+    is in memory at a time when candidates of one share are listed together.
+    Each candidate first speaks one untimed warm-up line, so the real-time
+    factor leaves out model loading, downloads and GPU warm-up.
     """
     sentences = sentences or SENTENCES
     out_dir = Path(out_dir)
     results: list[CandidateResult] = []
     adapters: dict[str, TTSAdapter] = {}
     failed: dict[str, str] = {}
+    last_use = {(cand.share or cand.key): n for n, cand in enumerate(candidates)}
     try:
-        for cand in candidates:
+        for n_cand, cand in enumerate(candidates):
+            _close_finished(adapters, last_use, n_cand)
             res = CandidateResult(cand.key, cand.title, cand.engine, cand.voice, cand.lang, cand.licence, cand.usable, cand.note)
             results.append(res)
             share = cand.share or cand.key
@@ -182,6 +186,12 @@ def run_candidates(candidates: list[Candidate], out_dir: Path, sentences: dict[s
         for adapter in adapters.values():
             adapter.close()
     return results
+
+
+def _close_finished(adapters: dict[str, TTSAdapter], last_use: dict[str, int], index: int) -> None:
+    """Close the adapters that no candidate from ``index`` on still needs."""
+    for share in [s for s in adapters if last_use[s] < index]:
+        adapters.pop(share).close()
 
 
 _CSS = """
@@ -274,10 +284,23 @@ VI_PRESETS = [
     ("Thùy Dung", "VieNeu preset: female, southern accent, news reading"),
 ]
 EN_VOICES = ["af_heart", "am_michael", "bf_emma"]
+EN_CLONES = [
+    ("clone", "Cloned voice, English (Chatterbox-Turbo)", "Zero-shot clone by Chatterbox-Turbo (350M), the faster model."),
+    ("clone-standard", "Cloned voice, English (Chatterbox)", "Zero-shot clone by the original Chatterbox (500M)."),
+]
 
 
-def default_candidates(ref_wav: Path | None = None, device: str = "auto", langs: tuple[str, ...] = ("vi", "en")) -> list[Candidate]:
-    """The standard comparison: 3 VieNeu presets, the clone (if a reference is given) and 3 Kokoro voices."""
+def default_candidates(
+    ref_wav: Path | None = None,
+    device: str = "auto",
+    langs: tuple[str, ...] = ("vi", "en"),
+    ref_wav_en: Path | None = None,
+) -> list[Candidate]:
+    """The standard comparison: 3 VieNeu presets, the clone, 3 Kokoro voices and the two English clones.
+
+    The clones appear only when a reference clip is given; the English clones use
+    ``ref_wav_en``, else ``ref_wav``.
+    """
     from .tts import get_adapter
 
     cands: list[Candidate] = []
@@ -310,6 +333,17 @@ def default_candidates(ref_wav: Path | None = None, device: str = "auto", langs:
                 licence="Apache-2.0 (code, weights)", usable="yes", make=make_kokoro, share="kokoro",
                 note="Voice provenance is not documented per voice; see docs/voices.md.",
             ))
+        ref_en = ref_wav_en or ref_wav
+        if ref_en is not None:
+            def make_clone_en() -> TTSAdapter:
+                return get_adapter("clone-en", device=device, ref_wav=ref_en)
+
+            for voice, title, note in EN_CLONES:
+                cands.append(Candidate(
+                    key=f"clone-en-{voice}", title=title, engine="clone-en", voice=voice, lang="en",
+                    licence="MIT (code, weights)", usable="yes", make=make_clone_en, share="clone-en",
+                    note=note + " Usable because the voice is your own; every line carries the Perth watermark.",
+                ))
     return cands
 
 

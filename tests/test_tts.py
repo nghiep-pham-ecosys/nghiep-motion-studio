@@ -101,12 +101,13 @@ class WavAndRegistryTest(unittest.TestCase):
             get_adapter("nope")
 
     def test_registry_lists_the_engines(self):
-        self.assertEqual(sorted(ENGINES), ["clone", "kokoro", "mock", "vieneu"])
+        self.assertEqual(sorted(ENGINES), ["clone", "clone-en", "kokoro", "mock", "vieneu"])
 
     def test_importing_tts_does_not_import_heavy_libraries(self):
         code = (
             "import sys; sys.path.insert(0, 'src'); import motion_studio.tts, motion_studio.narrate, "
-            "motion_studio.voices_page; bad = [m for m in ('torch', 'kokoro', 'vieneu', 'numpy') if m in sys.modules]; "
+            "motion_studio.voices_page, motion_studio.voice_mix, motion_studio.tts.chatterbox_tts; "
+            "bad = [m for m in ('torch', 'kokoro', 'vieneu', 'chatterbox', 'numpy') if m in sys.modules]; "
             "print(','.join(bad))"
         )
         out = subprocess.run([sys.executable, "-c", code], cwd=ROOT, capture_output=True, text=True, check=True).stdout

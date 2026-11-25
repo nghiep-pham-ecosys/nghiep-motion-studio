@@ -16,6 +16,7 @@ from .theme import THEMES
 from .visuals import GENERATED_KINDS, VisualError, missing_tools
 
 REF_ENV = "MOTION_STUDIO_REF_WAV"
+REF_EN_ENV = "MOTION_STUDIO_REF_WAV_EN"
 
 
 def output_stem(path: Path) -> str:
@@ -145,9 +146,30 @@ def _ref_wav(args: argparse.Namespace) -> Path | None:
     return Path(value).expanduser() if value else None
 
 
+def _ref_wav_en(args: argparse.Namespace) -> Path | None:
+    """The reference for the English clone: its own clip if given, else the general one."""
+    value = getattr(args, "ref_wav_en", None) or os.environ.get(REF_EN_ENV) or ""
+    return Path(value).expanduser() if value else _ref_wav(args)
+
+
+def engine_options(engine: str, voices: set[str], args: argparse.Namespace) -> dict[str, object]:
+    """Options for one engine of a narration run: the device, and a reference clip where a clone needs one."""
+    options: dict[str, object] = {"device": args.device}
+    if engine == "clone-en":
+        ref = _ref_wav_en(args)
+    elif engine == "clone" or "clone" in voices:
+        ref = _ref_wav(args)
+    else:
+        ref = None
+    if ref is not None:
+        options["ref_wav"] = ref
+    return options
+
+
 def _cmd_narrate(args: argparse.Namespace) -> int:
     from .narrate import narrate, save_scenes, timing_path
-    from .tts import TTSError, get_adapter
+    from .tts import TTSAdapter, TTSError, get_adapter
+    from .voice_mix import plan_voices
 
     try:
         scenes = load(args.file)
@@ -157,23 +179,34 @@ def _cmd_narrate(args: argparse.Namespace) -> int:
     if args.lang not in scenes.languages:
         print(f"FAIL language {args.lang} not in {args.file} (has {', '.join(scenes.languages)})", file=sys.stderr)
         return 2
-    options: dict[str, object] = {"device": args.device}
-    ref = _ref_wav(args)
-    if ref is not None and (args.engine == "clone" or args.voice == "clone"):
-        options["ref_wav"] = ref
+    if bool(args.engine) != bool(args.voice):
+        print("FAIL pass --engine and --voice together (the default voice)", file=sys.stderr)
+        return 2
     try:
-        adapter = get_adapter(args.engine, **options)
+        choices = plan_voices(scenes.doc, args.lang, (args.engine, args.voice) if args.engine else None)
+    except ValueError as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 2
+    wanted: dict[str, set[str]] = {}
+    for choice in choices:
+        wanted.setdefault(choice.engine, set()).add(choice.voice)
+    adapters: dict[str, TTSAdapter] = {}
+    try:
         try:
-            result = narrate(scenes, args.lang, adapter, args.voice, pause_s=args.pause, force=args.force)
+            for engine, voices in wanted.items():
+                adapters[engine] = get_adapter(engine, **engine_options(engine, voices, args))
+            result = narrate(scenes, args.lang, adapters, choices=choices, pause_s=args.pause, force=args.force)
         finally:
-            adapter.close()
+            for adapter in adapters.values():
+                adapter.close()
         save_scenes(scenes, Path(args.file), args.lang)
     except (TTSError, ScenesError, ValueError, OSError, RuntimeError) as exc:
         print(f"FAIL {exc}", file=sys.stderr)
         return 1
     total = sum(s.duration_s for s in result.scenes)
+    voices_used = ", ".join(sorted({f"{s.engine}:{s.voice}" for s in result.scenes}))
     print(
-        f"OK   {args.file} [{args.lang}] {result.engine}:{result.voice}: {len(result.scenes)} scene(s), "
+        f"OK   {args.file} [{args.lang}] {voices_used}: {len(result.scenes)} scene(s), "
         f"{total:.1f} s of narration, {result.synthesized} line(s) made, {result.reused} reused; timing in {timing_path(scenes.base_dir, args.lang, result.audio_dir)}"
     )
     return 0
@@ -187,7 +220,7 @@ def _cmd_voices(args: argparse.Namespace) -> int:
     if args.mock:
         cands = mock_candidates(langs)
     else:
-        cands = default_candidates(ref_wav=_ref_wav(args), device=args.device, langs=langs)
+        cands = default_candidates(ref_wav=_ref_wav(args), device=args.device, langs=langs, ref_wav_en=_ref_wav_en(args))
     recognise = None
     if args.asr:
         try:
@@ -340,9 +373,10 @@ def build_parser() -> argparse.ArgumentParser:
     n = sub.add_parser("narrate", help="synthesise narration audio for one language and record per-line timing")
     n.add_argument("file")
     n.add_argument("--lang", required=True)
-    n.add_argument("--engine", required=True, help="mock, kokoro, vieneu or clone")
-    n.add_argument("--voice", required=True, help="engine voice id (clone: 'clone')")
-    n.add_argument("--ref-wav", help=f"reference WAV for the clone voice (default: ${REF_ENV})")
+    n.add_argument("--engine", help="default engine for scenes that scenes.json gives no voice: mock, kokoro, vieneu, clone or clone-en")
+    n.add_argument("--voice", help="default voice id of that engine (clone and clone-en: 'clone')")
+    n.add_argument("--ref-wav", help=f"reference WAV for the cloned voice (default: ${REF_ENV})")
+    n.add_argument("--ref-wav-en", help=f"reference WAV for the English clone (default: ${REF_EN_ENV}, else --ref-wav)")
     n.add_argument("--device", default="auto", help="auto, cuda or cpu")
     n.add_argument("--pause", type=float, default=0.3, help="silence between lines in seconds (default: 0.3)")
     n.add_argument("--force", action="store_true", help="synthesise every line again")
@@ -352,6 +386,7 @@ def build_parser() -> argparse.ArgumentParser:
     vo.add_argument("-o", "--out-dir", default="out/voices")
     vo.add_argument("--lang", action="append", choices=["vi", "en"], help="languages to include (default: both)")
     vo.add_argument("--ref-wav", help=f"reference WAV for the cloned voice (default: ${REF_ENV}; skipped if unset)")
+    vo.add_argument("--ref-wav-en", help=f"reference WAV for the English clone (default: ${REF_EN_ENV}, else --ref-wav; skipped if unset)")
     vo.add_argument("--device", default="auto")
     vo.add_argument("--mock", action="store_true", help="use the model-free test engine")
     vo.add_argument("--asr", action="store_true", help="transcribe every sample with local faster-whisper and show the word error rate")

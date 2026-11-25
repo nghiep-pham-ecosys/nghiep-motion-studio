@@ -18,6 +18,10 @@ a line is synthesised again only when one of those changed, and a failed or
 interrupted run can never leave a file that a later run mistakes for another
 text. Scene files and the timing file are only replaced after every line of
 every scene succeeded.
+
+Each scene can have its own voice (``voice_mix.plan_voices``: the scene's
+``voice``, its ``speaker``, the ``voice_mix`` policy, else the default). The
+timing file records the engine, voice and speaker of every scene.
 """
 
 from __future__ import annotations
@@ -30,13 +34,15 @@ import re
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping, Sequence
 
 from .schema import Scenes, ScenesError, from_dict
 from .tts.base import TTSAdapter, TTSError, read_wav, write_wav
+from .voice_mix import VoiceChoice
 
 TIMING_VERSION = 1
 DEFAULT_AUDIO_DIR = "audio/tts"
+MIX = "mix"  # engine and voice of a timing file whose scenes use more than one voice
 # A sentence ends at . ! ? … (optionally followed by closing quotes or brackets) before whitespace.
 _SENTENCE_END = re.compile(r"[.!?…]+[\"'”’)\]]*(?=\s)")
 # Words that end with a period but do not end a sentence (compared in lower case).
@@ -101,6 +107,9 @@ class SceneNarration:
     file: str
     duration_s: float
     lines: list[LineTiming] = field(default_factory=list)
+    engine: str = ""
+    voice: str = ""
+    speaker: str | None = None
 
 
 @dataclass
@@ -154,17 +163,41 @@ def _check_audio_dir(audio_dir: str) -> None:
         raise ValueError("audio_dir must be a relative folder inside the scenes folder")
 
 
+def resample(samples: array.array, src: int, dst: int) -> array.array:
+    """Linear resampling of 16-bit samples (used only to upsample a line to the highest rate of a language)."""
+    if src == dst or not samples:
+        return array.array("h", samples)
+    n = max(1, int(round(len(samples) * dst / src)))
+    step = (len(samples) - 1) / max(1, n - 1)
+    out = array.array("h", bytes(2 * n))
+    last = len(samples) - 1
+    for i in range(n):
+        x = i * step
+        j = int(x)
+        frac = x - j
+        a = samples[j]
+        b = samples[j + 1] if j < last else a
+        out[i] = int(round(a + (b - a) * frac))
+    return out
+
+
 def narrate(
     scenes: Scenes,
     lang: str,
-    adapter: TTSAdapter,
-    voice: str,
+    adapter: TTSAdapter | Mapping[str, TTSAdapter],
+    voice: str | None = None,
     *,
+    choices: Sequence[VoiceChoice] | None = None,
     audio_dir: str = DEFAULT_AUDIO_DIR,
     pause_s: float = 0.3,
     force: bool = False,
 ) -> NarrationResult:
     """Synthesise every scene's ``lang`` narration, write the scene files and the timing file.
+
+    One voice: pass an adapter and ``voice``. A voice mix: pass ``choices`` (one
+    VoiceChoice per scene, see ``voice_mix.plan_voices``) and the adapters by
+    engine name. When engines differ in sample rate, lines are upsampled to the
+    highest rate of the language.
 
     ``scenes.doc`` is updated in memory to point at the new scene files; save it
     with ``save_scenes``. Nothing is replaced on disk until every line of every
@@ -175,63 +208,81 @@ def narrate(
     if not 0 <= pause_s <= 5:
         raise ValueError("pause_s must be between 0 and 5 seconds")
     _check_audio_dir(audio_dir)
+    adapters: dict[str, TTSAdapter] = (
+        {adapter.engine: adapter} if isinstance(adapter, TTSAdapter) else dict(adapter)
+    )
+    if choices is None:
+        if voice is None or not isinstance(adapter, TTSAdapter):
+            raise ValueError("pass one adapter and a voice, or choices (one per scene) with adapters by engine")
+        choices = [VoiceChoice(adapter.engine, voice)] * len(scenes.scenes)
+    choices = list(choices)
+    if len(choices) != len(scenes.scenes):
+        raise ValueError(f"got {len(choices)} voice choice(s) for {len(scenes.scenes)} scene(s)")
+    missing = sorted({c.engine for c in choices} - set(adapters))
+    if missing:
+        raise ValueError(f"no adapter for engine(s) {', '.join(missing)}")
     base = scenes.base_dir
     lines_dir = base / audio_dir / "lines"
-    tag = adapter.cache_tag()
+    tags = {engine: a.cache_tag() for engine, a in adapters.items()}
 
-    rate: int | None = None
     synthesized = reused = 0
     engine_seconds = 0.0
     used: set[str] = set()
-    pending: list[tuple[dict[str, Any], str, array.array, list[LineTiming]]] = []
-    for scene in scenes.scenes:
+    voiced: list[tuple[dict[str, Any], VoiceChoice, list[tuple[str, str, array.array, int]]]] = []
+    for scene, choice in zip(scenes.scenes, choices):
         sid = scene["id"]
+        tts = adapters[choice.engine]
         texts = split_lines(scene["narration"][lang])
         if not texts:
             raise ValueError(f"scene {sid!r}: no {lang} narration to speak")
-        clips: list[tuple[str, str, array.array]] = []
+        clips: list[tuple[str, str, array.array, int]] = []
         for n, text in enumerate(texts):
-            key = _line_key(adapter.engine, tag, voice, lang, text)
+            key = _line_key(tts.engine, tags[choice.engine], choice.voice, lang, text)
             rel = f"{audio_dir}/lines/{sid}-{n:03d}-{key}.{lang}.wav"
             path = base / rel
             if path.is_file() and not force:
                 reused += 1
             else:
                 started = time.perf_counter()
-                adapter.synthesize(text, voice, lang, path)  # atomic write: never a half file under this name
+                tts.synthesize(text, choice.voice, lang, path)  # atomic write: never a half file under this name
                 engine_seconds += time.perf_counter() - started
                 synthesized += 1
             used.add(path.name)
             samples, line_rate = read_wav(path)
-            if rate is None:
-                rate = line_rate
-            elif line_rate != rate:
-                raise TTSError(f"{rel}: sample rate {line_rate} differs from {rate}; use one engine per language")
-            clips.append((text, rel, samples))
+            clips.append((text, rel, samples, line_rate))
+        voiced.append((scene, choice, clips))
 
-        assert rate is not None
-        gap = array.array("h", bytes(2 * int(round(pause_s * rate))))
+    rate = max(r for _, _, clips in voiced for *_, r in clips)
+    gap = array.array("h", bytes(2 * int(round(pause_s * rate))))
+    pending: list[tuple[dict[str, Any], VoiceChoice, str, array.array, list[LineTiming]]] = []
+    for scene, choice, clips in voiced:
         joined = array.array("h")
         timings: list[LineTiming] = []
-        for n, (text, rel, samples) in enumerate(clips):
+        for n, (text, rel, samples, line_rate) in enumerate(clips):
             if n:
                 joined.extend(gap)
             start = len(joined)
-            joined.extend(samples)
+            joined.extend(resample(samples, line_rate, rate))
             timings.append(LineTiming(index=n, text=text, start_s=start / rate, end_s=len(joined) / rate, file=rel))
-        pending.append((scene, f"{audio_dir}/{sid}.{lang}.wav", joined, timings))
+        pending.append((scene, choice, f"{audio_dir}/{scene['id']}.{lang}.wav", joined, timings))
 
     # Commit: drop the old timing first, so a crash below leaves no timing that disagrees with the audio.
-    assert rate is not None
     tpath = timing_path(base, lang, audio_dir)
     tpath.unlink(missing_ok=True)
     results: list[SceneNarration] = []
-    for scene, scene_rel, joined, timings in pending:
+    for scene, choice, scene_rel, joined, timings in pending:
         write_wav(base / scene_rel, joined, rate)
-        results.append(SceneNarration(id=scene["id"], file=scene_rel, duration_s=len(joined) / rate, lines=timings))
+        results.append(SceneNarration(
+            id=scene["id"], file=scene_rel, duration_s=len(joined) / rate, lines=timings,
+            engine=choice.engine, voice=choice.voice, speaker=choice.speaker,
+        ))
         scene.setdefault("audio", {})[lang] = scene_rel
+    engines = {c.engine for c in choices}
+    voice_names = {c.voice for c in choices}
+    engine = engines.pop() if len(engines) == 1 else MIX
+    voice_name = voice_names.pop() if len(voice_names) == 1 and engine != MIX else MIX
     result = NarrationResult(
-        lang=lang, engine=adapter.engine, voice=voice, sample_rate=rate, pause_s=pause_s, audio_dir=audio_dir,
+        lang=lang, engine=engine, voice=voice_name, sample_rate=rate, pause_s=pause_s, audio_dir=audio_dir,
         scenes=results, synthesized=synthesized, reused=reused, seconds=engine_seconds,
     )
     _write_text_atomic(tpath, result.timing_json())

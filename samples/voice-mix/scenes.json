@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "title": {"en": "Two voices, one video", "vi": "Hai giọng đọc, một video"},
+  "languages": ["en", "vi"],
+  "speakers": {
+    "owner": {
+      "en": {"engine": "clone-en", "voice": "clone"},
+      "vi": {"engine": "vieneu", "voice": "clone"}
+    },
+    "guest": {
+      "en": {"engine": "kokoro", "voice": "af_heart"},
+      "vi": {"engine": "vieneu", "voice": "Trúc Ly"}
+    }
+  },
+  "voice_mix": {"policy": "narrator", "narrator": "owner"},
+  "scenes": [
+    {
+      "id": "intro",
+      "chapter": {"en": "Intro", "vi": "Mở đầu"},
+      "narration": {
+        "en": "Welcome. I am the narrator, and this video mixes two voices.",
+        "vi": "Xin chào. Tôi là người dẫn chuyện, và video này dùng hai giọng đọc."
+      },
+      "duration_s": 3,
+      "visual": {"kind": "title", "text": {"en": "Two voices", "vi": "Hai giọng đọc"}}
+    },
+    {
+      "id": "question",
+      "speaker": "guest",
+      "narration": {
+        "en": "So what does retrieval add to a language model?",
+        "vi": "Vậy truy xuất thêm gì cho một mô hình ngôn ngữ?"
+      },
+      "duration_s": 3,
+      "visual": {"kind": "title", "text": {"en": "A question", "vi": "Một câu hỏi"}}
+    },
+    {
+      "id": "answer",
+      "narration": {
+        "en": "It lets the model look things up before it answers.",
+        "vi": "Nó cho mô hình tra cứu tài liệu trước khi trả lời."
+      },
+      "duration_s": 3,
+      "visual": {"kind": "title", "text": {"en": "Look it up first", "vi": "Tra cứu trước"}}
+    },
+    {
+      "id": "outro",
+      "chapter": {"en": "Wrap-up", "vi": "Tổng kết"},
+      "voice": {"en": {"engine": "kokoro", "voice": "bm_george"}},
+      "narration": {
+        "en": "A scene can also pick its own voice, like this one.",
+        "vi": "Một cảnh cũng có thể chọn giọng riêng, như cảnh này."
+      },
+      "duration_s": 3,
+      "visual": {"kind": "title", "text": {"en": "Thanks for watching", "vi": "Cảm ơn đã xem"}}
+    }
+  ]
+}

@@ -42,13 +42,29 @@ tts-setup:
     uv pip install -p "{{tts_python}}" "kokoro==0.9.4" "misaki[en]==0.9.4" "vieneu==3.8.4" "transformers==4.57.6" "soundfile>=0.12" "numpy>=1.26" "faster-whisper==1.2.1"
     uv pip install -p "{{tts_python}}" "en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl"
 
-# Build the voice comparison page in out/voices (set MOTION_STUDIO_REF_WAV to a clean 6-8 s WAV to add the cloned voice)
+# The English clone (Chatterbox) in its own venv: it pins torch, transformers and numpy apart from the TTS venv.
+# chatterbox-tts is installed without its own pins (torch 2.6, gradio); the list below is what its code imports, tested together.
+clone_en_venv := env_var_or_default("MOTION_STUDIO_CLONE_EN_VENV", home_directory() / ".cache/nghiep-motion-studio/clone-en-venv")
+clone_en_python := clone_en_venv / "bin/python"
+
+# Create the English clone environment (Chatterbox 0.1.7); weights download on first use into ~/.cache/nghiep-motion-studio/hf
+clone-en-setup:
+    [ -x "{{clone_en_python}}" ] || uv venv -p 3.12 "{{clone_en_venv}}"
+    uv pip install -p "{{clone_en_python}}" torch==2.11.0 torchaudio==2.11.0 --index-url https://download.pytorch.org/whl/cu128
+    uv pip install -p "{{clone_en_python}}" --no-deps "chatterbox-tts==0.1.7"
+    uv pip install -p "{{clone_en_python}}" "numpy>=1.26,<2" "librosa==0.11.0" "transformers==5.2.0" "diffusers==0.29.0" "safetensors==0.5.3" "resemble-perth==1.0.1" "s3tokenizer==0.3.0" "conformer==0.3.2" "omegaconf" "pyloudnorm" "einops" "scipy" torch==2.11.0 torchaudio==2.11.0 --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match
+
+# Build the voice comparison page in out/voices (set MOTION_STUDIO_REF_WAV to a clean 6-8 s WAV to add the cloned voices; MOTION_STUDIO_REF_WAV_EN for an English clip)
 voices:
     "{{tts_python}}" -m motion_studio voices -o out/voices --asr
 
 # Narrate one language of a scenes.json in place (writes audio/tts/ next to it), e.g. just narrate out/demo/scenes.json vi vieneu "Trúc Ly"
 narrate file lang engine voice:
     "{{tts_python}}" -m motion_studio narrate "{{file}}" --lang {{lang}} --engine {{engine}} --voice "{{voice}}"
+
+# Narrate one language with the voices scenes.json sets (speakers, voice, voice_mix), e.g. just narrate-mix out/demo/scenes.json en
+narrate-mix file lang:
+    "{{tts_python}}" -m motion_studio narrate "{{file}}" --lang {{lang}}
 
 # Render the generated-visuals sample (diagram, code, terminal, manim; EN and VI) into out/
 sample-visuals:

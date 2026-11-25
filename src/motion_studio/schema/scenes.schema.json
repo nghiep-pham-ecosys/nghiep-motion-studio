@@ -30,6 +30,24 @@
       "description": "Colours and fonts of frames and generated visuals. Default: light.",
       "enum": ["light", "dark"]
     },
+    "speakers": {
+      "description": "Named voices. Each speaker gives, per language, the TTS engine and voice that read its scenes. A language it leaves out falls back to the default voice of the narrate command.",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"$ref": "#/$defs/id"},
+      "additionalProperties": {"$ref": "#/$defs/voice_by_lang"}
+    },
+    "voice_mix": {
+      "description": "Who reads the scenes that name no speaker. narrator: one speaker (needs narrator). alternate-chapters: the speakers take turns, a new chapter starting at every scene with chapter (needs speakers).",
+      "type": "object",
+      "required": ["policy"],
+      "additionalProperties": false,
+      "properties": {
+        "policy": {"enum": ["narrator", "alternate-chapters"]},
+        "narrator": {"$ref": "#/$defs/id"},
+        "speakers": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/id"}}
+      }
+    },
     "scenes": {
       "type": "array",
       "minItems": 1,
@@ -60,6 +78,23 @@
       "pattern": "^#[0-9a-fA-F]{6}(?![\\s\\S])"
     },
     "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*(?![\\s\\S])", "maxLength": 64},
+    "voice_ref": {
+      "description": "A TTS engine and one of its voices, for example {\"engine\": \"kokoro\", \"voice\": \"af_heart\"} or {\"engine\": \"clone-en\", \"voice\": \"clone\"}.",
+      "type": "object",
+      "required": ["engine", "voice"],
+      "additionalProperties": false,
+      "properties": {
+        "engine": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*(?![\\s\\S])", "maxLength": 32},
+        "voice": {"type": "string", "minLength": 1, "pattern": "\\S", "maxLength": 64}
+      }
+    },
+    "voice_by_lang": {
+      "description": "A voice per language code.",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"$ref": "#/$defs/lang"},
+      "additionalProperties": {"$ref": "#/$defs/voice_ref"}
+    },
     "label": {
       "description": "On-screen text: one string for every language, or text per language code.",
       "anyOf": [
@@ -75,6 +110,8 @@
         "id": {"$ref": "#/$defs/id"},
         "chapter": {"$ref": "#/$defs/localized"},
         "narration": {"$ref": "#/$defs/localized"},
+        "speaker": {"description": "Who reads this scene: a key of /speakers. Overrides voice_mix.", "$ref": "#/$defs/id"},
+        "voice": {"description": "This scene's own voice per language. Overrides speaker and voice_mix.", "$ref": "#/$defs/voice_by_lang"},
         "duration_s": {
           "description": "Minimum scene length in seconds. With audio, the scene lasts max(duration_s, audio length + tail).",
           "type": "number",

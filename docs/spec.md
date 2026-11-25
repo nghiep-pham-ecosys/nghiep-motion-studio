@@ -34,7 +34,7 @@ Vietnamese videos come from the same file and differ only in voice and text.
 |---|------|-----------------|-----------------|--------|
 | 1 | Script | topic + outline -> `scenes.json` (EN + VI narration) | LLM inside the Claude subscription (offline/mock mode in tests) | planned |
 | 2 | Visuals | `scenes.json` -> one image or clip per scene | Manim CE (diagrams from data, custom scenes, animated code), VHS (terminal recordings), SVG/code-drawn images | **built** for the generated kinds (`motion-studio visuals`, also run by `render`) |
-| 3 | Voice | narration per language -> WAV per scene, written into `audio`, plus per-line timing | EN: Kokoro-82M; VI: VieNeu-TTS v3 Turbo presets or a clone of the author's own voice (all local; licences in `docs/voices.md`) | **built** (`motion-studio narrate`, `just voices`) |
+| 3 | Voice | narration per language -> WAV per scene, written into `audio`, plus per-line timing | EN: Kokoro-82M or a Chatterbox clone of the author's own voice; VI: VieNeu-TTS v3 Turbo presets or a clone of the author's own voice; a voice per scene or speaker (all local; licences in `docs/voices.md`) | **built** (`motion-studio narrate`, `just voices`) |
 | 4 | Assembly | `scenes.json` + visuals + audio -> 1080p MP4 per language | ffmpeg (title cards, fit and Ken Burns on images, clips, frame-exact audio) | **built** (`motion-studio render`) |
 | 5 | Subtitles | MP4 audio + narration -> SRT per language | local speech-to-text alignment | planned |
 | 6 | Quality gate | MP4 -> pass/fail | ffprobe checks: duration, loudness, sync, black frames | planned |
@@ -148,9 +148,31 @@ puts them first on PATH. `motion-studio tools` (or `just tools`) reports which
 kinds can run. CI installs both and renders one scene of each kind at
 640x360; locally a test whose tool is missing is skipped with the reason.
 
-Schema v1 holds one narration per scene. Dialogue (format 1) needs a speaker
-per scene and a voice per character and language; those fields arrive with
-the voice step.
+### Voices per scene (issue 17)
+
+Schema v1 holds one narration per scene, and each scene can have its own
+voice, so dialogue (format 1) and a narrator with a second speaker work from
+one file:
+
+- `speakers` (top level) names voices: per language, a TTS `engine` and one
+  of its `voice` ids;
+- a scene's `speaker` picks one of them; a scene's own `voice` (per
+  language) wins over its speaker;
+- `voice_mix` (top level) covers the scenes that name no speaker:
+  `{"policy": "narrator", "narrator": "owner"}` gives them all to one
+  speaker; `{"policy": "alternate-chapters", "speakers": ["owner", "guest"]}`
+  lets the speakers take turns, starting a new turn at every scene with a
+  `chapter`;
+- anything left uses `narrate --engine --voice`; without them `narrate`
+  names every scene without a voice.
+
+`motion-studio validate` checks that every speaker named by a scene or by
+`voice_mix` exists, that the policy has its field (`narrator` or two or more
+`speakers`), that voice languages are in `languages` and that every engine
+is known. Example: `samples/voice-mix/scenes.json` (the owner's clone
+narrates, a preset voice asks the question, one scene picks its own voice).
+Clone reference clips are passed at run time, never written into
+scenes.json.
 
 Timing: narration is decoded once and measured from its samples. A scene
 lasts `max(duration_s, audio length + 0.5 s)`, rounded up to a whole frame,
@@ -261,6 +283,16 @@ any long video is made.
   voice; the clip stays outside the repo. The final VI voice is chosen by ear
   on the comparison page.
 - Every video description discloses the AI-generated narration.
+
+## Decisions (2026-11-25, issue 17)
+
+- English clone: Chatterbox (Resemble AI), MIT code and weights, local, with
+  its Perth watermark on every line. XTTS-v2 and F5-TTS are non-commercial;
+  OpenVoice V2 stays the fallback (see `docs/voices.md`). Two models are
+  offered (`clone`: Turbo, `clone-standard`); Nghiep picks by ear before the
+  English clone is used in a video.
+- Chatterbox runs in its own venv and, from the other commands, as a worker
+  process, because its pinned libraries clash with the Kokoro and VieNeu venv.
 
 ## Subtitles (issue 9)
 
