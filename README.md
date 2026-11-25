@@ -6,9 +6,9 @@ for the lab-to-prod content lab. Design: [docs/spec.md](docs/spec.md).
 Status: in progress. Built: the `scenes.json` schema, the ffmpeg renderer,
 local TTS narration (Kokoro for English, VieNeu-TTS for Vietnamese, a
 cloned voice in both languages with VieNeu and Chatterbox, and a voice per
-scene or speaker with a `voice_mix` policy; see [docs/voices.md](docs/voices.md))
-and generated visuals (Manim diagrams and scenes, animated code, VHS terminal
-recordings).
+scene or speaker with a `voice_mix` policy; see [docs/voices.md](docs/voices.md)),
+generated visuals (Manim diagrams and scenes, animated code, VHS terminal
+recordings), subtitles and a quality gate for rendered videos.
 
 ## Quick start
 
@@ -39,5 +39,16 @@ just sample-visuals    # out/visuals.en.mp4, out/visuals.vi.mp4
 ```
 
 Tests skip an adapter whose tool is missing and say why.
+
+Quality gate (every rendered video, before review):
+
+```sh
+just drift out/demo.en.mp4                               # subtitle drift report (faster-whisper, TTS venv)
+just gate out/demo.en.mp4 samples/demo/scenes.json      # duration, loudness, black frames, drift, fact check
+```
+
+The gate exits 1 when any check fails and writes `out/demo.en.gate.json`.
+It needs a `factcheck.md` next to `scenes.json`; thresholds and the file
+format are in "Quality gate" in [docs/spec.md](docs/spec.md).
 
 Rendered output (`out/`, `*.mp4`, `*.wav`) stays out of git.

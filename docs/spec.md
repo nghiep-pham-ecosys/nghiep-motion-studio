@@ -2,7 +2,8 @@
 
 Status: in progress. Built so far: the `scenes.json` schema and the ffmpeg
 renderer (step 4, issue 6), the voice step with per-line timing (step 3,
-issue 7) and generated visuals (step 2, issue 8). Everything else is
+issue 7), generated visuals (step 2, issue 8), subtitles (step 5,
+issue 9) and the quality gate (step 6, issue 10). Everything else is
 planned.
 
 ## Goal
@@ -36,8 +37,8 @@ Vietnamese videos come from the same file and differ only in voice and text.
 | 2 | Visuals | `scenes.json` -> one image or clip per scene | Manim CE (diagrams from data, custom scenes, animated code), VHS (terminal recordings), SVG/code-drawn images | **built** for the generated kinds (`motion-studio visuals`, also run by `render`) |
 | 3 | Voice | narration per language -> WAV per scene, written into `audio`, plus per-line timing | EN: Kokoro-82M or a Chatterbox clone of the author's own voice; VI: VieNeu-TTS v3 Turbo presets or a clone of the author's own voice; a voice per scene or speaker (all local; licences in `docs/voices.md`) | **built** (`motion-studio narrate`, `just voices`) |
 | 4 | Assembly | `scenes.json` + visuals + audio -> 1080p MP4 per language | ffmpeg (title cards, fit and Ken Burns on images, clips, frame-exact audio) | **built** (`motion-studio render`) |
-| 5 | Subtitles | MP4 audio + narration -> SRT per language | local speech-to-text alignment | planned |
-| 6 | Quality gate | MP4 -> pass/fail | ffprobe checks: duration, loudness, sync, black frames | planned |
+| 5 | Subtitles | MP4 audio + narration -> SRT per language | narration timing, local speech-to-text alignment | **built** (`render`, `motion-studio subtitles`) |
+| 6 | Quality gate | MP4 + sidecars + `factcheck.md` -> pass/fail and `.gate.json` | ffprobe and ffmpeg (`loudnorm` analysis, `blackdetect`), the drift report: duration, loudness, black frames, subtitle drift, fact check | **built** (`motion-studio gate`, `just gate`) |
 | 7 | Extras | MP4 + `scenes.json` -> thumbnail, description, chapters, Shorts | ffmpeg + templates | planned |
 
 ### `scenes.json`
@@ -335,3 +336,41 @@ bias of its own. `--align` without narration timing gave cue starts within
 (checked 2026-11-25): faster-whisper MIT, Whisper models MIT,
 Systran/faster-whisper-tiny and -base MIT. Models live in
 `~/.cache/huggingface`, never in the repo.
+
+## Quality gate (issue 10)
+
+A broken render must never reach YouTube. `motion-studio gate
+<name>.<lang>.mp4 --scenes scenes.json` (or `just gate <video> <scenes>`)
+runs five checks and exits 1 if any fails. It writes
+`<name>.<lang>.gate.json` (every check with `ok`, a summary and the
+measured values, plus the limits used) and prints one `PASS`/`FAIL` line per
+check. The gate fails closed: a check that cannot run (a missing file, an
+ffmpeg error, an unreadable report) fails. Only a video with a passing
+`.gate.json` goes on to Nghiep's review.
+
+| Check | Passes when | Why this limit |
+|-------|-------------|----------------|
+| `duration` | the video has a video and an audio stream whose lengths differ by at most 0.1 s; the video length matches `<name>.<lang>.timeline.json` (written by `render`) within 0.1 s; and it is between 600 and 1200 s | the target is 10-20 minute videos; `--min-s` and `--max-s` change the window (for samples and Shorts). 0.1 s is three frames at 30 fps and covers AAC's 21 ms frames; a cut or a lost scene is longer than that |
+| `loudness` | integrated loudness is -14 LUFS +/- 1 LU and the true peak is at most -1.0 dBTP (ffmpeg `loudnorm` analysis, which measures per EBU R128 / ITU-R BS.1770) | YouTube's playback normalisation turns videos louder than about -14 LUFS down (a third-party measurement; YouTube does not publish the number) and does not turn quieter ones up, so a quieter video sounds weak next to others. +/- 1 LU is the usual delivery tolerance; -1 dBTP leaves room for the lossy re-encode, which raises peaks. Silence fails |
+| `black-frames` | ffmpeg `blackdetect` finds no run of 0.1 s or more where 98 % of the pixels have luma below 5 % of the range (`d=0.1:pix_th=0.05:pic_th=0.98`) | no scene is meant to be black; three frames is the shortest flash a viewer notices. The ffmpeg default `pix_th=0.10` (luma 38 in limited range) flags the dark theme background (slate-900, luma 36) as black on a title card; 0.05 (luma 27) does not, and pure black (16) still fails |
+| `subtitle-drift` | `<name>.<lang>.srt` exists, and `<name>.<lang>.drift.json` exists, is newer than the video and the SRT, and passes the drift limits in "Subtitles": median, mean absolute and first-to-second-half change at most 200 ms, 90th percentile at most 350 ms, at least half the cues matched | the limits are re-applied from the code, never read from the report, so an edited report cannot loosen them. The report comes from `just drift <video>` (faster-whisper in the TTS venv) or from `gate --check-drift` where faster-whisper is installed |
+| `fact-check` | `factcheck.md` next to `scenes.json` has a `Reviewed-by:` line, a `Date: YYYY-MM-DD` line, a `Narration:` line with the first 12 hex characters of the narration hash, at least 3 checked claims (`- [x] ...`), each with a source (an `http(s)://` link or `source:`), and no unchecked claim (`- [ ] ...`) | factual claims are reviewed by a person before publishing (see "Quality checks per step"). The narration hash (sha256 over every scene's id and narration in every language) makes the file stale when the script changes, but not when `narrate` writes audio paths. A 10-minute explainer makes more than three factual claims, so fewer means the review was skipped. The gate prints the expected hash when it does not match |
+
+One `factcheck.md` covers every language of a video, since the narration of
+all languages is reviewed together. Example:
+
+```markdown
+# Fact check: RAG explained
+
+Reviewed-by: nghiep
+Date: 2026-11-25
+Narration: 3f2a9c0d41be
+
+- [x] RAG retrieves passages before generating - source: https://arxiv.org/abs/2005.11401
+- [x] ...
+```
+
+The gate checks the clean `<name>.<lang>.mp4` with its sidecars; a
+`.burned.mp4` copy is made from it and needs no gate of its own. The
+renderer does not normalise loudness yet, so a rendered video fails
+`loudness` until the final mix is normalised to -14 LUFS (planned).
