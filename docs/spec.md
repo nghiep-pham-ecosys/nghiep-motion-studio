@@ -4,7 +4,8 @@ Status: in progress. Built so far: the `scenes.json` schema and the ffmpeg
 renderer (step 4, issue 6), the voice step with per-line timing (step 3,
 issue 7), generated visuals (step 2, issue 8), subtitles (step 5,
 issue 9), the quality gate (step 6, issue 10), the work dir that keeps
-renders off the local disk (issue 22) and Shorts (part of step 7, issue 11).
+renders off the local disk (issue 22), Shorts (part of step 7, issue 11) and
+the upload to YouTube as private, scheduled drafts (step 8, issue 12).
 Everything else is planned.
 
 ## Goal
@@ -40,7 +41,8 @@ Vietnamese videos come from the same file and differ only in voice and text.
 | 4 | Assembly | `scenes.json` + visuals + audio -> 1080p MP4 per language | ffmpeg (title cards, fit and Ken Burns on images, clips, frame-exact audio, two-pass `loudnorm` on the final mix) | **built** (`motion-studio render`) |
 | 5 | Subtitles | MP4 audio + narration -> SRT per language | narration timing, local speech-to-text alignment | **built** (`render`, `motion-studio subtitles`) |
 | 6 | Quality gate | MP4 + sidecars + `factcheck.md` -> pass/fail and `.gate.json` | ffprobe and ffmpeg (`loudnorm` analysis, `blackdetect`), the drift report: duration, loudness, black frames, subtitle drift, fact check | **built** (`motion-studio gate`, `just gate`) |
-| 7 | Extras | MP4 + `scenes.json` -> thumbnail, description, chapters, Shorts | ffmpeg + templates | Shorts **built** (`motion-studio shorts`, `just shorts`); the rest planned |
+| 7 | Extras | MP4 + `scenes.json` -> thumbnail, description, chapters, Shorts | ffmpeg + templates | Shorts **built** (`motion-studio shorts`, `just shorts`); description and chapters **built** (`stage-upload`); the thumbnail planned |
+| 8 | Upload | gated MP4 + SRT (+ Shorts) -> private, scheduled YouTube videos, `upload.json` | a draft GitHub release + the `youtube-upload` workflow in lab-to-prod (YouTube Data API, free quota) | **built** (`motion-studio stage-upload`, `finish-upload`) |
 
 ### `scenes.json`
 
@@ -380,6 +382,70 @@ scenes, chapters every three scenes, 1920x1080): three clips of 47.2, 47.4 and
 48.8 s, each 1080x1920 with audio, at -14.07, -14.01 and -14.03 LUFS and a
 true peak of -12.0 to -12.4 dBTP.
 
+## Upload to YouTube (issue 12)
+
+Uploads are automatic but stay private until Nghiep approves the weekly
+batch. The YouTube secrets live only in lab-to-prod (GitHub Secrets), so the
+upload runs there, in GitHub Actions; this repository never holds or reads a
+token. Three steps:
+
+1. **Stage** (`motion-studio stage-upload <job>.<lang>.mp4 --scenes
+   scenes.json --publish-at 2026-12-01T19:00:00+07:00 [--shorts] [--tags
+   a,b] [--description-file f]`, or `just stage-upload`). It refuses, and
+   calls nothing, unless the video is the clean `<job>.<lang>.mp4` in its job
+   folder and its `.gate.json` names it, is newer than it, says `ok`, lists
+   all five checks as passed and used the default limits
+   (`--allow-gate-limits` is for a test upload only). The publish time needs
+   a UTC offset and must be in the future. Then it builds the metadata:
+   - title: `title` of scenes.json in that language (at most 100 characters,
+     no `<` or `>`);
+   - description: the text of `--description-file` (else a one-line default),
+     then `Chapters` with one `M:SS Name` line per chapter, then the "Made
+     with AI" label (at most 5,000 bytes). Chapters start where the scene's
+     `chapter` changes (as for Shorts), in whole seconds from the render's
+     `.timeline.json`; the first starts at 0:00 (the video title when the
+     first scene has no chapter). YouTube shows chapters only when there are
+     at least 3 and each is at least 10 s long, so anything else is refused;
+   - tags (at most 500 characters), language (`defaultLanguage` and
+     `defaultAudioLanguage`), `publish_at`, and `synthetic_media: true`
+     (YouTube's altered or synthetic content flag; the voice is TTS).
+   With `--shorts`, each clip of the video's Shorts report (all clips found
+   and inside the loudness targets, newer than the video) is an item too:
+   title `<chapter, else video title> #Shorts`, its own SRT, public
+   `--shorts-every-days` (1) x n days after the video.
+   The mp4s, SRTs and `manifest.json` go up as assets of the **draft**
+   release `yt-<job>-<lang>` of lab-to-prod (`gh release create --draft`,
+   `gh release upload --clobber`; manifest last). Draft releases and their
+   assets are visible only to people with push access; a release that is not
+   a draft, or a draft that already holds a `result.json` (an upload has
+   started), is refused. The job holds its render lock meanwhile, so the cap
+   cannot delete the files. `<job>/<job>.<lang>.staged.json` records the
+   repository, the tag and the manifest. `--dry-run` prints the manifest and
+   calls nothing.
+2. **Upload**, after Nghiep approves the batch: the orchestrator runs
+   lab-to-prod's `youtube-upload` workflow with the tag (`live=true`; without
+   it the workflow is a dry run). It uploads every item as **private** with
+   `publishAt` (YouTube makes it public then), adds the SRT as captions,
+   logs the quota of every call, keeps `result.json` (video ids) on the draft
+   so a re-run skips what is up, saves it as the artifact
+   `youtube-upload-<tag>` and deletes the draft only when every item is up.
+   Details: lab-to-prod `publish/README.md`.
+3. **Finish** (`motion-studio finish-upload <job>/<job>.<lang>.staged.json`,
+   or `just finish-upload`). It reads `result.json` from the artifact of the
+   newest successful live run for the tag (`gh run list`, `gh run
+   download`; or `--run ID`, or `--result FILE`), checks that it is
+   complete and matches the staged items, and writes `<job>/upload.json` in
+   the format of "Work dir and disk", with `platform`, `url`, `publish_at`,
+   `captions` and `release` on each file. An earlier record of the job is
+   merged (the English and Vietnamese videos are uploaded one after the
+   other). Then it runs `clean --after-upload`, but only once every finished
+   video of the job is in the record; until then it says which videos wait
+   and deletes nothing. `--no-clean` writes the record only.
+
+Every `gh` call goes through one wrapper (`$MOTION_STUDIO_GH` names the
+binary), so the tests use a fake gh. `$MOTION_STUDIO_RELEASE_REPO` (or
+`--repo`) changes the repository, `nghiep-pham-ecosys/lab-to-prod` by default.
+
 ## Quality checks per step
 
 1. Script: `motion-studio validate` passes; every scene has narration in every
@@ -400,7 +466,9 @@ true peak of -12.0 to -12.4 dBTP.
 
 Each video also yields a blog post and a short post, generated from the same
 `scenes.json`. Nghiep reviews both, and the video, before anything goes to
-YouTube. The pipeline never publishes by itself.
+YouTube. The pipeline never publishes by itself: it stages a draft release,
+and the upload (private, scheduled) runs only when the batch is approved
+(see "Upload to YouTube").
 
 ## Cost and constraints
 
