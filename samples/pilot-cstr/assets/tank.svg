@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <!-- A stirred tank: feed in at the top left, outlet at the bottom right. No background: the theme shows through. -->
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+  </defs>
+  <!-- feed pipe -->
+  <line x1="180" y1="230" x2="560" y2="230" stroke="#334155" stroke-width="14" marker-end="url(#arrow)"/>
+  <text x="200" y="200" font-family="DejaVu Sans" font-size="44" fill="#0f172a">A + W</text>
+  <!-- tank body -->
+  <rect x="600" y="160" width="400" height="560" rx="40" fill="#e0f2fe" stroke="#0369a1" stroke-width="10"/>
+  <!-- liquid -->
+  <rect x="610" y="300" width="380" height="410" rx="32" fill="#7dd3fc" opacity="0.75"/>
+  <path d="M 610 300 q 47 -22 95 0 t 95 0 t 95 0 t 95 0" fill="none" stroke="#0369a1" stroke-width="5"/>
+  <!-- stirrer -->
+  <rect x="770" y="70" width="60" height="70" rx="8" fill="#475569"/>
+  <line x1="800" y1="140" x2="800" y2="560" stroke="#334155" stroke-width="12"/>
+  <ellipse cx="740" cy="560" rx="62" ry="20" fill="#f59e0b" stroke="#b45309" stroke-width="5"/>
+  <ellipse cx="860" cy="560" rx="62" ry="20" fill="#f59e0b" stroke="#b45309" stroke-width="5"/>
+  <!-- mixing swirls -->
+  <path d="M 680 470 a 50 34 0 1 1 30 40" fill="none" stroke="#0c4a6e" stroke-width="6" marker-end="url(#arrow)"/>
+  <path d="M 920 470 a 50 34 0 1 0 -30 40" fill="none" stroke="#0c4a6e" stroke-width="6" marker-end="url(#arrow)"/>
+  <text x="800" y="420" font-family="DejaVu Sans" font-size="54" font-weight="bold" fill="#0f172a" text-anchor="middle">A → B</text>
+  <!-- outlet pipe -->
+  <line x1="1000" y1="660" x2="1400" y2="660" stroke="#334155" stroke-width="14" marker-end="url(#arrow)"/>
+  <text x="1030" y="630" font-family="DejaVu Sans" font-size="44" fill="#0f172a">A + B + W</text>
+  <!-- labels -->
+  <text x="800" y="800" font-family="DejaVu Sans" font-size="40" fill="#334155" text-anchor="middle">V</text>
+  <text x="370" y="290" font-family="DejaVu Sans" font-size="40" fill="#334155" text-anchor="middle">Q</text>
+  <text x="1200" y="720" font-family="DejaVu Sans" font-size="40" fill="#334155" text-anchor="middle">Q</text>
+</svg>

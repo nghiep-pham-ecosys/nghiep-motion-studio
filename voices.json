@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "narrator": {
+    "en": {"engine": "clone-en", "voice": "clone-standard", "ref_env": "MOTION_STUDIO_REF_WAV_EN"},
+    "vi": {"engine": "clone", "voice": "clone", "ref_env": "MOTION_STUDIO_REF_WAV"}
+  },
+  "presets": {
+    "male-male": {
+      "description": "The owner and a second male voice.",
+      "guest": {
+        "en": [{"engine": "kokoro", "voice": "am_michael"}],
+        "vi": [{"engine": "vieneu", "voice": "Minh Đức"}]
+      },
+      "stand_in": {
+        "en": {"engine": "kokoro", "voice": "bm_george"},
+        "vi": {"engine": "vieneu", "voice": "Hải Đăng"}
+      }
+    },
+    "male-female": {
+      "description": "The owner and a female voice.",
+      "guest": {
+        "en": [{"engine": "kokoro", "voice": "af_heart"}, {"engine": "kokoro", "voice": "bf_emma"}],
+        "vi": [{"engine": "vieneu", "voice": "Trúc Ly"}, {"engine": "vieneu", "voice": "Thùy Dung"}]
+      },
+      "stand_in": {
+        "en": {"engine": "kokoro", "voice": "am_michael"},
+        "vi": {"engine": "vieneu", "voice": "Minh Đức"}
+      }
+    }
+  }
+}

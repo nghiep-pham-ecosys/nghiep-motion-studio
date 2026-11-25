@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "job": "pilot-cstr-vi",
+  "topic": "The CSTR unit of process-sim-lab, as a dialogue (Vietnamese, owner and a second male voice)",
+  "scenes": "scenes.vi.json",
+  "factcheck": "factcheck.vi.md",
+  "languages": ["vi"],
+  "cast": {"vi": {"preset": "male-male"}},
+  "shorts": 3
+}

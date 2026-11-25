@@ -27,9 +27,14 @@ ci: test validate
 test:
     python3 -m unittest discover -v -s tests -p 'test_*.py'
 
-# Validate every sample scenes.json
+# Validate every sample scenes.json (and the per-language scenes.<lang>.json of the pilot)
 validate:
-    python3 -m motion_studio validate samples/*/scenes.json
+    python3 -m motion_studio validate samples/*/scenes*.json
+
+# One command from a topic file to a gated video and its Shorts (script, scenes, voice, visuals, render, subtitles, gate,
+# shorts), e.g. just video samples/pilot-cstr/cstr-en.topic.json --stand-in
+video topic *args:
+    python3 -m motion_studio video "{{topic}}" --tts-python "{{tts_python}}" {{args}}
 
 # Render the 3-scene sample (EN and VI) into the work dir (<work dir>/three-scenes/)
 sample:
