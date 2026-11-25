@@ -3,8 +3,9 @@
 Status: in progress. Built so far: the `scenes.json` schema and the ffmpeg
 renderer (step 4, issue 6), the voice step with per-line timing (step 3,
 issue 7), generated visuals (step 2, issue 8), subtitles (step 5,
-issue 9), the quality gate (step 6, issue 10) and the work dir that keeps
-renders off the local disk (issue 22). Everything else is planned.
+issue 9), the quality gate (step 6, issue 10), the work dir that keeps
+renders off the local disk (issue 22) and Shorts (part of step 7, issue 11).
+Everything else is planned.
 
 ## Goal
 
@@ -39,7 +40,7 @@ Vietnamese videos come from the same file and differ only in voice and text.
 | 4 | Assembly | `scenes.json` + visuals + audio -> 1080p MP4 per language | ffmpeg (title cards, fit and Ken Burns on images, clips, frame-exact audio, two-pass `loudnorm` on the final mix) | **built** (`motion-studio render`) |
 | 5 | Subtitles | MP4 audio + narration -> SRT per language | narration timing, local speech-to-text alignment | **built** (`render`, `motion-studio subtitles`) |
 | 6 | Quality gate | MP4 + sidecars + `factcheck.md` -> pass/fail and `.gate.json` | ffprobe and ffmpeg (`loudnorm` analysis, `blackdetect`), the drift report: duration, loudness, black frames, subtitle drift, fact check | **built** (`motion-studio gate`, `just gate`) |
-| 7 | Extras | MP4 + `scenes.json` -> thumbnail, description, chapters, Shorts | ffmpeg + templates | planned |
+| 7 | Extras | MP4 + `scenes.json` -> thumbnail, description, chapters, Shorts | ffmpeg + templates | Shorts **built** (`motion-studio shorts`, `just shorts`); the rest planned |
 
 ### `scenes.json`
 
@@ -242,8 +243,9 @@ its outputs (the folder of `scenes.json`, else the file's stem):
   <job>.<lang>.mp4            render, plus .timeline.json, .lines.json, .srt,
                               .burned.mp4, .drift.json, .gate.json
   visuals/                    generated-clip cache
-  shorts/                     Shorts (step 7)
+  shorts/                     Shorts (step 7): <job>-<n>.<lang>.mp4 and .srt, <job>.<lang>.shorts.json
   .render-*/  .burn-*/        temporary folders of a running render or burn
+  shorts/.shorts-*/           temporary folder of a running Shorts cut
   upload.json                 the upload record (written by the upload step, issue 12)
 ```
 
@@ -313,6 +315,70 @@ The WSL disk file grows as files are written and does not shrink by itself
 when they are deleted: deleted space is reused inside it, so the cap bounds
 its growth, but it hands no space back to Windows unless sparse mode is on
 (`wsl --manage <distro> --set-sparse true`) or the disk is compacted.
+
+## Shorts (issue 11)
+
+Each long video gives up to three Shorts. `motion-studio shorts
+<name>.<lang>.mp4 [--scenes scenes.json]` (or `just shorts <video> --scenes
+<scenes.json>`) reads the clean render with its `.timeline.json` and
+`.lines.json` (else its `.srt`) and writes into the job folder:
+
+```
+<job>/shorts/<job>-<n>.<lang>.mp4     n = 1..3, in video order
+<job>/shorts/<job>-<n>.<lang>.srt     the cues of that clip, on its own clock
+<job>/shorts/<job>.<lang>.shorts.json windows, marks, chapter, cue count and loudness of each clip
+```
+
+`clean --after-upload` treats these mp4s like the main videos (see "Work dir
+and disk"), and a new cut first removes the clips of an earlier one.
+
+**Where a clip may start and end.** Candidates are every scene boundary of
+the timeline (a *chapter mark* where the scene's `chapter` differs from the
+one before it, so chapters come from `scenes.json`; no new field is needed),
+the start and end of the video, and every gap between two narration lines
+where the first line ends a sentence (`.`, `!`, `?`, `…`). Each candidate is
+moved into the silence around it, read from the video's audio in 10 ms energy
+frames (as for subtitles): a clip starts 0.25 s before the first word after
+the pause and ends 0.6 s after the last word before it, on whole frames. A
+candidate with no pause of at least 0.1 s within 0.5 s is dropped, so a clip
+never cuts a word. Without `--scenes` (and no `scenes.json` next to the
+video) every scene start still counts, but there are no chapter marks or
+titles.
+
+**Which windows.** Every pair of marks 45-60 s apart is a window. The chosen
+set never overlaps and holds as many windows as fit, up to `--count` (3);
+among sets of that size it has the best marks: a window scores 10 x its start
+mark (chapter 3, scene 2, sentence 1) + 3 x its end mark (chapter or end of
+video 3, scene 2, sentence 1), plus a little for length. When fewer windows
+fit (a video under about 2.5 minutes), the ones found are cut, the command
+prints `FAIL only N of 3 Shorts windows ...` and exits 1: nothing is padded
+or looped. `--dry-run` prints the windows without cutting.
+
+**Picture.** 1080x1920 (9:16) on the theme's background (`--theme`, else the
+file's theme, else light). The 16:9 frame is scaled to the full width (1072
+px plus a 4 px outline in the theme's border colour), not cropped, so
+diagrams and code stay whole; its top is at 29 % of the height. The chapter
+title of the window's start (80 px, two rows of at most 22 characters) sits
+above it, and the subtitles below it: bold 64 px text, at most two rows of
+20 characters, on the theme's subtitle box, side margins of 12 % of the width.
+Everything stays out of the top 15 % and the bottom 25 %, where the Shorts
+player draws its own title, buttons and progress bar. Cues are rebuilt from
+the narration lines whose middle lies in the window, moved to the clip's
+clock and trimmed to the speech in the clip's audio, then drawn by libass from
+an ASS file at the frame's own resolution.
+
+**Sound.** The window's audio is cut sample-exact (48 kHz stereo) and goes
+through the same two-pass `loudnorm` as a render (`render.normalize_mix`), so
+every clip lands on -14 LUFS with its true peak under -1 dBTP, whatever the
+loudness of that part of the long video. The finished clip is measured again
+with the gate's analysis; a clip outside the gate's tolerance (+/- 1 LU) is a
+`FAIL` line and exit 1. Video and audio have the same length (whole frames,
+checked after encoding).
+
+Checked on 2026-11-25 with a 147.6 s mock-narrated render (12 title-card
+scenes, chapters every three scenes, 1920x1080): three clips of 47.2, 47.4 and
+48.8 s, each 1080x1920 with audio, at -14.07, -14.01 and -14.03 LUFS and a
+true peak of -12.0 to -12.4 dBTP.
 
 ## Quality checks per step
 

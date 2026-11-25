@@ -117,3 +117,7 @@ drift video:
 # Quality gate for a rendered video, e.g. just gate ~/.cache/nghiep-motion-studio/work/demo/demo.en.mp4 samples/demo/scenes.json (exit 1 on any failure; writes <name>.<lang>.gate.json; run `just drift` first)
 gate video scenes *args:
     python3 -m motion_studio gate "{{video}}" --scenes "{{scenes}}" {{args}}
+
+# Cut 3 Shorts (45-60 s, 9:16, large subtitles) at chapter marks into the job's shorts/ folder, e.g. just shorts ~/.cache/nghiep-motion-studio/work/rag/rag.en.mp4 --scenes samples/rag/scenes.json
+shorts video *args:
+    python3 -m motion_studio shorts "{{video}}" {{args}}

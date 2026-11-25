@@ -424,6 +424,63 @@ def _cmd_gate(args: argparse.Namespace) -> int:
     return 0 if report.ok else 1
 
 
+def _cmd_shorts(args: argparse.Namespace) -> int:
+    from .shorts import ShortOptions, ShortsError, make_shorts
+
+    video = Path(args.video)
+    if video.name.endswith(".burned.mp4"):
+        print(f"FAIL {video.name} already has subtitles burned in; pass the clean <name>.<lang>.mp4", file=sys.stderr)
+        return 1
+    lang = args.lang or _lang_of(video)
+    if not lang:
+        print(f"FAIL cannot tell the language from {video.name}; pass --lang", file=sys.stderr)
+        return 2
+    try:
+        opts = ShortOptions(count=args.count, min_s=args.min_s, max_s=args.max_s, theme=args.theme,
+                            preset=args.preset, crf=args.crf)
+    except ValueError as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 2
+    scenes_file = Path(args.scenes) if args.scenes else video.parent / "scenes.json"
+    doc, theme = None, None
+    try:
+        if args.scenes or scenes_file.is_file():
+            scenes = load(scenes_file)
+            doc, theme = scenes.doc, scenes.theme
+        else:
+            print(f"NOTE no scenes.json given or next to {video.name}: every scene start counts as a mark, "
+                  "but no chapter marks or titles (pass --scenes)", file=sys.stderr)
+        parent = video.resolve().parent
+        if workdir.is_job(parent) and not args.dry_run:
+            with workdir.active_job(parent):
+                result = make_shorts(video, lang, doc, opts, theme)
+        else:
+            result = make_shorts(video, lang, doc, opts, theme, dry_run=args.dry_run)
+    except (ShortsError, ScenesError, WorkDirError, OSError, ValueError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    for clip in result.clips:
+        w = clip.window
+        where = f"{w.start_s:.2f}-{w.end_s:.2f} s ({w.duration_s:.2f} s, {w.start_kind} -> {w.end_kind})"
+        title = f" [{w.chapter}]" if w.chapter else ""
+        if args.dry_run:
+            print(f"OK   {clip.path.name}: {where}{title}")
+            continue
+        m = clip.measured
+        print(f"{'OK  ' if clip.loudness_ok else 'FAIL'} {clip.path}: {where}{title}, {clip.cues} cue(s), "
+              f"{m['integrated_lufs']:.1f} LUFS, true peak {m['true_peak_dbtp']:.1f} dBTP")
+    if len(result.clips) < result.wanted:
+        print(f"FAIL only {len(result.clips)} of {result.wanted} Shorts windows of {opts.min_s:g}-{opts.max_s:g} s "
+              f"fit {video.name} ({result.duration_s:.1f} s); nothing is padded", file=sys.stderr)
+        return 1
+    if not args.dry_run and not result.ok:
+        print("FAIL a Short is outside the gate's loudness targets", file=sys.stderr)
+        return 1
+    if result.report:
+        print(f"OK   report: {result.report}")
+    return 0
+
+
 def _cmd_clean(args: argparse.Namespace) -> int:
     try:
         root = workdir.work_dir()
@@ -556,6 +613,21 @@ def build_parser() -> argparse.ArgumentParser:
     gt.add_argument("--device", default="cpu", help="cpu (default), cuda or auto")
     gt.add_argument("--report", help="where to write the JSON report (default: <name>.<lang>.gate.json)")
     gt.set_defaults(func=_cmd_gate)
+
+    sh = sub.add_parser("shorts", help="cut 45-60 s vertical Shorts (9:16, large subtitles) from a rendered video, "
+                        "at chapter marks and sentence ends; exit 1 when fewer than --count fit")
+    sh.add_argument("video", help="a rendered clean <name>.<lang>.mp4 (its .timeline.json and .lines.json or .srt are read)")
+    sh.add_argument("--scenes", help="the scenes.json it was rendered from, for chapter marks and titles "
+                    "(default: scenes.json next to the video, if any)")
+    sh.add_argument("--lang", help="language (default: from the file name)")
+    sh.add_argument("--count", type=int, default=3, help="how many Shorts (default: 3)")
+    sh.add_argument("--min-s", type=float, default=45.0, help="shortest Short in seconds (default: 45)")
+    sh.add_argument("--max-s", type=float, default=60.0, help="longest Short in seconds (default: 60)")
+    sh.add_argument("--theme", choices=sorted(THEMES), help="colours and fonts (default: the file's theme, else light)")
+    sh.add_argument("--preset", default="medium", help="x264 preset (default: medium)")
+    sh.add_argument("--crf", type=_crf, default=20, help="x264 quality, lower is better (default: 20)")
+    sh.add_argument("--dry-run", action="store_true", help="print the windows only; cut nothing")
+    sh.set_defaults(func=_cmd_shorts)
 
     c = sub.add_parser("clean", help="free disk space in the work dir: after an upload, or down to the size cap")
     mode = c.add_mutually_exclusive_group(required=True)
