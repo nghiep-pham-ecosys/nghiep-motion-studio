@@ -31,9 +31,9 @@ test:
 validate:
     python3 -m motion_studio validate samples/*/scenes.json
 
-# Render the 3-scene sample (EN and VI) into out/
+# Render the 3-scene sample (EN and VI) into the work dir (<work dir>/three-scenes/)
 sample:
-    python3 -m motion_studio render samples/three-scenes/scenes.json -o out
+    python3 -m motion_studio render samples/three-scenes/scenes.json
 
 # Create the local TTS environment (CUDA torch, Kokoro, VieNeu-TTS); model weights download on first use
 tts-setup:
@@ -66,9 +66,21 @@ narrate file lang engine voice:
 narrate-mix file lang:
     "{{tts_python}}" -m motion_studio narrate "{{file}}" --lang {{lang}}
 
-# Render the generated-visuals sample (diagram, code, terminal, manim; EN and VI) into out/
+# Render the generated-visuals sample (diagram, code, terminal, manim; EN and VI) into the work dir (<work dir>/visuals/)
 sample-visuals:
-    python3 -m motion_studio render samples/visuals/scenes.json -o out
+    python3 -m motion_studio render samples/visuals/scenes.json
+
+# Work dir size per job and free space on the Windows drive that holds the WSL disk
+disk:
+    python3 -m motion_studio disk
+
+# Strip the oldest jobs in the work dir to its size cap (MOTION_STUDIO_WORK_CAP_GB, default 10); text files stay
+prune:
+    python3 -m motion_studio clean --cap
+
+# After an upload: delete the job's videos, Shorts and intermediates, e.g. just clean-uploaded ~/.cache/nghiep-motion-studio/work/rag/upload.json
+clean-uploaded record:
+    python3 -m motion_studio clean --after-upload "{{record}}"
 
 # Show which visual adapters can run on this machine
 tools:
@@ -98,10 +110,10 @@ vhs-install:
     "${bin}/vhs" --version
     "${bin}/ttyd" --version
 
-# Check subtitle drift of a rendered video with faster-whisper base (CPU int8), e.g. just drift out/demo.en.mp4
+# Check subtitle drift of a rendered video with faster-whisper base (CPU int8), e.g. just drift ~/.cache/nghiep-motion-studio/work/demo/demo.en.mp4
 drift video:
     "{{tts_python}}" -m motion_studio subtitles "{{video}}" --check-drift
 
-# Quality gate for a rendered video, e.g. just gate out/demo.en.mp4 samples/demo/scenes.json (exit 1 on any failure; writes <name>.<lang>.gate.json; run `just drift` first)
+# Quality gate for a rendered video, e.g. just gate ~/.cache/nghiep-motion-studio/work/demo/demo.en.mp4 samples/demo/scenes.json (exit 1 on any failure; writes <name>.<lang>.gate.json; run `just drift` first)
 gate video scenes *args:
     python3 -m motion_studio gate "{{video}}" --scenes "{{scenes}}" {{args}}

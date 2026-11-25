@@ -15,6 +15,8 @@ from .schema import Scenes, ScenesError, load, load_schema
 from .subtitles import DEFAULT_MODEL as DEFAULT_WHISPER_MODEL
 from .theme import THEMES
 from .visuals import GENERATED_KINDS, VisualError, missing_tools
+from . import workdir
+from .workdir import WorkDirError
 
 REF_ENV = "MOTION_STUDIO_REF_WAV"
 REF_EN_ENV = "MOTION_STUDIO_REF_WAV_EN"
@@ -73,8 +75,40 @@ def _cmd_render(args: argparse.Namespace) -> int:
     except ValueError as exc:
         print(f"FAIL {exc}", file=sys.stderr)
         return 2
-    out_dir = Path(args.out_dir)
     stem = output_stem(Path(args.file))
+    try:
+        if args.out_dir is not None:
+            return _render_langs(args, scenes, langs, opts, Path(args.out_dir), stem)
+        root, cap = workdir.work_dir(), workdir.cap_bytes()
+        with workdir.active_job(workdir.job_dir(stem, root)) as job:
+            _prune(root, cap, job)
+            try:
+                return _render_langs(args, scenes, langs, opts, job, stem)
+            finally:
+                _prune(root, cap, job)
+    except (WorkDirError, OSError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+
+
+def _prune(root: Path, cap: int, current: Path | None) -> None:
+    """Hold the work dir to its cap, oldest jobs first; never the current job or one another render holds."""
+    result = workdir.enforce_cap(root, cap, current)
+    for name, freed in result.pruned:
+        print(f"NOTE work dir over its {workdir.human(cap)} cap: removed the renders of {name} ({workdir.human(freed)})")
+    if result.skipped_active:
+        print(f"NOTE skipped job(s) being rendered: {', '.join(result.skipped_active)}", file=sys.stderr)
+    if result.over_cap:
+        print(f"WARN work dir {root} holds {workdir.human(result.after)}, over its {workdir.human(cap)} cap, "
+              "with only active jobs left", file=sys.stderr)
+
+
+def _render_langs(args: argparse.Namespace, scenes: Scenes, langs: list[str], opts: RenderOptions, out_dir: Path,
+                  stem: str) -> int:
+    """Render every language into ``out_dir``; intermediates and the visuals cache go there too."""
+    if opts.visuals_dir is None:
+        opts.visuals_dir = out_dir / "visuals"
+    opts.temp_dir = out_dir
     for lang in langs:
         output = out_dir / f"{stem}.{lang}.mp4"
         try:
@@ -261,6 +295,20 @@ def _cmd_visuals(args: argparse.Namespace) -> int:
         print(f"FAIL language(s) {', '.join(unknown)} not in {args.file} (has {', '.join(scenes.languages)})", file=sys.stderr)
         return 2
     opts = RenderOptions(jobs=args.jobs, visuals_dir=args.visuals_dir, rebuild_visuals=args.rebuild, theme=args.theme)
+    try:
+        if args.visuals_dir is not None:
+            return _build_visuals(scenes, langs, opts)
+        root, cap = workdir.work_dir(), workdir.cap_bytes()
+        with workdir.active_job(workdir.job_dir(output_stem(Path(args.file)), root)) as job:
+            opts.visuals_dir = job / "visuals"
+            _prune(root, cap, job)
+            return _build_visuals(scenes, langs, opts)
+    except (WorkDirError, OSError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+
+
+def _build_visuals(scenes: Scenes, langs: list[str], opts: RenderOptions) -> int:
     for lang in langs:
         try:
             built, timeline = with_generated_visuals(scenes, lang, plan(scenes, lang, opts), opts)
@@ -376,6 +424,36 @@ def _cmd_gate(args: argparse.Namespace) -> int:
     return 0 if report.ok else 1
 
 
+def _cmd_clean(args: argparse.Namespace) -> int:
+    try:
+        root = workdir.work_dir()
+        if args.after_upload:
+            result = workdir.clean_after_upload(Path(args.after_upload), root, copy_to=args.copy_to)
+            for item in result.copied:
+                print(f"OK   copied {item['path']} -> {item['to']}")
+            print(f"OK   {result.job}: removed {len(result.deleted)} file(s), {workdir.human(result.freed)}; "
+                  "kept the upload record, subtitles, scenes.json and the script")
+            return 0
+        cap = workdir.cap_bytes(args.cap_gb)
+        _prune(root, cap, None)
+        print(f"OK   work dir {root}: {workdir.human(workdir.tree_size(root) if root.is_dir() else 0)} "
+              f"(cap {workdir.human(cap)})")
+        return 0
+    except (WorkDirError, OSError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+
+
+def _cmd_disk(_: argparse.Namespace) -> int:
+    try:
+        report = workdir.disk_report(workdir.work_dir(), workdir.cap_bytes())
+    except (WorkDirError, OSError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    print("\n".join(report.lines()))
+    return 0
+
+
 def _cmd_tools(_: argparse.Namespace) -> int:
     status = 0
     for kind, why in missing_tools().items():
@@ -403,13 +481,15 @@ def build_parser() -> argparse.ArgumentParser:
     r = sub.add_parser("render", help="render a scenes.json to one mp4 per language")
     r.add_argument("file")
     r.add_argument("--lang", action="append", help="language to render (repeatable); default: all")
-    r.add_argument("-o", "--out-dir", default="out", help="output folder (default: out)")
+    r.add_argument("-o", "--out-dir",
+                   help=f"output folder (default: <work dir>/<name>, where the work dir is ${workdir.WORK_DIR_ENV} "
+                        "or ~/.cache/nghiep-motion-studio/work, held to its size cap)")
     r.add_argument("--preset", default="medium", help="x264 preset (default: medium)")
     r.add_argument("--crf", type=_crf, default=20, help="x264 quality, lower is better (default: 20)")
     r.add_argument("--jobs", type=_non_negative, default=0, help="parallel scene encodes (default: automatic)")
     r.add_argument("--font", help="fontconfig font name for title cards and subtitles (default: the theme's)")
     r.add_argument("--theme", choices=sorted(THEMES), help="colours and fonts (default: the file's theme, else light)")
-    r.add_argument("--visuals-dir", type=Path, help="cache for generated clips (default: <scenes dir>/.cache/visuals)")
+    r.add_argument("--visuals-dir", type=Path, help="cache for generated clips (default: <output folder>/visuals)")
     r.add_argument("--rebuild-visuals", action="store_true", help="build generated clips even when cached")
     r.add_argument("--no-loudnorm", action="store_true",
                    help="keep the audio mix as it is, without loudness normalisation (drafts; the gate needs it on)")
@@ -444,7 +524,7 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("file")
     g.add_argument("--lang", action="append", help="language to build (repeatable); default: all")
     g.add_argument("--jobs", type=_non_negative, default=0, help="parallel builds (default: 1)")
-    g.add_argument("--visuals-dir", type=Path, help="cache for generated clips (default: <scenes dir>/.cache/visuals)")
+    g.add_argument("--visuals-dir", type=Path, help="cache for generated clips (default: <work dir>/<name>/visuals)")
     g.add_argument("--rebuild", action="store_true", help="build clips even when cached")
     g.add_argument("--theme", choices=sorted(THEMES), help="colours and fonts (default: the file's theme, else light)")
     g.set_defaults(func=_cmd_visuals)
@@ -476,6 +556,22 @@ def build_parser() -> argparse.ArgumentParser:
     gt.add_argument("--device", default="cpu", help="cpu (default), cuda or auto")
     gt.add_argument("--report", help="where to write the JSON report (default: <name>.<lang>.gate.json)")
     gt.set_defaults(func=_cmd_gate)
+
+    c = sub.add_parser("clean", help="free disk space in the work dir: after an upload, or down to the size cap")
+    mode = c.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--after-upload", metavar="UPLOAD_JSON",
+                      help="<work dir>/<name>/upload.json: delete that job's videos, Shorts and intermediates "
+                           "once the record says every video was uploaded")
+    mode.add_argument("--cap", action="store_true", help="remove the oldest jobs' renders until the work dir fits its cap")
+    c.add_argument("--cap-gb", type=float, help=f"size cap in GB for --cap (default: ${workdir.CAP_ENV}, else "
+                   f"{workdir.DEFAULT_CAP_GB:g})")
+    c.add_argument("--copy-to", metavar="REMOTE:PATH",
+                   help=f"with --after-upload: copy the master mp4s there with rclone first (default: "
+                        f"${workdir.CLOUD_COPY_ENV}; off when unset)")
+    c.set_defaults(func=_cmd_clean)
+
+    d = sub.add_parser("disk", help="print the work dir size and the free space on the Windows drive of the WSL disk")
+    d.set_defaults(func=_cmd_disk)
 
     t = sub.add_parser("tools", help="report which visual adapters can run on this machine (exit 1 if any cannot)")
     t.set_defaults(func=_cmd_tools)

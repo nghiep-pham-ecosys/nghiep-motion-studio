@@ -595,7 +595,8 @@ def burn(video: Path, srt: Path, out: Path | None = None, **kw: Any) -> Path:
     video, srt = Path(video).resolve(), Path(srt).resolve()
     out = Path(out).resolve() if out else sidecar(video, ".burned.mp4")
     w, h = video_size(video)
-    with tempfile.TemporaryDirectory(prefix="motion-studio-subs-") as tmp:
+    # The partial file is written next to the output (the work dir), not to the system temp on the WSL disk.
+    with tempfile.TemporaryDirectory(prefix=".burn-", dir=out.parent) as tmp:
         # The filter argument names a plain local file, so paths need no escaping.
         shutil.copyfile(srt, Path(tmp) / "subs.srt")
         partial = Path(tmp) / "burned.mp4"

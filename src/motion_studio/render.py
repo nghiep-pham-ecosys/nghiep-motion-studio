@@ -80,6 +80,7 @@ class RenderOptions:
     ffmpeg: str = "ffmpeg"
     ffprobe: str = "ffprobe"
     keep_workdir: Path | None = None  # set to keep segments for debugging
+    temp_dir: Path | None = None  # parent of the render's temporary folder (segments, mix); None = the system temp
     visuals_dir: Path | None = None  # cache for generated clips; default <scenes dir>/.cache/visuals
     rebuild_visuals: bool = False  # build generated clips even when cached
     normalize_audio: bool = True  # two-pass loudnorm on the final mix; False keeps the mix as it is (drafts)
@@ -511,7 +512,10 @@ def render(scenes: Scenes, lang: str, output: str | Path, opts: RenderOptions | 
         workdir.mkdir(parents=True, exist_ok=True)
         cleanup = None
     else:
-        cleanup = tempfile.TemporaryDirectory(prefix="motion-studio-")
+        temp_parent = Path(opts.temp_dir).resolve() if opts.temp_dir is not None else None
+        if temp_parent is not None:
+            temp_parent.mkdir(parents=True, exist_ok=True)
+        cleanup = tempfile.TemporaryDirectory(prefix=".render-", dir=temp_parent)
         workdir = Path(cleanup.name)
     try:
         # 1. Decode each narration file once and measure it from its samples.

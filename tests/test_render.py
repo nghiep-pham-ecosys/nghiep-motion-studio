@@ -7,6 +7,7 @@ import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -484,6 +485,13 @@ class LoudnessIntegrationTest(unittest.TestCase):
 
 
 class CliOptionsTest(unittest.TestCase):
+    def setUp(self):  # render without -o goes to the work dir: point it at a temp folder, never the real cache
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        env = mock.patch.dict(os.environ, {"MOTION_STUDIO_WORK_DIR": tmp.name})
+        env.start()
+        self.addCleanup(env.stop)
+
     def run_cli(self, *argv):
         err = io.StringIO()
         with redirect_stdout(io.StringIO()), redirect_stderr(err):
