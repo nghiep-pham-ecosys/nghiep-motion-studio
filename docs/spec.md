@@ -3,8 +3,8 @@
 Status: in progress. Built so far: the `scenes.json` schema and the ffmpeg
 renderer (step 4, issue 6), the voice step with per-line timing (step 3,
 issue 7), generated visuals (step 2, issue 8), subtitles (step 5,
-issue 9) and the quality gate (step 6, issue 10). Everything else is
-planned.
+issue 9), the quality gate (step 6, issue 10) and the work dir that keeps
+renders off the local disk (issue 22). Everything else is planned.
 
 ## Goal
 
@@ -126,8 +126,9 @@ inside the code file and frame at least one non-blank line; a tape does not
 set `Output`, `Set Width`, `Set Height` or `Set Framerate`. Leading blank
 lines of a code file are not shown, but line numbers still match the file.
 
-Clips are cached in `<scenes dir>/.cache/visuals/` (gitignored; change it with
-`--visuals-dir`). The cache key covers the adapter and tool versions, the
+`render` and `visuals` cache clips in `<job folder>/visuals/` (see "Work dir
+and disk"; change it with `--visuals-dir`). Called as a library,
+`render()` keeps its old default, `<scenes dir>/.cache/visuals/` (gitignored). The cache key covers the adapter and tool versions, the
 visual with its text in one language, the output size, frame rate,
 background, theme, the target length (for the kinds that fit the scene, and for
 `manim`, whose script can read it), the language (for `manim`) and the bytes
@@ -222,6 +223,96 @@ mix as it is (quick drafts; `"status": "off"`).
 
 Character consistency (when characters are drawn): a fixed character sheet is
 reused for every scene and stored next to `scenes.json`.
+
+## Work dir and disk (issue 22)
+
+The laptop has about 30 GB free on each Windows drive, and the WSL disk lives
+on one of them. A 15-minute 1080p video with its intermediates is roughly
+0.3-1 GB, so renders go to one work dir with a size cap and are deleted after
+upload.
+
+**Layout.** The work dir is `$MOTION_STUDIO_WORK_DIR`, else
+`~/.cache/nghiep-motion-studio/work` (outside every checkout; `/`, the home
+folder and its parents are refused). Each video is a *job* folder named like
+its outputs (the folder of `scenes.json`, else the file's stem):
+
+```
+<work dir>/<job>/
+  .motion-studio-job          marker and lock (only folders with it are ever cleaned)
+  <job>.<lang>.mp4            render, plus .timeline.json, .lines.json, .srt,
+                              .burned.mp4, .drift.json, .gate.json
+  visuals/                    generated-clip cache
+  shorts/                     Shorts (step 7)
+  .render-*/  .burn-*/        temporary folders of a running render or burn
+  upload.json                 the upload record (written by the upload step, issue 12)
+```
+
+`render` without `-o` writes there; `-o <folder>` still renders anywhere
+else (that folder gets the same layout but no cap and no cleanup).
+Narration audio (`narrate`) stays next to `scenes.json` under `audio/`,
+since scenes.json paths are relative to its folder.
+
+**Size cap.** `$MOTION_STUDIO_WORK_CAP_GB`, default 10 GB (10^9 bytes). Before
+and after each render (and `visuals` build), and on `motion-studio clean
+--cap` (`just prune`), the oldest jobs (newest file time) are stripped until
+the work dir fits. A job is never touched while a render holds it: `render`
+holds a shared `flock` on the marker, and cleanup takes an exclusive lock
+without waiting and skips a job it cannot lock (so the job being rendered
+right now is safe, in this process or another). A job over the cap on its own
+gives a `WARN` line.
+
+**What is kept.** Stripping a job (by the cap or after upload) deletes every
+file except: `upload.json`, `scenes.json`, `factcheck.md`, `script.md` (or `.txt`, `.json`), every
+`.srt` and the marker. Folders left empty are removed. A symbolic link is
+removed, never followed, so nothing outside the job is deleted. A stripped job
+can be rendered again from its scenes.json.
+
+**After upload.** The upload step (issue 12) writes `<job>/upload.json` and
+then runs `motion-studio clean --after-upload <job>/upload.json` (`just
+clean-uploaded <record>`):
+
+```json
+{
+  "version": 1,
+  "status": "uploaded",
+  "job": "rag",
+  "files": [
+    {"path": "rag.en.mp4", "remote_id": "<id the platform returned>"},
+    {"path": "shorts/rag-1.en.mp4", "remote_id": "<id>"}
+  ]
+}
+```
+
+It refuses, and deletes nothing, unless: the record is a regular file in a
+job folder directly inside the work dir; `version` is 1, `status` is
+`uploaded` and `job` is that folder's name; every entry has a relative `path`
+inside the job and a non-empty `remote_id`; every named file exists (first
+clean only); every finished video in the job (top-level `*.mp4`, `shorts/**/
+*.mp4`) is named, or is the `.burned.mp4` or clean twin of a named one; and no
+render holds the job. Then the job is stripped and a `cleaned` entry (time,
+bytes freed, files deleted, cloud copies) is added to the record. Running it
+again is harmless.
+
+**Optional cloud copy (off by default).** With `--copy-to REMOTE:PATH` or
+`$MOTION_STUDIO_CLOUD_COPY` (for example `gdrive:motion-studio`, a Google
+Drive remote set up with `rclone config`, free tier), the master videos
+(top-level `<job>.<lang>.mp4`, not the burned copies) are copied first with
+`rclone copyto --checksum` to `<remote>/<job>/<name>`; rclone checks size and,
+where the remote supports it, the hash. Any copy failure, or a missing
+rclone, stops the cleanup before anything is deleted. `$MOTION_STUDIO_RCLONE`
+names the rclone binary (tests use a fake). No remote is configured in the
+repository.
+
+**`just disk`** (`motion-studio disk`) prints the work dir size against the
+cap, each job's size and last use, and the free space on the Windows drive
+that holds the WSL disk. The drive comes from `$MOTION_STUDIO_HOST_DRIVE`
+(for example `/mnt/d`), else from this distro's `BasePath` in the Windows
+registry (`reg.exe query HKCU\...\Lxss /s`, read-only), else `/mnt/c`.
+
+The WSL disk file grows as files are written and does not shrink by itself
+when they are deleted: deleted space is reused inside it, so the cap bounds
+its growth, but it hands no space back to Windows unless sparse mode is on
+(`wsl --manage <distro> --set-sparse true`) or the disk is compacted.
 
 ## Quality checks per step
 
