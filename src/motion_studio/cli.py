@@ -1,4 +1,4 @@
-"""Command line: ``motion-studio validate|render|narrate|subtitles|...``."""
+"""Command line: ``motion-studio validate|render|narrate|subtitles|gate|...``."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 from . import __version__
+from .gate import MAX_DURATION_S as GATE_MAX_S, MIN_DURATION_S as GATE_MIN_S
 from .render import RenderError, RenderOptions, plan, render, with_generated_visuals
 from .schema import Scenes, ScenesError, load, load_schema
 from .subtitles import DEFAULT_MODEL as DEFAULT_WHISPER_MODEL
@@ -330,6 +331,36 @@ def _cmd_subtitles(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_gate(args: argparse.Namespace) -> int:
+    from .gate import Limits, run_drift, run_gate, sidecar
+
+    video = Path(args.video)
+    lang = args.lang or _lang_of(video)
+    if not video.is_file():
+        print(f"FAIL {video} not found", file=sys.stderr)
+        return 1
+    if not lang:
+        print(f"FAIL cannot tell the language from {video.name}; pass --lang", file=sys.stderr)
+        return 2
+    limits = Limits(min_duration_s=args.min_s, max_duration_s=args.max_s)
+    if limits.min_duration_s > limits.max_duration_s:
+        print("FAIL --min-s is larger than --max-s", file=sys.stderr)
+        return 2
+    if args.check_drift:
+        from .subtitles import SubtitleError, whisper_recogniser
+
+        try:
+            run_drift(video, lang, whisper_recogniser(args.model, args.device), args.model)
+        except (SubtitleError, OSError, ValueError) as exc:
+            print(f"WARN drift not measured: {exc}", file=sys.stderr)  # the drift check below then fails
+    report = run_gate(video, Path(args.scenes), lang, limits)
+    out = Path(args.report) if args.report else sidecar(video, ".gate.json")
+    out.write_text(report.json(), encoding="utf-8")
+    print(report.summary())
+    print(f"     report: {out}")
+    return 0 if report.ok else 1
+
+
 def _cmd_tools(_: argparse.Namespace) -> int:
     status = 0
     for kind, why in missing_tools().items():
@@ -414,6 +445,20 @@ def build_parser() -> argparse.ArgumentParser:
     st.add_argument("--model", default=DEFAULT_WHISPER_MODEL, help=f"faster-whisper model (default: {DEFAULT_WHISPER_MODEL})")
     st.add_argument("--device", default="cpu", help="cpu (default), cuda or auto")
     st.set_defaults(func=_cmd_subtitles)
+
+    gt = sub.add_parser("gate", help="quality gate for a rendered video: duration, loudness, black frames, "
+                        "subtitle drift, fact check; exit 1 when any check fails (writes .gate.json)")
+    gt.add_argument("video", help="a rendered <name>.<lang>.mp4 (its .timeline.json, .srt and .drift.json are read)")
+    gt.add_argument("--scenes", required=True, help="the scenes.json it was rendered from (factcheck.md sits next to it)")
+    gt.add_argument("--lang", help="language (default: from the file name)")
+    gt.add_argument("--min-s", type=float, default=GATE_MIN_S, help=f"shortest allowed length in seconds (default: {GATE_MIN_S:g})")
+    gt.add_argument("--max-s", type=float, default=GATE_MAX_S, help=f"longest allowed length in seconds (default: {GATE_MAX_S:g})")
+    gt.add_argument("--check-drift", action="store_true",
+                    help="measure drift with faster-whisper first (needs the subtitles extra); else .drift.json is read")
+    gt.add_argument("--model", default=DEFAULT_WHISPER_MODEL, help=f"faster-whisper model for --check-drift (default: {DEFAULT_WHISPER_MODEL})")
+    gt.add_argument("--device", default="cpu", help="cpu (default), cuda or auto")
+    gt.add_argument("--report", help="where to write the JSON report (default: <name>.<lang>.gate.json)")
+    gt.set_defaults(func=_cmd_gate)
 
     t = sub.add_parser("tools", help="report which visual adapters can run on this machine (exit 1 if any cannot)")
     t.set_defaults(func=_cmd_tools)

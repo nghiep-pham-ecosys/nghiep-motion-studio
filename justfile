@@ -101,3 +101,7 @@ vhs-install:
 # Check subtitle drift of a rendered video with faster-whisper base (CPU int8), e.g. just drift out/demo.en.mp4
 drift video:
     "{{tts_python}}" -m motion_studio subtitles "{{video}}" --check-drift
+
+# Quality gate for a rendered video, e.g. just gate out/demo.en.mp4 samples/demo/scenes.json (exit 1 on any failure; writes <name>.<lang>.gate.json; run `just drift` first)
+gate video scenes *args:
+    python3 -m motion_studio gate "{{video}}" --scenes "{{scenes}}" {{args}}
