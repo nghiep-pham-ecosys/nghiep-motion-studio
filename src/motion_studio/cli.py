@@ -9,8 +9,9 @@ import sys
 from pathlib import Path
 
 from . import __version__
-from .render import RenderError, RenderOptions, render
+from .render import RenderError, RenderOptions, plan, render, with_generated_visuals
 from .schema import Scenes, ScenesError, load, load_schema
+from .visuals import GENERATED_KINDS, VisualError, missing_tools
 
 REF_ENV = "MOTION_STUDIO_REF_WAV"
 
@@ -61,7 +62,10 @@ def _cmd_render(args: argparse.Namespace) -> int:
         print(f"FAIL language(s) {', '.join(unknown)} not in {args.file} (has {', '.join(scenes.languages)})", file=sys.stderr)
         return 2
     try:
-        opts = RenderOptions(preset=args.preset, crf=args.crf, jobs=args.jobs, font=args.font)
+        opts = RenderOptions(
+            preset=args.preset, crf=args.crf, jobs=args.jobs, font=args.font,
+            visuals_dir=args.visuals_dir, rebuild_visuals=args.rebuild_visuals,
+        )
     except ValueError as exc:
         print(f"FAIL {exc}", file=sys.stderr)
         return 2
@@ -72,7 +76,7 @@ def _cmd_render(args: argparse.Namespace) -> int:
         try:
             result = render(scenes, lang, output, opts)
             output.with_suffix(".timeline.json").write_text(result.timeline_json(), encoding="utf-8")
-        except (RenderError, ValueError, OSError) as exc:
+        except (RenderError, VisualError, ValueError, OSError) as exc:
             print(f"FAIL {exc}", file=sys.stderr)
             return 1
         print(f"OK   {result.output} ({result.width}x{result.height}, {result.fps} fps, {result.duration_s:.2f} s)")
@@ -162,6 +166,40 @@ def _cmd_voices(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_visuals(args: argparse.Namespace) -> int:
+    try:
+        scenes = load(args.file)
+    except (ScenesError, OSError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    langs = args.lang or scenes.languages
+    unknown = [lang for lang in langs if lang not in scenes.languages]
+    if unknown:
+        print(f"FAIL language(s) {', '.join(unknown)} not in {args.file} (has {', '.join(scenes.languages)})", file=sys.stderr)
+        return 2
+    opts = RenderOptions(jobs=args.jobs, visuals_dir=args.visuals_dir, rebuild_visuals=args.rebuild)
+    for lang in langs:
+        try:
+            built, timeline = with_generated_visuals(scenes, lang, plan(scenes, lang, opts), opts)
+        except (RenderError, VisualError, ValueError, OSError) as exc:
+            print(f"FAIL {exc}", file=sys.stderr)
+            return 1
+        for scene, timing in zip(built.scenes, timeline):
+            original = scenes.scenes[timing.index]["visual"]["kind"]
+            if original in GENERATED_KINDS:
+                print(f"OK   {lang} {timing.id} ({original}, {timing.duration_s:.2f} s): {scene['visual']['src']}")
+    return 0
+
+
+def _cmd_tools(_: argparse.Namespace) -> int:
+    status = 0
+    for kind, why in missing_tools().items():
+        if why:
+            status = 1
+        print(f"{'OK  ' if why is None else 'MISS'} {kind}" + (f": {why}" if why else ""))
+    return status
+
+
 def _cmd_schema(_: argparse.Namespace) -> int:
     print(json.dumps(load_schema(), indent=2))
     return 0
@@ -185,6 +223,8 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--crf", type=_crf, default=20, help="x264 quality, lower is better (default: 20)")
     r.add_argument("--jobs", type=_non_negative, default=0, help="parallel scene encodes (default: automatic)")
     r.add_argument("--font", default="DejaVu Sans", help="fontconfig font name for title cards")
+    r.add_argument("--visuals-dir", type=Path, help="cache for generated clips (default: <scenes dir>/.cache/visuals)")
+    r.add_argument("--rebuild-visuals", action="store_true", help="build generated clips even when cached")
     r.set_defaults(func=_cmd_render)
 
     n = sub.add_parser("narrate", help="synthesise narration audio for one language and record per-line timing")
@@ -206,6 +246,17 @@ def build_parser() -> argparse.ArgumentParser:
     vo.add_argument("--mock", action="store_true", help="use the model-free test engine")
     vo.add_argument("--asr", action="store_true", help="transcribe every sample with local faster-whisper and show the word error rate")
     vo.set_defaults(func=_cmd_voices)
+
+    g = sub.add_parser("visuals", help="build the generated clips (manim, diagram, code, terminal) of a scenes.json")
+    g.add_argument("file")
+    g.add_argument("--lang", action="append", help="language to build (repeatable); default: all")
+    g.add_argument("--jobs", type=_non_negative, default=0, help="parallel builds (default: 1)")
+    g.add_argument("--visuals-dir", type=Path, help="cache for generated clips (default: <scenes dir>/.cache/visuals)")
+    g.add_argument("--rebuild", action="store_true", help="build clips even when cached")
+    g.set_defaults(func=_cmd_visuals)
+
+    t = sub.add_parser("tools", help="report which visual adapters can run on this machine (exit 1 if any cannot)")
+    t.set_defaults(func=_cmd_tools)
 
     s = sub.add_parser("schema", help="print the scenes.json JSON Schema")
     s.set_defaults(func=_cmd_schema)

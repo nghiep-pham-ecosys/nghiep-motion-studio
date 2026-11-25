@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "title": {
+    "en": "Generated visuals",
+    "vi": "Hình minh hoạ tự sinh"
+  },
+  "languages": ["en", "vi"],
+  "scenes": [
+    {
+      "id": "diagram",
+      "chapter": {"en": "Diagram", "vi": "Sơ đồ"},
+      "narration": {
+        "en": "A diagram from data: the question goes to a retriever, which searches the documents and passes the best passages to the generator.",
+        "vi": "Sơ đồ dựng từ dữ liệu: câu hỏi đi tới bộ truy xuất, bộ này tìm trong kho tài liệu và chuyển những đoạn phù hợp nhất cho bộ sinh."
+      },
+      "duration_s": 6,
+      "visual": {
+        "kind": "diagram",
+        "title": {"en": "Retrieval-augmented generation", "vi": "Sinh văn bản có truy xuất"},
+        "nodes": [
+          {"id": "question", "label": {"en": "Question", "vi": "Câu hỏi"}, "col": 0, "row": 0},
+          {"id": "retriever", "label": {"en": "Retriever", "vi": "Bộ truy xuất"}, "col": 1, "row": 0},
+          {"id": "docs", "label": {"en": "Documents", "vi": "Kho tài liệu"}, "col": 1, "row": 1},
+          {"id": "generator", "label": {"en": "Generator (LLM)", "vi": "Bộ sinh (LLM)"}, "col": 2, "row": 0}
+        ],
+        "edges": [
+          {"from": "question", "to": "retriever", "label": {"en": "query", "vi": "truy vấn"}},
+          {"from": "retriever", "to": "docs", "label": {"en": "search", "vi": "tìm kiếm"}},
+          {"from": "retriever", "to": "generator", "label": {"en": "top-k passages", "vi": "k đoạn tốt nhất"}}
+        ],
+        "steps": [["question"], ["retriever", "docs"], ["generator"]]
+      }
+    },
+    {
+      "id": "code",
+      "chapter": {"en": "Code", "vi": "Mã nguồn"},
+      "narration": {
+        "en": "An animated code block: the code is written line by line, then the retrieval step and the answer step are highlighted.",
+        "vi": "Khối mã động: mã hiện từng dòng, sau đó bước truy xuất và bước trả lời lần lượt được làm nổi bật."
+      },
+      "duration_s": 8,
+      "visual": {
+        "kind": "code",
+        "src": "code/retrieve.py",
+        "title": "rag.py",
+        "highlight": [[1, 5], [8, 11]]
+      }
+    },
+    {
+      "id": "terminal",
+      "chapter": {"en": "Terminal", "vi": "Dòng lệnh"},
+      "narration": {
+        "en": "A terminal recording made by VHS from a tape file.",
+        "vi": "Bản ghi dòng lệnh do VHS tạo từ một tệp tape."
+      },
+      "duration_s": 3,
+      "visual": {"kind": "terminal", "src": "tapes/hello.tape", "background": "#282a36"}
+    },
+    {
+      "id": "manim",
+      "chapter": {"en": "Manim", "vi": "Manim"},
+      "narration": {
+        "en": "A custom Manim scene: gradient descent rolls a ball down a loss curve.",
+        "vi": "Một cảnh Manim tự viết: hạ gradient lăn quả bóng xuống đường cong hàm mất mát."
+      },
+      "duration_s": 5,
+      "visual": {"kind": "manim", "src": "manim/descent.py", "scene": "Descent"}
+    }
+  ]
+}

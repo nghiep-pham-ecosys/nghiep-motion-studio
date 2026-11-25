@@ -37,6 +37,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .schema import Scenes
+from .visuals import GENERATED_KINDS, build_visuals, default_cache_dir
 
 SAMPLE_RATE = 48000
 ZOOM = 1.15  # how far the camera moves in on an image with motion
@@ -61,6 +62,8 @@ class RenderOptions:
     ffmpeg: str = "ffmpeg"
     ffprobe: str = "ffprobe"
     keep_workdir: Path | None = None  # set to keep segments for debugging
+    visuals_dir: Path | None = None  # cache for generated clips; default <scenes dir>/.cache/visuals
+    rebuild_visuals: bool = False  # build generated clips even when cached
 
     def __post_init__(self) -> None:
         if not self.font or any(c in _FONT_FORBIDDEN for c in self.font):
@@ -399,8 +402,9 @@ def render(scenes: Scenes, lang: str, output: str | Path, opts: RenderOptions | 
         _pool_run(jobs, lambda kv: _run(decode_audio_cmd(kv[0], kv[1].name, opts), cwd=workdir), list(decoded.items()))
         lengths = {src: wav_length(dst) for src, dst in decoded.items()}
 
-        # 2. Plan.
+        # 2. Plan, then build generated visuals (Manim, diagram, code, VHS) and re-plan.
         timeline = plan(scenes, lang, opts, audio_length=lambda p: lengths[p])
+        scenes, timeline = with_generated_visuals(scenes, lang, timeline, opts, lambda p: lengths[p])
 
         # 3. Encode every scene (video segment + exact-length WAV) and check frame counts.
         def encode_video(item: tuple[SceneTiming, SceneJob, str]) -> None:
@@ -441,6 +445,34 @@ def render(scenes: Scenes, lang: str, output: str | Path, opts: RenderOptions | 
         if cleanup is not None:
             cleanup.cleanup()
     return RenderResult(output=output, lang=lang, width=scenes.width, height=scenes.height, fps=scenes.fps, timeline=timeline)
+
+
+def with_generated_visuals(
+    scenes: Scenes,
+    lang: str,
+    timeline: list[SceneTiming],
+    opts: RenderOptions,
+    audio_length: Callable[[Path], float] | None = None,
+) -> tuple[Scenes, list[SceneTiming]]:
+    """Build the generated visuals of ``scenes`` and return scenes that use them as clips, re-planned.
+
+    Paced kinds fit their scene; a clip with its own length (manim, terminal)
+    stretches its scene so it is never cut. Scenes without generated visuals
+    come back unchanged.
+    """
+    if not any(s["visual"]["kind"] in GENERATED_KINDS for s in scenes.scenes):
+        return scenes, timeline
+    built, _ = build_visuals(
+        scenes,
+        lang,
+        {t.id: t.duration_s for t in timeline},
+        Path(opts.visuals_dir) if opts.visuals_dir is not None else default_cache_dir(scenes),
+        default_background=DEFAULT_BACKGROUND,
+        clip_length=lambda p: probe_duration(p, opts.ffprobe),
+        jobs=opts.jobs or 1,  # one Manim/VHS build at a time unless --jobs asks for more (each uses ~0.5-1 GB)
+        rebuild=opts.rebuild_visuals,
+    )
+    return built, plan(built, lang, opts, audio_length=audio_length)
 
 
 def ffmpeg_available(opts: RenderOptions | None = None) -> bool:

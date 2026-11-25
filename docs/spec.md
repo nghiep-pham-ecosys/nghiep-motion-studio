@@ -1,8 +1,9 @@
 # Spec: long-form explainer video pipeline
 
 Status: in progress. Built so far: the `scenes.json` schema and the ffmpeg
-renderer (step 4, issue 6) and the voice step with per-line timing (step 3,
-issue 7). Everything else is planned.
+renderer (step 4, issue 6), the voice step with per-line timing (step 3,
+issue 7) and generated visuals (step 2, issue 8). Everything else is
+planned.
 
 ## Goal
 
@@ -32,7 +33,7 @@ Vietnamese videos come from the same file and differ only in voice and text.
 | # | Step | Input -> output | Free-first tool | Status |
 |---|------|-----------------|-----------------|--------|
 | 1 | Script | topic + outline -> `scenes.json` (EN + VI narration) | LLM inside the Claude subscription (offline/mock mode in tests) | planned |
-| 2 | Visuals | `scenes.json` -> one image or clip per scene | Manim (maths, diagrams), Motion Canvas (titles, animated code), VHS (terminal recordings), SVG/code-drawn images | planned |
+| 2 | Visuals | `scenes.json` -> one image or clip per scene | Manim CE (diagrams from data, custom scenes, animated code), VHS (terminal recordings), SVG/code-drawn images | **built** for the generated kinds (`motion-studio visuals`, also run by `render`) |
 | 3 | Voice | narration per language -> WAV per scene, written into `audio`, plus per-line timing | EN: Kokoro-82M; VI: VieNeu-TTS v3 Turbo presets or a clone of the author's own voice (all local; licences in `docs/voices.md`) | **built** (`motion-studio narrate`, `just voices`) |
 | 4 | Assembly | `scenes.json` + visuals + audio -> 1080p MP4 per language | ffmpeg (title cards, fit and Ken Burns on images, clips, frame-exact audio) | **built** (`motion-studio render`) |
 | 5 | Subtitles | MP4 audio + narration -> SRT per language | local speech-to-text alignment | planned |
@@ -75,10 +76,57 @@ Rules beyond the JSON Schema (checked by `motion-studio validate`):
 Visual kinds: `title` (text on a solid background), `image` (PNG, JPEG or
 SVG, fitted to the frame over the scene background, so transparent areas show
 the background; `motion` is `none`, `zoom-in`, `zoom-out`, `pan-left` or
-`pan-right`) and `video` (a clip from Manim, Motion Canvas, VHS or a screen
-recording; its own audio is dropped; `start_s` must be inside the clip; a
-short clip holds its last frame unless `loop` is true, and a loop repeats from
-`start_s`).
+`pan-right`) and `video` (a clip such as a screen recording; its own audio is
+dropped; `start_s` must be inside the clip; a short clip holds its last frame
+unless `loop` is true, and a loop repeats from `start_s`), plus the generated
+kinds below.
+
+### Generated visuals
+
+A generated visual is built into an mp4 clip at the output size and frame
+rate, then placed like a `video` visual. A working example of each kind is in
+`samples/visuals/scenes.json` (`just sample-visuals`).
+
+| Kind | Tool | The scene gives | Timing | Example |
+|------|------|-----------------|--------|---------|
+| `diagram` | Manim CE (built-in template) | `nodes` on a grid (`id`, `label`, `col` 0-7, `row` 0-5, optional `color`), `edges` (`from`, `to`, optional `label`), optional `steps` (node ids revealed together) and `title` | fits the scene: nodes appear step by step, each edge with the step that shows both ends, then a pulse runs along the edges | `{"kind": "diagram", "nodes": [...], "edges": [...]}` |
+| `code` | Manim CE `Code` mobject (built-in template; Pygments colours) | `src` (a code file, at most 40 lines), optional `language`, `style`, `title`, `highlight` (`[first, last]` line ranges) | fits the scene: lines are written one by one, then each range is framed while the rest dims | `{"kind": "code", "src": "code/rag.py", "highlight": [[1, 5]]}` |
+| `manim` | Manim CE | `src` (a `.py` file) and `scene` (the Scene class) | its own length; the scene is stretched so the clip is never cut. The script may read `MOTION_STUDIO_TARGET_S` and `MOTION_STUDIO_LANG` | `{"kind": "manim", "src": "manim/descent.py", "scene": "Descent"}` |
+| `terminal` | VHS (with ttyd and Chrome or Chromium) | `src` (a `.tape` file without `Output`, `Set Width`, `Set Height` or `Set Framerate`: the renderer sets them) | its own length; the scene is stretched so the recording is never cut | `{"kind": "terminal", "src": "tapes/demo.tape"}` |
+
+All kinds take an optional `background`; `manim` and `terminal` also take
+`loop`. `title` and every `label` are one string for all languages or text per
+language; a localized diagram is built once per language.
+
+Rules beyond the JSON Schema: diagram node ids are unique, two nodes never
+share a grid cell, edges join two different existing nodes, and `steps`
+(when given) holds every node exactly once; highlight ranges run forward, end
+inside the code file and frame at least one non-blank line; a tape does not
+set `Output`, `Set Width`, `Set Height` or `Set Framerate`. Leading blank
+lines of a code file are not shown, but line numbers still match the file.
+
+Clips are cached in `<scenes dir>/.cache/visuals/` (gitignored; change it with
+`--visuals-dir`). The cache key covers the adapter and tool versions, the
+visual with its text in one language, the output size, frame rate,
+background, the target length (for the kinds that fit the scene, and for
+`manim`, whose script can read it), the language (for `manim`) and the bytes
+of the source file and of the built-in template. Files a source loads by
+itself (a module a Manim script imports) are not tracked: use
+`--rebuild-visuals` after changing one.
+
+`manim` scripts and `terminal` tapes run real code (Python, shell commands)
+from the repository, so they come from trusted files only. `diagram` and
+`code` take data only.
+
+Tools: `just visuals-setup` installs Manim CE into
+`~/.cache/nghiep-motion-studio/visuals-venv` (Linux builds it from source, so
+`libcairo2-dev`, `libpango1.0-dev` and `pkg-config` come first); `just
+vhs-install` fetches VHS and ttyd release binaries from GitHub into
+`~/.cache/nghiep-motion-studio/bin` and checks their sha256. Both paths change
+with `MOTION_STUDIO_VISUALS_VENV` and `MOTION_STUDIO_TOOLS_BIN`, and `just`
+puts them first on PATH. `motion-studio tools` (or `just tools`) reports which
+kinds can run. CI installs both and renders one scene of each kind at
+640x360; locally a test whose tool is missing is skipped with the reason.
 
 Schema v1 holds one narration per scene. Dialogue (format 1) needs a speaker
 per scene and a voice per character and language; those fields arrive with
@@ -152,9 +200,18 @@ any long video is made.
   renderable in CI. A local image model may come later if the machine has a
   GPU; a paid image service only after a cost estimate and Nghiep's yes.
 - **ffmpeg for assembly**: enough for title cards, Ken Burns, clips and
-  subtitles, and it runs in CI. Animated diagrams and code come from Manim and
-  Motion Canvas as clips that ffmpeg places like any other visual, so no
-  second assembly tool is needed.
+  subtitles, and it runs in CI. Animated diagrams and code come from Manim as
+  clips that ffmpeg places like any other visual, so no second assembly tool
+  is needed.
+- **Manim for animated code, not Motion Canvas**: Motion Canvas renders
+  through its browser editor and needs a Node project per video, which is too
+  heavy for an unattended pipeline and for CI. Manim's `Code` mobject gives
+  syntax colours, line-by-line writing and highlights from one Python tool
+  that the diagrams already use.
+- **Diagrams from data**: the script step (an LLM) writes nodes and edges as
+  JSON, not Python, so a generated video never runs generated code.
+- **VHS for terminal recordings**: a `.tape` file is a readable, reviewable
+  script of keystrokes, and the recording is reproducible.
 - **One `scenes.json` for every language**: one file drives the EN and VI
   videos, the blog post and the short post, and is easy to review and diff.
 
@@ -171,6 +228,8 @@ any long video is made.
 - One `scenes.json` per video, shared by EN and VI.
 - Voice: Kokoro for English; a local Vietnamese TTS model for Vietnamese.
 - Visuals: Manim, Motion Canvas and VHS clips plus SVG/code-drawn images.
+  (Built in issue 8 with Manim for animated code instead of Motion Canvas;
+  see "Tool choices and reasons".)
 - Assembly: ffmpeg (Remotion is dropped).
 
 ## Decisions (2026-11-25, voice step)
