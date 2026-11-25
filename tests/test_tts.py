@@ -5,6 +5,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import importlib.util
 import wave
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
@@ -458,6 +459,7 @@ class VoicesPageTest(unittest.TestCase):
             self.assertFalse(any(p.name.startswith(".warmup") for p in (Path(tmp) / "audio").iterdir()))
         self.assertLess(max(s.seconds for s in res.samples), 0.4)
 
+    @unittest.skipUnless(importlib.util.find_spec("numpy"), "numpy comes with the vieneu extra; CI installs the base package only")
     def test_bad_reference_breaks_only_the_clone(self):
         import types
         from motion_studio.voices_page import default_candidates
