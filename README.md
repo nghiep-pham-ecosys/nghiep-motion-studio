@@ -8,7 +8,7 @@ local TTS narration (Kokoro for English, VieNeu-TTS for Vietnamese, a
 cloned voice in both languages with VieNeu and Chatterbox, and a voice per
 scene or speaker with a `voice_mix` policy; see [docs/voices.md](docs/voices.md)),
 generated visuals (Manim diagrams and scenes, animated code, VHS terminal
-recordings), subtitles and a quality gate for rendered videos.
+recordings), subtitles, loudness normalisation and a quality gate for rendered videos.
 
 ## Quick start
 
@@ -23,6 +23,12 @@ python3 -m unittest discover -s tests
 
 Without installing: `PYTHONPATH=src python3 -m motion_studio ...`, or `just ci`
 and `just sample`.
+
+`render` normalises each video's audio to -14 LUFS and -2 dBTP true peak
+with a two-pass ffmpeg `loudnorm`, the targets the quality gate checks. A
+silent render (no narration) is left as it is and reported with a `WARN`
+line; `--no-loudnorm` skips the step for drafts (see "Loudness" in
+[docs/spec.md](docs/spec.md)).
 
 Frames and visuals use the light theme by default; set `"theme": "dark"` in
 `scenes.json` or pass `--theme dark` for the dark one (see "Theme" in

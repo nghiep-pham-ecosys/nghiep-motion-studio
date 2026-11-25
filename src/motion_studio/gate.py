@@ -34,14 +34,14 @@ from dataclasses import asdict, dataclass, field, fields
 from pathlib import Path
 from typing import Any, Callable
 
+from .render import MAX_TRUE_PEAK_DBTP, TARGET_LUFS  # one home for the loudness targets: render normalises to them
+
 # --- thresholds (docs/spec.md, "Quality gate") -----------------------------------------------------------------------
 
 MIN_DURATION_S = 600.0  # 10 minutes
 MAX_DURATION_S = 1200.0  # 20 minutes
 STREAM_TOLERANCE_S = 0.1  # audio vs video length, and video vs timeline; AAC frames are 21 ms, a frame is 33 ms
-TARGET_LUFS = -14.0
 LUFS_TOLERANCE = 1.0  # LU either side of the target
-MAX_TRUE_PEAK_DBTP = -1.0
 BLACK_MIN_S = 0.1  # 3 frames at 30 fps: shorter runs are not visible
 BLACK_PIX_TH = 0.05  # luma below 16 + 0.05 * 219 = 27 (limited range) is black; the dark theme background is 36
 BLACK_PIC_TH = 0.98  # share of black pixels for a frame to count as black

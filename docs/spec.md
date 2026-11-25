@@ -36,7 +36,7 @@ Vietnamese videos come from the same file and differ only in voice and text.
 | 1 | Script | topic + outline -> `scenes.json` (EN + VI narration) | LLM inside the Claude subscription (offline/mock mode in tests) | planned |
 | 2 | Visuals | `scenes.json` -> one image or clip per scene | Manim CE (diagrams from data, custom scenes, animated code), VHS (terminal recordings), SVG/code-drawn images | **built** for the generated kinds (`motion-studio visuals`, also run by `render`) |
 | 3 | Voice | narration per language -> WAV per scene, written into `audio`, plus per-line timing | EN: Kokoro-82M or a Chatterbox clone of the author's own voice; VI: VieNeu-TTS v3 Turbo presets or a clone of the author's own voice; a voice per scene or speaker (all local; licences in `docs/voices.md`) | **built** (`motion-studio narrate`, `just voices`) |
-| 4 | Assembly | `scenes.json` + visuals + audio -> 1080p MP4 per language | ffmpeg (title cards, fit and Ken Burns on images, clips, frame-exact audio) | **built** (`motion-studio render`) |
+| 4 | Assembly | `scenes.json` + visuals + audio -> 1080p MP4 per language | ffmpeg (title cards, fit and Ken Burns on images, clips, frame-exact audio, two-pass `loudnorm` on the final mix) | **built** (`motion-studio render`) |
 | 5 | Subtitles | MP4 audio + narration -> SRT per language | narration timing, local speech-to-text alignment | **built** (`render`, `motion-studio subtitles`) |
 | 6 | Quality gate | MP4 + sidecars + `factcheck.md` -> pass/fail and `.gate.json` | ffprobe and ffmpeg (`loudnorm` analysis, `blackdetect`), the drift report: duration, loudness, black frames, subtitle drift, fact check | **built** (`motion-studio gate`, `just gate`) |
 | 7 | Extras | MP4 + `scenes.json` -> thumbnail, description, chapters, Shorts | ffmpeg + templates | planned |
@@ -185,6 +185,41 @@ and video stay in sync over any number of scenes. `render` also writes a
 `<name>.<lang>.timeline.json` with each scene's start and length, for the
 subtitle and Shorts steps.
 
+### Loudness (issue 24)
+
+`render` normalises the final mix of each language, so a narrated video
+meets the `loudness` check of the quality gate without a manual step:
+
+1. The scene WAVs are joined into one mix (48 kHz stereo, the planned sample
+   count).
+2. Pass 1 measures the mix with ffmpeg
+   `loudnorm=I=-14:TP=-2:LRA=11:print_format=json`.
+3. Pass 2 applies the measured `input_i`, `input_tp`, `input_lra`,
+   `input_thresh` and `target_offset` (`measured_I`, `measured_TP`,
+   `measured_LRA`, `measured_thresh`, `offset`) with `linear=true`, resamples
+   back to 48 kHz and pads or trims to the exact sample count, so audio and
+   video still end together. The mix is then encoded once to AAC.
+
+| Target | Value | Why |
+|--------|-------|-----|
+| integrated | -14 LUFS | the gate's target (see "Quality gate") |
+| true peak | -2 dBTP | the gate allows at most -1 dBTP on the finished AAC file; the encode raises peaks, so `loudnorm` aims 1 dB lower |
+| loudness range | 11 LU | `linear=true` applies one gain when the mix's range is at most this and the gain keeps the true peak under the target; otherwise `loudnorm` falls back to its dynamic mode (a gentle compressor and true-peak limiter), which still lands on -14 LUFS |
+
+The targets live in one place, `render.py` (`TARGET_LUFS`,
+`MAX_TRUE_PEAK_DBTP`); `gate.py` imports them, so the renderer and the gate
+cannot drift apart. The gate's tolerance (+/- 1 LU) stays in `gate.py`.
+
+What happened is printed after each render (input and output loudness, true
+peak, `linear` or `dynamic`) and stored under `loudness` in
+`<name>.<lang>.timeline.json`. A mix with no sound (no narration in this
+language, so pass 1 reads `-inf` or at most -70 LUFS, the BS.1770 absolute
+gate) is not normalised: the render still succeeds, joins the silence
+unchanged, prints a `WARN ... the audio is silent` line and records
+`"status": "silent"`; the gate then fails `loudness` ("no sound"), as it
+should for a video that will be published. `render --no-loudnorm` keeps the
+mix as it is (quick drafts; `"status": "off"`).
+
 Character consistency (when characters are drawn): a fixed character sheet is
 reused for every scene and stored next to `scenes.json`.
 
@@ -197,7 +232,7 @@ reused for every scene and stored next to `scenes.json`.
 2. Images: one per scene; resolution 1920x1080; spot-check character
    consistency on a contact sheet.
 3. Voice: no clipped audio; per-scene duration recorded; loudness normalised
-   (target -14 LUFS for the final mix).
+   (target -14 LUFS for the final mix, done by `render`, see "Loudness").
 4. Assembly: 1920x1080, H.264 yuv420p, AAC 48 kHz stereo; audio/subtitle drift
    under 200 ms; no black frames; chapters match scene boundaries; output
    plays in a standard player. The render tests check resolution, codecs,
@@ -371,6 +406,6 @@ Narration: 3f2a9c0d41be
 ```
 
 The gate checks the clean `<name>.<lang>.mp4` with its sidecars; a
-`.burned.mp4` copy is made from it and needs no gate of its own. The
-renderer does not normalise loudness yet, so a rendered video fails
-`loudness` until the final mix is normalised to -14 LUFS (planned).
+`.burned.mp4` copy is made from it and needs no gate of its own. `render`
+normalises the final mix to the gate's loudness targets (see "Loudness"), so
+a narrated render passes `loudness`; a silent one fails it.

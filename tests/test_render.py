@@ -11,12 +11,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from motion_studio import cli  # noqa: E402
+from motion_studio import cli, gate  # noqa: E402
 from motion_studio.render import (  # noqa: E402
+    MAX_TRUE_PEAK_DBTP,
     SAMPLE_RATE,
+    TARGET_LUFS,
+    TARGET_TRUE_PEAK_DBTP,
+    RenderError,
     RenderOptions,
     ffmpeg_available,
+    loudnorm_report,
+    measure_mix_cmd,
     mux_cmd,
+    normalize_mix_cmd,
     plan,
     render,
     scene_audio_cmd,
@@ -162,9 +169,61 @@ class CommandTest(unittest.TestCase):
         self.assertIn("language=vie", cmd)
         self.assertIn("title=Dây chuyền này hoạt động thế nào", cmd)
 
+    def test_mux_takes_the_normalised_mix(self):
+        cmd = mux_cmd(self.scenes, "vi", Path("/tmp/x.mp4"), RenderOptions())
+        self.assertEqual(cmd[cmd.index("video.ffconcat") + 2], "mix.wav")
+        self.assertNotIn("audio.ffconcat", cmd)
+
     def test_font_name_cannot_break_the_filter(self):
         with self.assertRaises(ValueError):
             RenderOptions(font="Evil:fontfile=/etc/passwd")
+
+
+LOUDNORM_STDERR = """[Parsed_loudnorm_0 @ 0x1]
+{
+	"input_i" : "%s",
+	"input_tp" : "%s",
+	"input_lra" : "0.00",
+	"input_thresh" : "-70.00",
+	"output_i" : "-inf",
+	"output_tp" : "-inf",
+	"output_lra" : "0.00",
+	"output_thresh" : "-70.00",
+	"normalization_type" : "dynamic",
+	"target_offset" : "inf"
+}
+"""
+
+
+class LoudnessCommandTest(unittest.TestCase):
+    def test_targets_have_one_home(self):
+        self.assertIs(gate.TARGET_LUFS, TARGET_LUFS)
+        self.assertIs(gate.MAX_TRUE_PEAK_DBTP, MAX_TRUE_PEAK_DBTP)
+        self.assertEqual((TARGET_LUFS, MAX_TRUE_PEAK_DBTP), (-14.0, -1.0))
+        self.assertLess(TARGET_TRUE_PEAK_DBTP, MAX_TRUE_PEAK_DBTP, "headroom for the AAC encode")
+
+    def test_report_parses_silence_as_minus_infinity(self):
+        report = loudnorm_report("size=N/A\n" + LOUDNORM_STDERR % ("-inf", "-inf"))
+        self.assertEqual(report["input_i"], float("-inf"))
+        self.assertEqual(report["target_offset"], float("inf"))
+        self.assertEqual(report["normalization_type"], "dynamic")
+        with self.assertRaises(RenderError):
+            loudnorm_report("no report here")
+
+    def test_pass_one_measures_and_pass_two_applies_linear(self):
+        opts = RenderOptions()
+        first = measure_mix_cmd("audio.ffconcat", opts)
+        af = first[first.index("-af") + 1]
+        self.assertIn("loudnorm=I=-14:TP=-2:LRA=11:print_format=json", af)
+        self.assertNotIn("error", first, "the report is printed at info level")
+        measured = loudnorm_report(LOUDNORM_STDERR % ("-31.07", "-29.5"))
+        measured.update(input_thresh=-41.3, target_offset=0.12)
+        second = normalize_mix_cmd("audio.ffconcat", measured, 48000, "mix.wav", opts)
+        af = second[second.index("-af") + 1]
+        for part in ("measured_I=-31.07", "measured_TP=-29.50", "measured_LRA=0.00", "measured_thresh=-41.30",
+                     "offset=0.12", "linear=true", "aresample=48000", "apad=whole_len=48000", "atrim=end_sample=48000"):
+            self.assertIn(part, af)
+        self.assertEqual(second[-1], "mix.wav")
 
 
 def ffprobe_json(path: Path) -> dict:
@@ -344,6 +403,84 @@ class RenderIntegrationTest(unittest.TestCase):
             os.chdir(old)
         self.assertEqual(code, 0)
         self.assertTrue((self.dir / "three-scenes.en.mp4").is_file())
+
+
+def tone_scenes(folder: Path, sources: dict[str, str]):
+    """A 320x180 file with one title scene per lavfi audio source (written as WAVs), then a silent scene."""
+    scenes = []
+    for name, src in sources.items():
+        subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i", src, f"{name}.wav"],
+                       cwd=folder, check=True)
+        scene = title_scene(name, 1.0)
+        scene["audio"] = {"en": f"{name}.wav"}
+        scenes.append(scene)
+    scenes.append(title_scene("quiet-end", 1.0))
+    doc = doc_with(scenes)
+    doc["output"] = {"width": 320, "height": 180, "fps": 30}
+    return from_dict(doc, folder)
+
+
+@unittest.skipUnless(ffmpeg_available() or REQUIRE_FFMPEG, "ffmpeg not installed")
+class LoudnessIntegrationTest(unittest.TestCase):
+    """Synthetic narration that is too quiet or too loud comes out inside the gate's loudness limits."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.dir = Path(self.tmp.name)
+        self.addCleanup(self.tmp.cleanup)
+
+    def render_and_gate(self, name: str, sources: dict[str, str]):
+        out = self.dir / f"{name}.en.mp4"
+        result = render(tone_scenes(self.dir, sources), "en", out, FAST)
+        check = gate.check_loudness(out, gate.Limits())
+        info = ffprobe_json(out)
+        v, a = (next(s for s in info["streams"] if s["codec_type"] == kind) for kind in ("video", "audio"))
+        self.assertLess(abs(float(v["duration"]) - float(a["duration"])), 0.05, "the mix keeps its length")
+        self.assertAlmostEqual(float(v["duration"]), result.duration_s, delta=0.05)
+        return result, check
+
+    def test_too_quiet_is_raised_to_the_target(self):
+        result, check = self.render_and_gate("quiet", {"q": "sine=f=440:r=48000:d=5,volume=-10dB"})  # about -32 LUFS
+        self.assertEqual(result.loudness["status"], "normalised")
+        self.assertLess(result.loudness["input_i"], -25)
+        self.assertTrue(check.ok, check.summary)
+        self.assertAlmostEqual(check.details["integrated_lufs"], TARGET_LUFS, delta=0.5)
+
+    def test_too_loud_is_lowered_and_peaks_are_limited(self):
+        sources = {"loud": "anoisesrc=r=48000:d=4:a=1:c=pink,volume=10dB",  # clipped noise, louder than -9 LUFS
+                   "click": "aevalsrc='0.99*sin(2*PI*220*t)*lt(mod(t\\,1)\\,0.05)':s=48000:d=4"}  # peaks, little loudness
+        result, check = self.render_and_gate("loud", sources)
+        self.assertEqual(result.loudness["status"], "normalised")
+        self.assertGreater(result.loudness["input_i"], -9)
+        self.assertTrue(check.ok, check.summary)
+        self.assertLessEqual(check.details["true_peak_dbtp"], MAX_TRUE_PEAK_DBTP)
+        self.assertIn('"loudness"', result.timeline_json())
+
+    def test_silent_render_works_and_says_so(self):
+        out = self.dir / "three-scenes.en.mp4"
+        result = render(load(SAMPLE), "en", out, FAST)
+        self.assertEqual(result.loudness["status"], "silent")
+        self.assertEqual(result.loudness["input_i"], "-inf")
+        json.loads(result.timeline_json())  # -inf is stored as text: still valid JSON
+        audio = [s for s in ffprobe_json(out)["streams"] if s["codec_type"] == "audio"]
+        self.assertEqual(len(audio), 1, "a silent render still has its audio track")
+
+    def test_cli_reports_loudness_and_the_off_switch(self):
+        def run(*extra):
+            out, err = io.StringIO(), io.StringIO()
+            with redirect_stdout(out), redirect_stderr(err):
+                code = cli.main(["render", str(SAMPLE), "--lang", "en", "-o", str(self.dir), "--preset", "ultrafast",
+                                 "--subtitles", "none", *extra])
+            return code, out.getvalue() + err.getvalue()
+
+        code, text = run()
+        self.assertEqual(code, 0, text)
+        self.assertIn("WARN three-scenes.en.mp4 loudness not normalised: the audio is silent", text)
+        code, text = run("--no-loudnorm")
+        self.assertEqual(code, 0, text)
+        self.assertIn("(--no-loudnorm)", text)
+        timeline = json.loads((self.dir / "three-scenes.en.timeline.json").read_text(encoding="utf-8"))
+        self.assertEqual(timeline["loudness"], {"status": "off"})
 
 
 class CliOptionsTest(unittest.TestCase):
