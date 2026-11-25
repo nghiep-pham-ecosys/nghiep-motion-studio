@@ -55,12 +55,20 @@
       "type": "string",
       "pattern": "^#[0-9a-fA-F]{6}(?![\\s\\S])"
     },
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*(?![\\s\\S])", "maxLength": 64},
+    "label": {
+      "description": "On-screen text: one string for every language, or text per language code.",
+      "anyOf": [
+        {"type": "string", "minLength": 1, "pattern": "\\S"},
+        {"$ref": "#/$defs/localized"}
+      ]
+    },
     "scene": {
       "type": "object",
       "required": ["id", "narration", "visual"],
       "additionalProperties": false,
       "properties": {
-        "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*(?![\\s\\S])", "maxLength": 64},
+        "id": {"$ref": "#/$defs/id"},
         "chapter": {"$ref": "#/$defs/localized"},
         "narration": {"$ref": "#/$defs/localized"},
         "duration_s": {
@@ -80,7 +88,11 @@
           "oneOf": [
             {"$ref": "#/$defs/visual_title"},
             {"$ref": "#/$defs/visual_image"},
-            {"$ref": "#/$defs/visual_video"}
+            {"$ref": "#/$defs/visual_video"},
+            {"$ref": "#/$defs/visual_manim"},
+            {"$ref": "#/$defs/visual_diagram"},
+            {"$ref": "#/$defs/visual_code"},
+            {"$ref": "#/$defs/visual_terminal"}
           ]
         }
       }
@@ -110,7 +122,7 @@
       }
     },
     "visual_video": {
-      "description": "A video clip (for example a Manim, Motion Canvas or VHS render). Its own audio is dropped. A short clip holds its last frame unless loop is true.",
+      "description": "A video clip (for example a screen recording). Its own audio is dropped. A short clip holds its last frame unless loop is true.",
       "type": "object",
       "required": ["kind", "src"],
       "additionalProperties": false,
@@ -118,6 +130,104 @@
         "kind": {"const": "video"},
         "src": {"$ref": "#/$defs/path"},
         "start_s": {"type": "number", "minimum": 0},
+        "loop": {"type": "boolean"},
+        "background": {"$ref": "#/$defs/color"}
+      }
+    },
+    "visual_manim": {
+      "description": "A custom Manim CE scene rendered to a clip at the output size. It runs Python from the repository, so use trusted files only. The scene lasts at least as long as the clip.",
+      "type": "object",
+      "required": ["kind", "src", "scene"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"const": "manim"},
+        "src": {"allOf": [{"$ref": "#/$defs/path"}, {"pattern": "\\.py(?![\\s\\S])"}]},
+        "scene": {"description": "Name of the Scene class in src.", "type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*(?![\\s\\S])"},
+        "loop": {"type": "boolean"},
+        "background": {"$ref": "#/$defs/color"}
+      }
+    },
+    "visual_diagram": {
+      "description": "An animated box-and-arrow diagram drawn with Manim from data. Nodes sit on a grid (col, row) and appear step by step; an edge appears with the step that shows both of its ends. The motion fits the scene length.",
+      "type": "object",
+      "required": ["kind", "nodes"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"const": "diagram"},
+        "title": {"$ref": "#/$defs/label"},
+        "nodes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 24,
+          "items": {
+            "type": "object",
+            "required": ["id", "label", "col", "row"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {"$ref": "#/$defs/id"},
+              "label": {"$ref": "#/$defs/label"},
+              "col": {"type": "integer", "minimum": 0, "maximum": 7},
+              "row": {"type": "integer", "minimum": 0, "maximum": 5},
+              "color": {"$ref": "#/$defs/color"}
+            }
+          }
+        },
+        "edges": {
+          "type": "array",
+          "maxItems": 48,
+          "items": {
+            "type": "object",
+            "required": ["from", "to"],
+            "additionalProperties": false,
+            "properties": {
+              "from": {"$ref": "#/$defs/id"},
+              "to": {"$ref": "#/$defs/id"},
+              "label": {"$ref": "#/$defs/label"}
+            }
+          }
+        },
+        "steps": {
+          "description": "Node ids revealed together, in order. Default: one node per step in list order. Every node is in exactly one step.",
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/id"}}
+        },
+        "background": {"$ref": "#/$defs/color"}
+      }
+    },
+    "visual_code": {
+      "description": "An animated code block drawn with Manim: the code is written line by line, then each highlight range is framed while the other lines dim. The motion fits the scene length.",
+      "type": "object",
+      "required": ["kind", "src"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"const": "code"},
+        "src": {"$ref": "#/$defs/path"},
+        "language": {"description": "Pygments lexer name. Default: from the file extension.", "type": "string", "pattern": "^[a-z0-9][a-z0-9+#._-]*(?![\\s\\S])"},
+        "style": {"description": "Pygments style name. Default: monokai.", "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*(?![\\s\\S])"},
+        "title": {"$ref": "#/$defs/label"},
+        "highlight": {
+          "description": "Line ranges [first, last], 1-based and inclusive, framed in order.",
+          "type": "array",
+          "maxItems": 12,
+          "items": {
+            "type": "array",
+            "prefixItems": [{"type": "integer", "minimum": 1}, {"type": "integer", "minimum": 1}],
+            "minItems": 2,
+            "maxItems": 2
+          }
+        },
+        "background": {"$ref": "#/$defs/color"}
+      }
+    },
+    "visual_terminal": {
+      "description": "A terminal recording made by VHS from a .tape file. The tape runs real shell commands, so use trusted files only. It must not set Output, Width, Height or Framerate. The scene lasts at least as long as the recording.",
+      "type": "object",
+      "required": ["kind", "src"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"const": "terminal"},
+        "src": {"allOf": [{"$ref": "#/$defs/path"}, {"pattern": "\\.tape(?![\\s\\S])"}]},
         "loop": {"type": "boolean"},
         "background": {"$ref": "#/$defs/color"}
       }

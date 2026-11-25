@@ -21,6 +21,9 @@ tts = [
     "numpy>=1.26",
     "faster-whisper==1.2.1",
 ]
+# Manim CE for the manim, diagram and code visual kinds. Linux builds it from source:
+# install libcairo2-dev, libpango1.0-dev and pkg-config first.
+visuals = ["manim==0.22.1"]
 
 [project.scripts]
 motion-studio = "motion_studio.cli:main"
@@ -29,4 +32,4 @@ motion-studio = "motion_studio.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-motion_studio = ["schema/*.json"]
+motion_studio = ["schema/*.json", "visuals/templates/*.py"]

@@ -2,6 +2,16 @@
 
 export PYTHONPATH := "src"
 export MOTION_STUDIO_REQUIRE_FFMPEG := "1"
+# Visual tools live outside the checkout (like the TTS venv), so worktrees share them and keep them:
+# Manim CE in visuals_venv (`just visuals-setup`), VHS and ttyd in tools_bin (`just vhs-install`). Both come first on PATH.
+visuals_venv := env_var_or_default("MOTION_STUDIO_VISUALS_VENV", home_directory() / ".cache/nghiep-motion-studio/visuals-venv")
+tools_bin := env_var_or_default("MOTION_STUDIO_TOOLS_BIN", home_directory() / ".cache/nghiep-motion-studio/bin")
+export PATH := visuals_venv / "bin" + ":" + tools_bin + ":" + env_var("PATH")
+
+vhs_version := "0.12.1"
+vhs_sha256 := "eb33787a5b1cebf91fe0b18bd231e2d71d36c1ff4babd99ddac1a6ab411efd10"
+ttyd_version := "1.7.7"
+ttyd_sha256 := "8a217c968aba172e0dbf3f34447218dc015bc4d5e59bf51db2f2cd12b7be4f55"
 
 # Local TTS environment: outside the repo, next to the model caches.
 tts_venv := env_var_or_default("MOTION_STUDIO_TTS_VENV", home_directory() / ".cache/nghiep-motion-studio/tts-venv")
@@ -39,3 +49,35 @@ voices:
 # Narrate one language of a scenes.json in place (writes audio/tts/ next to it), e.g. just narrate out/demo/scenes.json vi vieneu "Trúc Ly"
 narrate file lang engine voice:
     "{{tts_python}}" -m motion_studio narrate "{{file}}" --lang {{lang}} --engine {{engine}} --voice "{{voice}}"
+
+# Render the generated-visuals sample (diagram, code, terminal, manim; EN and VI) into out/
+sample-visuals:
+    python3 -m motion_studio render samples/visuals/scenes.json -o out
+
+# Show which visual adapters can run on this machine
+tools:
+    python3 -m motion_studio tools
+
+# Install Manim CE (and jsonschema) into visuals_venv (Linux: sudo apt install libcairo2-dev libpango1.0-dev pkg-config first)
+visuals-setup:
+    [ -x "{{visuals_venv}}/bin/python" ] || uv venv -p /usr/bin/python3 "{{visuals_venv}}"
+    uv pip install -p "{{visuals_venv}}/bin/python" "manim==0.22.1" "jsonschema>=4.10"
+
+# Install VHS and ttyd into tools_bin from their GitHub releases, checked by sha256 (VHS also needs Chrome or Chromium)
+vhs-install:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    dl="$(mktemp -d)"
+    trap 'rm -rf "${dl}"' EXIT
+    bin="{{tools_bin}}"
+    mkdir -p "${bin}"
+    tarball="vhs_{{vhs_version}}_Linux_x86_64.tar.gz"
+    curl -fsSL --retry 3 -o "${dl}/${tarball}" "https://github.com/charmbracelet/vhs/releases/download/v{{vhs_version}}/${tarball}"
+    echo "{{vhs_sha256}}  ${dl}/${tarball}" | sha256sum -c -
+    tar -xzf "${dl}/${tarball}" -C "${dl}"
+    install -m 755 "${dl}/vhs_{{vhs_version}}_Linux_x86_64/vhs" "${bin}/vhs"
+    curl -fsSL --retry 3 -o "${dl}/ttyd" "https://github.com/tsl0922/ttyd/releases/download/{{ttyd_version}}/ttyd.x86_64"
+    echo "{{ttyd_sha256}}  ${dl}/ttyd" | sha256sum -c -
+    install -m 755 "${dl}/ttyd" "${bin}/ttyd"
+    "${bin}/vhs" --version
+    "${bin}/ttyd" --version
