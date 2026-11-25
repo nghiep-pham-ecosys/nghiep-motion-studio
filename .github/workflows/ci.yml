@@ -37,6 +37,32 @@ jobs:
           fi
           echo "OK: no tracked file over 2 MB"
 
+  tests:
+    name: tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install ffmpeg and fonts
+        run: |
+          set -euo pipefail
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends ffmpeg fonts-dejavu-core
+          ffmpeg -hide_banner -version | head -n 1
+      - name: Install the package
+        run: python3 -m pip install --disable-pip-version-check -e .
+      - name: Validate samples
+        run: motion-studio validate samples/*/scenes.json
+      - name: Run tests
+        env:
+          MOTION_STUDIO_REQUIRE_FFMPEG: "1"
+        run: python3 -m unittest discover -v -s tests -p 'test_*.py'
+
   gitleaks:
     name: gitleaks
     runs-on: ubuntu-24.04
@@ -65,7 +91,7 @@ jobs:
   ci-result:
     name: ci-result
     if: always()
-    needs: [docs, gitleaks]
+    needs: [docs, tests, gitleaks]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
