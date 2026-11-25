@@ -241,3 +241,43 @@ any long video is made.
   voice; the clip stays outside the repo. The final VI voice is chosen by ear
   on the comparison page.
 - Every video description discloses the AI-generated narration.
+
+## Subtitles (issue 9)
+
+`render` writes `<name>.<lang>.srt` from the narration timing by default
+(`--subtitles none|srt|burn`); `burn` also writes `<name>.<lang>.burned.mp4`
+with the text drawn in by libass (portrait frames get larger text, 20
+characters per row, placed above the Shorts buttons). No model is needed:
+each narration line is trimmed to the speech in the rendered audio (10 ms
+energy frames) and a long line is split at its nearest real pause.
+`motion-studio subtitles <video> [--burn] [--align --scenes scenes.json]
+[--check-drift]` rebuilds the SRT, aligns lines with faster-whisper when no
+timing exists, or measures drift (`just drift <video>`).
+
+Drift is the systematic offset between cue starts and faster-whisper word
+starts. The gate: median offset, mean absolute offset and first-to-second
+half change each at most 200 ms, and the 90th percentile at most 350 ms, so
+one scene that is consistently off still fails. Single words can be off by up
+to about 300 ms in Whisper itself: on the sample, the two worst English cues
+(a breath before "then", the acronym "ffmpeg") start exactly where the audio
+energy rises from silence, and large-v3-turbo puts those words in the same
+wrong place. Whisper runs with Silero VAD and 30 ms padding; with the default
+400 ms padding, word starts come out up to 0.5 s early.
+
+Measured on 2026-11-25. The sample is the narration of
+`samples/three-scenes` and `samples/visuals` (7 scenes) as title-card
+scenes, narrated with `just narrate <file> en kokoro af_heart` and
+`just narrate <file> vi vieneu "Trúc Ly"`, rendered at 1280x720, then
+`just drift <video>` per language:
+
+| Model | EN median / mean abs / p90 / max | VI median / mean abs / p90 / max | Gate | Time for 45 s audio (CPU int8) |
+|-------|----------------------------------|----------------------------------|------|-------------------------------|
+| tiny | 100 / 120 / 390 / 390 ms | 100 / 113 / 210 / 210 ms | fails (EN p90) | 2.4 s |
+| base (default) | 10 / 70 / 230 / 230 ms | 25 / 43 / 90 / 90 ms | passes | 3.1 s |
+
+`base` is the smallest model that passes, and `tiny` also carries a +100 ms
+bias of its own. `--align` without narration timing gave cue starts within
+220 ms (EN) and 80 ms (VI) of the timing path on the same videos. Licences
+(checked 2026-11-25): faster-whisper MIT, Whisper models MIT,
+Systran/faster-whisper-tiny and -base MIT. Models live in
+`~/.cache/huggingface`, never in the repo.

@@ -1,4 +1,4 @@
-"""Command line: ``motion-studio validate|render``."""
+"""Command line: ``motion-studio validate|render|narrate|subtitles|...``."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ from pathlib import Path
 from . import __version__
 from .render import RenderError, RenderOptions, plan, render, with_generated_visuals
 from .schema import Scenes, ScenesError, load, load_schema
+from .subtitles import DEFAULT_MODEL as DEFAULT_WHISPER_MODEL
 from .visuals import GENERATED_KINDS, VisualError, missing_tools
 
 REF_ENV = "MOTION_STUDIO_REF_WAV"
@@ -80,11 +81,39 @@ def _cmd_render(args: argparse.Namespace) -> int:
             print(f"FAIL {exc}", file=sys.stderr)
             return 1
         print(f"OK   {result.output} ({result.width}x{result.height}, {result.fps} fps, {result.duration_s:.2f} s)")
-        _write_lines(scenes, lang, output, result.timeline_json())
+        lines = _write_lines(scenes, lang, output, result.timeline_json())
+        if args.subtitles == "none":
+            for suffix in (".srt", ".burned.mp4"):  # files from an earlier render no longer match this video
+                output.with_suffix(suffix).unlink(missing_ok=True)
+        elif not _render_subtitles(args, output, lines, result.width, result.height):
+            return 1
     return 0
 
 
-def _write_lines(scenes: Scenes, lang: str, output: Path, timeline_text: str) -> None:
+def _render_subtitles(args: argparse.Namespace, output: Path, lines: list | None, width: int, height: int) -> bool:
+    """Write the SRT (and the burned copy) for one render. False only when a requested burn failed."""
+    from .subtitles import SubtitleError, burn, sidecar, write_srt
+
+    srt = sidecar(output, ".srt")
+    sidecar(output, ".burned.mp4").unlink(missing_ok=True)  # made again below only when asked; never an old cut
+    if not lines:
+        srt.unlink(missing_ok=True)
+        print(f"WARN {srt.name} skipped: no narration timing for this render; run `motion-studio narrate`, "
+              f"or `motion-studio subtitles {output} --scenes <scenes.json> --align`", file=sys.stderr)
+        return args.subtitles != "burn"
+    try:
+        srt, cues = write_srt(output, lines, width, height)
+        print(f"OK   {srt} ({len(cues)} cue(s))")
+        if args.subtitles == "burn":
+            burned = burn(output, srt, preset=args.preset, crf=args.crf, font=args.font)
+            print(f"OK   {burned} (subtitles burned in)")
+    except (SubtitleError, OSError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return False
+    return True
+
+
+def _write_lines(scenes: Scenes, lang: str, output: Path, timeline_text: str) -> list | None:
     """Best effort: if a narration timing file matches this render, place every line on the video clock.
 
     A missing or stale timing file never fails the render; a stale one removes any old lines file.
@@ -95,15 +124,17 @@ def _write_lines(scenes: Scenes, lang: str, output: Path, timeline_text: str) ->
     tpath = timing_path(scenes.base_dir, lang)
     if not tpath.is_file():
         lines_path.unlink(missing_ok=True)
-        return
+        return None
     try:
         timing = json.loads(tpath.read_text(encoding="utf-8"))
         check_timing(timing, scenes, lang)
         lines = line_timeline(timing, json.loads(timeline_text))
         lines_path.write_text(json.dumps(lines, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        return lines
     except (StaleTiming, ValueError, KeyError, TypeError, OSError) as exc:
         lines_path.unlink(missing_ok=True)
         print(f"WARN {lines_path.name} skipped: {exc}; run `motion-studio narrate --lang {lang}` again", file=sys.stderr)
+        return None
 
 
 def _ref_wav(args: argparse.Namespace) -> Path | None:
@@ -191,6 +222,77 @@ def _cmd_visuals(args: argparse.Namespace) -> int:
     return 0
 
 
+def _lang_of(video: Path) -> str | None:
+    """``x.en.mp4`` -> ``en``."""
+    parts = video.name.split(".")
+    return parts[-2] if len(parts) >= 3 and len(parts[-2]) == 2 and parts[-2].isalpha() else None
+
+
+def _narration_lines(scenes_file: str, lang: str) -> tuple[list[str], list[str]]:
+    from .narrate import split_lines
+
+    scenes = load(scenes_file)
+    if lang not in scenes.languages:
+        raise ScenesError([f"language {lang} is not in this file (has {', '.join(scenes.languages)})"], scenes_file)
+    texts, ids = [], []
+    for scene in scenes.scenes:
+        for text in split_lines(scene["narration"][lang]):
+            texts.append(text)
+            ids.append(scene["id"])
+    return texts, ids
+
+
+def _cmd_subtitles(args: argparse.Namespace) -> int:
+    from .subtitles import SubtitleError, burn, drift, sidecar, video_size, whisper_recogniser, write_srt
+
+    video = Path(args.video)
+    lang = args.lang or _lang_of(video)
+    if not video.is_file():
+        print(f"FAIL {video} not found", file=sys.stderr)
+        return 1
+    if not lang:
+        print(f"FAIL cannot tell the language from {video.name}; pass --lang", file=sys.stderr)
+        return 2
+    if args.align and not args.scenes:
+        print("FAIL --align needs --scenes (the narration text)", file=sys.stderr)
+        return 2
+    lines_path = sidecar(video, ".lines.json")
+    if not args.align and not lines_path.is_file():
+        print(f"FAIL no {lines_path.name}: render a narrated scenes.json, or pass --scenes and --align", file=sys.stderr)
+        return 1
+    words = None
+    try:
+        recognise = whisper_recogniser(args.model, args.device) if (args.align or args.check_drift) else None
+        if args.align:
+            from .subtitles import align_lines
+
+            texts, ids = _narration_lines(args.scenes, lang)
+            words = recognise(video, lang)
+            lines = align_lines(texts, words, ids)
+            lines_path.write_text(json.dumps(lines, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+            print(f"OK   {lines_path} ({len(lines)} line(s) aligned with faster-whisper {args.model})")
+        else:
+            lines = json.loads(lines_path.read_text(encoding="utf-8"))
+        w, h = video_size(video)
+        srt, cues = write_srt(video, lines, w, h)
+        print(f"OK   {srt} ({len(cues)} cue(s))")
+        if args.burn:
+            print(f"OK   {burn(video, srt)} (subtitles burned in)")
+        if args.check_drift:
+            if words is not None:
+                print("NOTE drift after --align compares the cues with the words they were aligned from "
+                      "(a self-consistency check only)", file=sys.stderr)
+            report = drift(cues, words if words is not None else recognise(video, lang), lang, args.model)
+            sidecar(video, ".drift.json").write_text(report.json(), encoding="utf-8")
+            print(f"{'OK  ' if report.ok else 'FAIL'} {report.summary()}")
+            if not report.ok:
+                return 1
+    except (SubtitleError, ScenesError, OSError, ValueError, KeyError, TypeError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    return 0
+
+
 def _cmd_tools(_: argparse.Namespace) -> int:
     status = 0
     for kind, why in missing_tools().items():
@@ -225,6 +327,9 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--font", default="DejaVu Sans", help="fontconfig font name for title cards")
     r.add_argument("--visuals-dir", type=Path, help="cache for generated clips (default: <scenes dir>/.cache/visuals)")
     r.add_argument("--rebuild-visuals", action="store_true", help="build generated clips even when cached")
+    r.add_argument("--subtitles", choices=["none", "srt", "burn"], default="srt",
+                   help="srt: write <name>.<lang>.srt from the narration timing (default); "
+                        "burn: also write <name>.<lang>.burned.mp4 with the subtitles drawn in")
     r.set_defaults(func=_cmd_render)
 
     n = sub.add_parser("narrate", help="synthesise narration audio for one language and record per-line timing")
@@ -254,6 +359,18 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--visuals-dir", type=Path, help="cache for generated clips (default: <scenes dir>/.cache/visuals)")
     g.add_argument("--rebuild", action="store_true", help="build clips even when cached")
     g.set_defaults(func=_cmd_visuals)
+
+    st = sub.add_parser("subtitles", help="make the SRT of a rendered video, burn it in, or check its drift with faster-whisper")
+    st.add_argument("video", help="a rendered <name>.<lang>.mp4 (its .lines.json is used when present)")
+    st.add_argument("--lang", help="language (default: from the file name)")
+    st.add_argument("--scenes", help="scenes.json with the narration (needed by --align)")
+    st.add_argument("--align", action="store_true", help="time the narration lines from faster-whisper word timestamps")
+    st.add_argument("--burn", action="store_true", help="also write <name>.<lang>.burned.mp4")
+    st.add_argument("--check-drift", action="store_true",
+                    help="compare cue starts with faster-whisper word starts; exit 1 when the drift gate fails (writes .drift.json)")
+    st.add_argument("--model", default=DEFAULT_WHISPER_MODEL, help=f"faster-whisper model (default: {DEFAULT_WHISPER_MODEL})")
+    st.add_argument("--device", default="cpu", help="cpu (default), cuda or auto")
+    st.set_defaults(func=_cmd_subtitles)
 
     t = sub.add_parser("tools", help="report which visual adapters can run on this machine (exit 1 if any cannot)")
     t.set_defaults(func=_cmd_tools)
