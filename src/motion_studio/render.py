@@ -11,8 +11,13 @@ How it works:
    whose sample count matches the frame count exactly. Sample counts come from
    the cumulative frame position, so audio and video stay in sync over any
    number of scenes. Every segment's frame count is checked after encoding.
-4. The segments are joined with the concat demuxer (video copied, not
-   re-encoded) and the audio is encoded once to AAC.
+4. The audio segments are joined into one mix and normalised with a two-pass
+   ffmpeg ``loudnorm`` (pass 1 measures, pass 2 applies the measurement with
+   ``linear=true``) to ``TARGET_LUFS`` integrated and ``TARGET_TRUE_PEAK_DBTP``
+   true peak, keeping the mix's exact sample count. A silent mix is left as it
+   is and reported (``RenderResult.loudness``).
+5. The video segments are joined with the concat demuxer (video copied, not
+   re-encoded) and the mix is encoded once to AAC.
 
 Colours and fonts come from the theme (``theme.py``): the file's ``theme``
 field, or ``RenderOptions.theme`` when set. A visual's own ``background`` or
@@ -31,6 +36,7 @@ from __future__ import annotations
 import json
 import math
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -48,6 +54,13 @@ SAMPLE_RATE = 48000
 ZOOM = 1.15  # how far the camera moves in on an image with motion
 LANG_639_2 = {"en": "eng", "vi": "vie", "fr": "fra", "de": "deu", "es": "spa", "ja": "jpn", "zh": "zho"}
 _FONT_FORBIDDEN = set(":'\\,;[]=")
+# Loudness of the final mix (docs/spec.md, "Loudness"). The quality gate (gate.py) checks the same numbers.
+TARGET_LUFS = -14.0  # integrated, EBU R128 / ITU-R BS.1770
+MAX_TRUE_PEAK_DBTP = -1.0  # the highest true peak a finished video may have
+TRUE_PEAK_HEADROOM_DB = 1.0  # loudnorm aims this far under the limit: the AAC encode raises peaks
+TARGET_TRUE_PEAK_DBTP = MAX_TRUE_PEAK_DBTP - TRUE_PEAK_HEADROOM_DB
+TARGET_LRA_LU = 11.0  # a mix with a wider loudness range gets loudnorm's dynamic mode instead of one gain
+SILENCE_LUFS = -70.0  # the BS.1770 absolute gate: a mix this quiet has nothing to measure or normalise
 _BT709_OUT = ["-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-color_range", "tv"]
 
 
@@ -69,6 +82,7 @@ class RenderOptions:
     keep_workdir: Path | None = None  # set to keep segments for debugging
     visuals_dir: Path | None = None  # cache for generated clips; default <scenes dir>/.cache/visuals
     rebuild_visuals: bool = False  # build generated clips even when cached
+    normalize_audio: bool = True  # two-pass loudnorm on the final mix; False keeps the mix as it is (drafts)
 
     def __post_init__(self) -> None:
         if self.font is not None and (not self.font or any(c in _FONT_FORBIDDEN for c in self.font)):
@@ -113,6 +127,7 @@ class RenderResult:
     height: int
     fps: int
     timeline: list[SceneTiming] = field(default_factory=list)
+    loudness: dict[str, Any] = field(default_factory=dict)  # what happened to the mix (see normalize_mix)
 
     @property
     def duration_s(self) -> float:
@@ -128,6 +143,8 @@ class RenderResult:
             "duration_s": round(self.duration_s, 6),
             "scenes": [asdict(t) for t in self.timeline],
         }
+        if self.loudness:
+            data["loudness"] = self.loudness
         return json.dumps(data, indent=2, ensure_ascii=False) + "\n"
 
 
@@ -367,11 +384,11 @@ def _concat_list(names: list[str]) -> str:
     return "ffconcat version 1.0\n" + "".join(f"file '{n}'\n" for n in names)
 
 
-def mux_cmd(scenes: Scenes, lang: str, out_path: Path, opts: RenderOptions) -> list[str]:
+def mux_cmd(scenes: Scenes, lang: str, out_path: Path, opts: RenderOptions, audio: str = "mix.wav") -> list[str]:
     cmd = [
         opts.ffmpeg, "-hide_banner", "-nostdin", "-loglevel", "error", "-y",
         "-f", "concat", "-safe", "0", "-i", "video.ffconcat",
-        "-f", "concat", "-safe", "0", "-i", "audio.ffconcat",
+        "-i", audio,
         "-map", "0:v:0", "-map", "1:a:0",
         "-c:v", "copy",
         "-bsf:v", "h264_metadata=colour_primaries=1:transfer_characteristics=1:matrix_coefficients=1:video_full_range_flag=0",
@@ -381,6 +398,98 @@ def mux_cmd(scenes: Scenes, lang: str, out_path: Path, opts: RenderOptions) -> l
     if lang in LANG_639_2:
         cmd += ["-metadata:s:a:0", f"language={LANG_639_2[lang]}"]
     return cmd + ["-movflags", "+faststart", "-f", "mp4", str(out_path)]
+
+
+# --- loudness ------------------------------------------------------------------------------------------------------------
+
+_LOUDNORM_JSON = re.compile(r"\{[^{}]*\"input_i\"[^{}]*\}")
+_LOUDNORM_KEYS = ("input_i", "input_tp", "input_lra", "input_thresh", "output_i", "output_tp", "target_offset")
+
+
+def loudnorm_report(stderr: str) -> dict[str, Any]:
+    """Parse the JSON block that ``loudnorm=print_format=json`` writes to stderr (numbers as floats, -inf kept)."""
+    match = _LOUDNORM_JSON.search(stderr)
+    if not match:
+        raise RenderError("ffmpeg loudnorm printed no report")
+    raw = json.loads(match.group(0))
+    out: dict[str, Any] = {"normalization_type": raw.get("normalization_type", "")}
+    for key in _LOUDNORM_KEYS:
+        try:
+            out[key] = float(str(raw[key]).strip())
+        except (KeyError, ValueError) as exc:
+            raise RenderError(f"unreadable loudnorm report ({key}): {raw.get(key)!r}") from exc
+    return out
+
+
+def _loudnorm_args() -> str:
+    return f"I={TARGET_LUFS:g}:TP={TARGET_TRUE_PEAK_DBTP:g}:LRA={TARGET_LRA_LU:g}"
+
+
+def _pcm_exact(samples: int) -> str:
+    """Back to 48 kHz s16 stereo with exactly ``samples`` samples (loudnorm works at 192 kHz)."""
+    return (
+        f"aresample={SAMPLE_RATE},aformat=sample_fmts=s16:sample_rates={SAMPLE_RATE}:channel_layouts=stereo,"
+        f"apad=whole_len={samples},atrim=end_sample={samples}"
+    )
+
+
+def measure_mix_cmd(concat: str, opts: RenderOptions) -> list[str]:
+    """Pass 1: measure the joined mix (the report is printed at info level, so no ``-loglevel error``)."""
+    return [
+        opts.ffmpeg, "-hide_banner", "-nostdin", "-nostats", "-y", "-f", "concat", "-safe", "0", "-i", concat, "-vn",
+        "-af", f"loudnorm={_loudnorm_args()}:print_format=json", "-f", "null", "-",
+    ]
+
+
+def normalize_mix_cmd(concat: str, measured: dict[str, Any], samples: int, out_name: str, opts: RenderOptions) -> list[str]:
+    """Pass 2: apply the pass-1 measurement with ``linear=true`` and write the mix as a WAV of ``samples``."""
+    m = measured
+    af = (
+        f"loudnorm={_loudnorm_args()}:measured_I={m['input_i']:.2f}:measured_TP={m['input_tp']:.2f}:"
+        f"measured_LRA={m['input_lra']:.2f}:measured_thresh={m['input_thresh']:.2f}:offset={m['target_offset']:.2f}:"
+        f"linear=true:print_format=json,{_pcm_exact(samples)}"
+    )
+    return [
+        opts.ffmpeg, "-hide_banner", "-nostdin", "-nostats", "-y", "-f", "concat", "-safe", "0", "-i", concat, "-vn",
+        "-af", af, "-c:a", "pcm_s16le", out_name,
+    ]
+
+
+def join_mix_cmd(concat: str, out_name: str, opts: RenderOptions) -> list[str]:
+    """Join the scene WAVs unchanged (normalisation off, or a silent mix)."""
+    return [
+        opts.ffmpeg, "-hide_banner", "-nostdin", "-loglevel", "error", "-y",
+        "-f", "concat", "-safe", "0", "-i", concat, "-vn", "-c:a", "pcm_s16le", out_name,
+    ]
+
+
+def _rounded(report: dict[str, Any], *keys: str) -> dict[str, Any]:
+    """Numbers rounded for the timeline file; -inf (silence) as text so the file stays valid JSON."""
+    return {k: (round(report[k], 2) if math.isfinite(report[k]) else str(report[k])) for k in keys}
+
+
+def normalize_mix(workdir: Path, concat: str, samples: int, out_name: str, opts: RenderOptions) -> dict[str, Any]:
+    """Join the scene WAVs listed in ``concat`` into ``out_name``, normalised to the loudness targets.
+
+    Returns what happened, for ``RenderResult.loudness``: ``status`` is ``normalised``, ``silent`` (nothing
+    above the -70 LUFS gate: the mix is joined unchanged) or ``off`` (``opts.normalize_audio`` is False).
+    """
+    targets = {"target_lufs": TARGET_LUFS, "target_true_peak_dbtp": TARGET_TRUE_PEAK_DBTP, "target_lra_lu": TARGET_LRA_LU}
+    if not opts.normalize_audio:
+        _run(join_mix_cmd(concat, out_name, opts), cwd=workdir)
+        return {"status": "off"}
+    measured = loudnorm_report(_run(measure_mix_cmd(concat, opts), cwd=workdir).stderr)
+    if not math.isfinite(measured["input_i"]) or measured["input_i"] <= SILENCE_LUFS:
+        _run(join_mix_cmd(concat, out_name, opts), cwd=workdir)
+        return {"status": "silent", **targets, **_rounded(measured, "input_i", "input_tp")}
+    applied = loudnorm_report(_run(normalize_mix_cmd(concat, measured, samples, out_name, opts), cwd=workdir).stderr)
+    return {
+        "status": "normalised",
+        "mode": applied["normalization_type"],  # "linear" (one gain) or "dynamic" (loudnorm's compressor/limiter)
+        **targets,
+        **_rounded(measured, "input_i", "input_tp", "input_lra"),
+        **_rounded(applied, "output_i", "output_tp"),
+    }
 
 
 def _pool_run(jobs: int, fn: Callable[[Any], Any], items: list[Any]) -> list[Any]:
@@ -445,9 +554,12 @@ def render(scenes: Scenes, lang: str, output: str | Path, opts: RenderOptions | 
         _pool_run(jobs, encode_video, video_items)
         _pool_run(jobs, lambda c: _run(c, cwd=workdir), audio_cmds)
 
-        # 4. Join.
-        (workdir / "video.ffconcat").write_text(_concat_list(video_names), encoding="utf-8")
+        # 4. Join the audio into one mix and normalise its loudness.
         (workdir / "audio.ffconcat").write_text(_concat_list(audio_names), encoding="utf-8")
+        loudness = normalize_mix(workdir, "audio.ffconcat", sum(t.samples for t in timeline), "mix.wav", opts)
+
+        # 5. Join the video and mux.
+        (workdir / "video.ffconcat").write_text(_concat_list(video_names), encoding="utf-8")
         partial = output.with_name(output.stem + ".partial.mp4")
         try:
             _run(mux_cmd(scenes, lang, partial, opts), cwd=workdir)
@@ -457,7 +569,10 @@ def render(scenes: Scenes, lang: str, output: str | Path, opts: RenderOptions | 
     finally:
         if cleanup is not None:
             cleanup.cleanup()
-    return RenderResult(output=output, lang=lang, width=scenes.width, height=scenes.height, fps=scenes.fps, timeline=timeline)
+    return RenderResult(
+        output=output, lang=lang, width=scenes.width, height=scenes.height, fps=scenes.fps, timeline=timeline,
+        loudness=loudness,
+    )
 
 
 def with_generated_visuals(

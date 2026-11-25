@@ -68,7 +68,7 @@ def _cmd_render(args: argparse.Namespace) -> int:
     try:
         opts = RenderOptions(
             preset=args.preset, crf=args.crf, jobs=args.jobs, font=args.font, theme=args.theme,
-            visuals_dir=args.visuals_dir, rebuild_visuals=args.rebuild_visuals,
+            visuals_dir=args.visuals_dir, rebuild_visuals=args.rebuild_visuals, normalize_audio=not args.no_loudnorm,
         )
     except ValueError as exc:
         print(f"FAIL {exc}", file=sys.stderr)
@@ -84,6 +84,7 @@ def _cmd_render(args: argparse.Namespace) -> int:
             print(f"FAIL {exc}", file=sys.stderr)
             return 1
         print(f"OK   {result.output} ({result.width}x{result.height}, {result.fps} fps, {result.duration_s:.2f} s)")
+        _print_loudness(output, result.loudness)
         lines = _write_lines(scenes, lang, output, result.timeline_json())
         if args.subtitles == "none":
             for suffix in (".srt", ".burned.mp4"):  # files from an earlier render no longer match this video
@@ -91,6 +92,20 @@ def _cmd_render(args: argparse.Namespace) -> int:
         elif not _render_subtitles(args, output, lines, result.width, result.height, args.theme or scenes.theme):
             return 1
     return 0
+
+
+def _print_loudness(output: Path, loudness: dict) -> None:
+    """One line on what happened to the mix; a mix the gate will refuse is a WARN."""
+    status = loudness.get("status")
+    if status == "normalised":
+        print(f"OK   {output.name} loudness: {loudness['input_i']} -> {loudness['output_i']} LUFS, true peak "
+              f"{loudness['output_tp']} dBTP ({loudness['mode']}; target {loudness['target_lufs']:g} LUFS)")
+    elif status == "silent":
+        print(f"WARN {output.name} loudness not normalised: the audio is silent (no narration for this language); "
+              "the gate's loudness check will fail", file=sys.stderr)
+    elif status == "off":
+        print(f"WARN {output.name} loudness not normalised (--no-loudnorm); the gate's loudness check may fail",
+              file=sys.stderr)
 
 
 def _render_subtitles(
@@ -396,6 +411,8 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--theme", choices=sorted(THEMES), help="colours and fonts (default: the file's theme, else light)")
     r.add_argument("--visuals-dir", type=Path, help="cache for generated clips (default: <scenes dir>/.cache/visuals)")
     r.add_argument("--rebuild-visuals", action="store_true", help="build generated clips even when cached")
+    r.add_argument("--no-loudnorm", action="store_true",
+                   help="keep the audio mix as it is, without loudness normalisation (drafts; the gate needs it on)")
     r.add_argument("--subtitles", choices=["none", "srt", "burn"], default="srt",
                    help="srt: write <name>.<lang>.srt from the narration timing (default); "
                         "burn: also write <name>.<lang>.burned.mp4 with the subtitles drawn in")
