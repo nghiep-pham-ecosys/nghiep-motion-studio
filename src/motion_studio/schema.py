@@ -6,7 +6,8 @@ Validation has two layers:
 2. Cross-field rules a JSON Schema cannot express well: every localized field
    covers exactly the declared languages, scene ids are unique, a scene without
    ``duration_s`` has audio for every language, diagrams and code highlights
-   are consistent, and referenced files exist.
+   are consistent, speakers and ``voice_mix`` name defined speakers and known
+   TTS engines, and referenced files exist.
 """
 
 from __future__ import annotations
@@ -284,7 +285,10 @@ def validate(doc: Any, base_dir: Path | None = None) -> list[str]:
     errs = schema_errors(doc)
     if errs:
         return errs
-    return semantic_errors(doc, base_dir)
+    from .tts import ENGINES  # a registry of names; no engine is imported
+    from .voice_mix import mix_errors
+
+    return semantic_errors(doc, base_dir) + mix_errors(doc, set(ENGINES))
 
 
 @dataclass(frozen=True)

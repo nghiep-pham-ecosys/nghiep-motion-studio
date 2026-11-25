@@ -21,6 +21,9 @@ tts = [
     "numpy>=1.26",
     "faster-whisper==1.2.1",
 ]
+# The English clone engine (clone-en): Chatterbox, MIT code and weights. It pins torch 2.6 and transformers 5.2,
+# which clash with the tts extra, so install it in its own venv (`just clone-en-setup` uses torch 2.11 instead).
+clone-en = ["chatterbox-tts==0.1.7", "resemble-perth==1.0.1", "s3tokenizer==0.3.0", "huggingface_hub>=0.30"]
 # Manim CE for the manim, diagram and code visual kinds. Linux builds it from source:
 # install libcairo2-dev, libpango1.0-dev and pkg-config first.
 visuals = ["manim==0.22.1"]

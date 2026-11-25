@@ -63,7 +63,7 @@ def wav_seconds(path: Path) -> float:
     return data_bytes / (channels * (bits // 8) * rate)
 
 
-def check_reference(path: Path) -> float:
+def check_reference(path: Path, min_seconds: float = MIN_REF_SECONDS, advice: str = "use a clean clip of 6-8 s") -> float:
     """Return the length of a reference WAV, or raise TTSError if it cannot serve as one.
 
     Messages name only the file, never its folder, so they are safe to show on a page.
@@ -75,8 +75,8 @@ def check_reference(path: Path) -> float:
         seconds = wav_seconds(path)
     except (OSError, ValueError, struct.error) as exc:
         raise TTSError(f"reference clip {path.name} is not a usable WAV ({exc}); {_CONVERT}") from exc
-    if seconds < MIN_REF_SECONDS:
-        raise TTSError(f"reference clip {path.name} is {seconds:.1f} s; use a clean clip of 6-8 s")
+    if seconds < min_seconds:
+        raise TTSError(f"reference clip {path.name} is {seconds:.1f} s; {advice}")
     return seconds
 
 

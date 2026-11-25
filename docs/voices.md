@@ -17,6 +17,7 @@ marked **not usable**.
 | `kokoro` | English | [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) via `kokoro==0.9.4` | Apache-2.0 / Apache-2.0 | **usable**, with the AI-voice disclosure below | no |
 | `vieneu` | Vietnamese (+ English words) | [VieNeu-TTS v3 Turbo](https://huggingface.co/pnnbao-ump/VieNeu-TTS-v3-Turbo) via `vieneu==3.8.4` | Apache-2.0 / Apache-2.0 | **usable** (preset voices listed below) | yes |
 | `clone` | Vietnamese | VieNeu-TTS v3 Turbo, zero-shot clone of a local reference clip | as `vieneu` | **usable** for your own voice only | yes |
+| `clone-en` | English | [Chatterbox-Turbo](https://huggingface.co/ResembleAI/chatterbox-turbo) (voice `clone`) or [Chatterbox](https://huggingface.co/ResembleAI/chatterbox) (voice `clone-standard`) via `chatterbox-tts==0.1.7`, zero-shot clone of a local reference clip | MIT / MIT | **usable** for your own voice only, with the disclosure below | yes |
 | `mock` | any | test tone, no model | n/a | not for videos | no |
 
 ### Kokoro-82M (English)
@@ -67,6 +68,48 @@ marked **not usable**.
   ([VieNeu-TTS-1000h](https://huggingface.co/datasets/pnnbao-ump/VieNeu-TTS-1000h)); the 0.3B GGUF weights are
   CC BY-NC 4.0; v2 has no commercial statement and a codec trained partly on CC BY-NC data. v4 is API-only.
 
+### Chatterbox and Chatterbox-Turbo (English clone)
+
+Checked on **2026-11-25** against the primary sources.
+
+- Licence: MIT for the code ([LICENSE](https://github.com/resemble-ai/chatterbox/blob/master/LICENSE), PyPI
+  `chatterbox-tts` 0.1.7) and for both weight repos (model cards
+  [chatterbox](https://huggingface.co/ResembleAI/chatterbox) and
+  [chatterbox-turbo](https://huggingface.co/ResembleAI/chatterbox-turbo), tag `license: mit`, not gated). MIT allows
+  commercial use. The adapter downloads a pinned commit of each repo (`MODELS` in
+  `src/motion_studio/tts/chatterbox_tts.py`).
+- Inherited parts: the speech tokenizer comes from CosyVoice
+  ([code Apache-2.0](https://github.com/FunAudioLLM/CosyVoice/blob/main/LICENSE),
+  [CosyVoice2-0.5B weights Apache-2.0](https://huggingface.co/FunAudioLLM/CosyVoice2-0.5B)) through
+  [S3Tokenizer](https://github.com/xingchensong/S3Tokenizer) (Apache-2.0); the watermarker
+  [Perth](https://github.com/resemble-ai/Perth) is MIT; `conformer` is MIT. The card thanks Llama 3, but only its
+  architecture is used: the backbone is a 520M Llama-style network (1024 wide, 30 layers, in `llama_configs.py`)
+  that no Meta checkpoint fits, so the Llama licence does not reach the weights. No non-commercial term was found.
+- Training data: "0.5M hours of cleaned data" (model card), sources not public. As with Kokoro and VieNeu, this is a
+  provenance risk, not a licence bar.
+- Watermark: every line carries Resemble AI's Perth watermark (imperceptible, made to survive MP3 compression and
+  editing). It stays in place; it helps the disclosure below.
+- Disclosure: videos that use the English clone say "Narration: AI-generated clone of the presenter's own voice
+  (Chatterbox, MIT)". The card's only use term is "Don't use this model to do bad things": clone only your own voice.
+- Status: the README marks Chatterbox as retired research (no updates or support). The pinned versions keep working;
+  nothing is fetched at run time once the weights are cached.
+- Reference: a clean clip of about 10 s of your own **English** speech. Turbo refuses clips of 5 s or less (the
+  adapter asks for at least 5.5 s); the model reads the first 10 s. A Vietnamese clip also works, but the card warns
+  that the clip's accent carries over, so give `MOTION_STUDIO_REF_WAV_EN` an English clip when you have one.
+- Voices: `clone` is Chatterbox-Turbo (350M, real-time factor 0.33 on an RTX 4070 laptop, 3.4 GB of VRAM at most);
+  `clone-standard` is the original Chatterbox (500M, real-time factor 0.73, 3.8 GB). Both were understood word for
+  word by faster-whisper base on the test lines with a synthetic reference. Which one sounds more like you is decided
+  by ear on the comparison page.
+
+### English cloning options checked
+
+| Model | Verdict | Why |
+|---|---|---|
+| Chatterbox, Chatterbox-Turbo | **usable** (chosen) | MIT code and weights; inherited parts Apache-2.0 or MIT; local; built-in watermark |
+| [OpenVoice V2](https://huggingface.co/myshell-ai/OpenVoiceV2) + [MeloTTS-English](https://huggingface.co/myshell-ai/MeloTTS-English) | usable (fallback) | MIT code and weights; changes the timbre of another TTS's output, so the clone is less close than Chatterbox's zero-shot model |
+| [XTTS-v2](https://huggingface.co/coqui/XTTS-v2) | not usable | Coqui Public Model License (non-commercial) |
+| [F5-TTS](https://huggingface.co/SWivid/F5-TTS) | not usable | weights CC BY-NC 4.0 |
+
 ## Other Vietnamese options checked
 
 | Model | Verdict | Why |
@@ -96,6 +139,21 @@ Model weights download to the Hugging Face cache (`~/.cache/huggingface`) on fir
 Kokoro 0.33 GB, VieNeu with its codec 0.39 GB, the faster-whisper check model 1.6 GB. Nothing is stored in the repo.
 `MOTION_STUDIO_TTS_VENV` moves the venv.
 
+The English clone has its own venv, because Chatterbox pins torch 2.6, transformers 5.2 and numpy 1.x:
+
+```sh
+just clone-en-setup  # venv in ~/.cache/nghiep-motion-studio/clone-en-venv: torch 2.11 (CUDA 12.8), chatterbox-tts 0.1.7
+```
+
+The recipe installs `chatterbox-tts` without its own pins (torch 2.6 and the unused gradio UI) and then the
+libraries its code imports; this set was tested together on 2026-11-25 (torch 2.11.0+cu128, transformers 5.2.0,
+diffusers 0.29.0, huggingface_hub 1.33.0, numpy 1.26.4, librosa 0.11.0, resemble-perth 1.0.1, s3tokenizer 0.3.0). The
+venv takes about 7 GB. Weights download on first use into `~/.cache/nghiep-motion-studio/hf` (not the shared
+Hugging Face cache): Turbo about 3.0 GB, the original model about 3.2 GB, 6.2 GB (5.8 GiB) for both. `MOTION_STUDIO_CLONE_EN_VENV`
+and `MOTION_STUDIO_MODELS_DIR` move them. The other commands keep running in the TTS venv: when they need
+`clone-en`, they start a small worker in the clone venv and talk to it over a pipe, so Kokoro, VieNeu and the English
+clone can read scenes of one video in one run.
+
 Tested versions: torch 2.11.0+cu128, kokoro 0.9.4, misaki 0.9.4, vieneu 3.8.4, transformers 4.57.6,
 faster-whisper 1.2.1. `vieneu[cuda]` would pin torch 2.8; the plain `vieneu` package runs on the torch above.
 
@@ -106,7 +164,9 @@ MOTION_STUDIO_REF_WAV=/path/to/clean-6-8s-clip.wav just voices
 ```
 
 This writes `out/voices/index.html` (gitignored): three VieNeu presets, the cloned voice (only when
-`MOTION_STUDIO_REF_WAV` is set) and three Kokoro voices read the same test lines. The page shows the real-time
+`MOTION_STUDIO_REF_WAV` is set), three Kokoro voices and the two English clones (only when
+`MOTION_STUDIO_REF_WAV_EN` or `MOTION_STUDIO_REF_WAV` is set) read the same test lines. Each model is closed after
+its last voice, so one model is in memory at a time. The page shows the real-time
 factor and, with `--asr` (on in `just voices`), what a local speech recogniser heard and its word error rate. The
 reference clip is read in place and never copied into `out/` or the repo.
 
@@ -116,7 +176,34 @@ reference clip is read in place and never copied into `out/` or the repo.
 just narrate path/to/scenes.json vi vieneu "Trúc Ly"
 just narrate path/to/scenes.json en kokoro af_heart
 MOTION_STUDIO_REF_WAV=/path/to/clip.wav just narrate path/to/scenes.json vi clone clone
+MOTION_STUDIO_REF_WAV_EN=/path/to/english-clip.wav just narrate path/to/scenes.json en clone-en clone
 ```
+
+### Several voices in one video
+
+scenes.json can name voices and choose them per scene (example: `samples/voice-mix/scenes.json`):
+
+```json
+"speakers": {
+  "owner": {"en": {"engine": "clone-en", "voice": "clone"}, "vi": {"engine": "vieneu", "voice": "clone"}},
+  "guest": {"en": {"engine": "kokoro", "voice": "af_heart"}, "vi": {"engine": "vieneu", "voice": "Trúc Ly"}}
+},
+"voice_mix": {"policy": "narrator", "narrator": "owner"}
+```
+
+- `voice_mix` decides who reads the scenes that name no speaker. `narrator`: one speaker reads them (the owner's
+  clone as narrator); a scene with `"speaker": "guest"` is read by the second voice. `alternate-chapters` with
+  `"speakers": ["owner", "guest"]`: the speakers take turns, and every scene with a `chapter` starts the next turn.
+- A scene's own `"voice": {"en": {"engine": ..., "voice": ...}}` wins over its speaker.
+- A language that no rule covers falls back to `--engine` and `--voice`; without them `narrate` names every scene
+  left without a voice.
+- `just narrate-mix path/to/scenes.json en` narrates with the voices of the file. Set `MOTION_STUDIO_REF_WAV`
+  (Vietnamese clone) and `MOTION_STUDIO_REF_WAV_EN` (English clone) first. The reference paths never go into
+  scenes.json.
+- For a Vietnamese clone next to Vietnamese presets, use the engine `vieneu` with the voice `clone`: one model serves
+  both. Lines from engines with different sample rates are upsampled to the highest rate of the language.
+- The timing file records the engine, voice and speaker of every scene; its top-level `engine` or `voice` is `mix`
+  when the scenes differ. Changing a scene's voice makes only that scene's lines again.
 
 `narrate` splits each scene's narration into sentences (abbreviations such as "TP.", "e.g." and list numbers do
 not end a sentence), synthesises each one, joins them with 0.3 s pauses into `audio/tts/<scene>.<lang>.wav`, sets

@@ -16,6 +16,7 @@ ENGINES: dict[str, str] = {
     "kokoro": "motion_studio.tts.kokoro_tts:KokoroTTS",
     "vieneu": "motion_studio.tts.vieneu_tts:VieNeuTTS",
     "clone": "motion_studio.tts.clone:CloneTTS",
+    "clone-en": "motion_studio.tts.chatterbox_tts:ChatterboxTTS",
 }
 
 
