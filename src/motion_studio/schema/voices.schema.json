@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/nghiep-pham-ecosys/nghiep-motion-studio/voices.schema.json",
+  "title": "Voices config: the narrator and the casting presets (motion-studio video)",
+  "type": "object",
+  "required": ["version", "narrator", "presets"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {"const": 1},
+    "narrator": {
+      "description": "The narrator per language: the owner's cloned voice and the environment variable that names its reference clip.",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"$ref": "#/$defs/lang"},
+      "additionalProperties": {
+        "type": "object",
+        "required": ["engine", "voice"],
+        "additionalProperties": false,
+        "properties": {
+          "engine": {"$ref": "#/$defs/engine"},
+          "voice": {"$ref": "#/$defs/voice_id"},
+          "ref_env": {
+            "description": "Environment variable with the path of the reference clip. Unset: the video stops, or uses the preset's stand-in voice with --stand-in.",
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*(?![\\s\\S])"
+          }
+        }
+      }
+    },
+    "presets": {
+      "description": "Casting presets by name. Each gives the guest voices allowed per language (the first is the default) and the stand-in narrator.",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"pattern": "^[a-z0-9][a-z0-9-]*(?![\\s\\S])"},
+      "additionalProperties": {
+        "type": "object",
+        "required": ["guest", "stand_in"],
+        "additionalProperties": false,
+        "properties": {
+          "description": {"type": "string"},
+          "guest": {
+            "type": "object",
+            "minProperties": 1,
+            "propertyNames": {"$ref": "#/$defs/lang"},
+            "additionalProperties": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/voice"}}
+          },
+          "stand_in": {
+            "description": "A preset voice that reads the narrator's lines when the owner's reference clip is missing.",
+            "type": "object",
+            "minProperties": 1,
+            "propertyNames": {"$ref": "#/$defs/lang"},
+            "additionalProperties": {"$ref": "#/$defs/voice"}
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "lang": {"type": "string", "pattern": "^[a-z]{2}(?![\\s\\S])"},
+    "engine": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*(?![\\s\\S])", "maxLength": 32},
+    "voice_id": {"type": "string", "minLength": 1, "pattern": "\\S", "maxLength": 64},
+    "voice": {
+      "type": "object",
+      "required": ["engine", "voice"],
+      "additionalProperties": false,
+      "properties": {"engine": {"$ref": "#/$defs/engine"}, "voice": {"$ref": "#/$defs/voice_id"}}
+    }
+  }
+}

@@ -361,6 +361,27 @@ class CliSubtitlesTest(unittest.TestCase):
         self.assertEqual(self.run_cli("subtitles", str(odd))[0], 2, "language not in the name")
 
 
+class SnapTest(unittest.TestCase):
+    def test_a_word_placed_in_a_pause_moves_to_the_next_onset(self):
+        from motion_studio.subtitles import Activity, snap_to_speech
+
+        # speech 0-1.0 s, silence 1.0-2.3 s, speech 2.3-3.0 s (10 ms frames)
+        act = Activity([True] * 100 + [False] * 130 + [True] * 70)
+        words = [Word(0.5, 1.0, "fixed."), Word(1.0, 1.2, "The"), Word(2.36, 2.8, "volumetric")]
+        snapped = snap_to_speech(words, act)
+        self.assertEqual(snapped[0], words[0])
+        self.assertEqual((snapped[1].start_s, snapped[1].end_s, snapped[1].text), (2.3, 2.3, "The"))
+        self.assertEqual(snapped[2], words[2])
+
+    def test_a_voiced_word_or_a_far_onset_is_kept(self):
+        from motion_studio.subtitles import Activity, snap_to_speech
+
+        act = Activity([True] * 100 + [False] * 200 + [True] * 50)
+        early = [Word(1.0, 1.2, "a"), Word(1.5, 1.8, "b"), Word(3.1, 3.4, "c")]  # "a": the next word starts before 3.0 s
+        self.assertEqual(snap_to_speech(early, act)[0], early[0])
+        self.assertEqual(snap_to_speech([Word(0.2, 0.9, "x")], act), [Word(0.2, 0.9, "x")])
+
+
 @unittest.skipUnless(HAS_WHISPER and ffmpeg_available(), "faster-whisper and numpy are not installed (pip install -e .[subtitles])")
 class WhisperTest(unittest.TestCase):
     """Loads the tiny model (downloads about 75 MB to the Hugging Face cache on first use)."""

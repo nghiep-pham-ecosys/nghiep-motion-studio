@@ -202,6 +202,10 @@ scenes.json can name voices and choose them per scene (example: `samples/voice-m
   scenes.json.
 - For a Vietnamese clone next to Vietnamese presets, use the engine `vieneu` with the voice `clone`: one model serves
   both. Lines from engines with different sample rates are upsampled to the highest rate of the language.
+- `just video` casts the speakers from a preset of [`voices.json`](../voices.json) instead (`male-male`,
+  `male-female`; narrator = the owner's clone, English `clone-en` voice `clone-standard`, Vietnamese `clone`). Without
+  a reference clip it stops, or reads with the preset's stand-in voice when given `--stand-in` (see "One command" in
+  [spec.md](spec.md)).
 - The timing file records the engine, voice and speaker of every scene; its top-level `engine` or `voice` is `mix`
   when the scenes differ. Changing a scene's voice makes only that scene's lines again.
 

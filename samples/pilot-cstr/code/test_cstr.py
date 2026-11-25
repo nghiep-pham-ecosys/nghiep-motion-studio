@@ -1,0 +1,13 @@
+def test_matches_analytic_conversion(self):
+    # k = 0.01 1/s, V = 2 m3, Q = 0.004 m3/s -> tau = 500 s, Da = 5, X = 5/6.
+    r = isothermal_cstr_first_order(
+        self.feed, reactant="A", product="B",
+        rate_constant=0.01, volume=2.0, volumetric_flow=0.004)
+    self.assertAlmostEqual(r.space_time, 500.0)
+    self.assertAlmostEqual(r.damkohler, 5.0)
+    self.assertAlmostEqual(r.conversion, 5.0 / 6.0, places=12)
+
+def test_conserves_moles_and_keeps_state(self): ...
+def test_zero_rate_means_no_conversion(self): ...
+def test_conversion_rises_with_volume(self): ...
+def test_rejects_bad_inputs(self): ...

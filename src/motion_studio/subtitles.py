@@ -179,6 +179,33 @@ def activity(media: Path, ffmpeg: str = "ffmpeg", rate: int = 16000) -> Activity
     return Activity([e > floor for e in energy])
 
 
+def snap_to_speech(words: list["Word"], act: Activity, min_voiced: float = 0.5) -> list["Word"]:
+    """Move a recognised word that lies mostly in silence to the speech onset after it.
+
+    After a pause, faster-whisper (with its VAD) often starts the next word
+    where the speech before the pause ended, so the word "starts" in the
+    silence, up to the length of the pause too early. A word with less than
+    ``min_voiced`` of its frames voiced moves to the next voiced frame, when
+    that comes before the next recognised word. Other words are left as they are.
+    """
+    out: list[Word] = []
+    n = len(act.voiced)
+    for i, w in enumerate(words):
+        a = max(0, int(w.start_s / act.frame_s))
+        b = min(n, max(a + 1, math.ceil(w.end_s / act.frame_s)))
+        frames = act.voiced[a:b]
+        if not frames or sum(frames) / len(frames) >= min_voiced:
+            out.append(w)
+            continue
+        k = b
+        while k < n and not act.voiced[k]:
+            k += 1
+        onset = round(k * act.frame_s, 3)
+        limit = words[i + 1].start_s if i + 1 < len(words) else w.end_s + 2.0
+        out.append(Word(onset, max(onset, w.end_s), w.text) if k < n and onset <= limit + 0.05 else w)
+    return out
+
+
 def trim_lines(lines: list[dict[str, Any]], act: Activity) -> list[dict[str, Any]]:
     """Move each line's start and end to where speech starts and ends inside it."""
     out = []
@@ -521,7 +548,8 @@ def whisper_recogniser(model: str = DEFAULT_MODEL, device: str = "cpu") -> Recog
                 decode_16k(audio), language=lang, word_timestamps=True, beam_size=5, vad_filter=True,
                 vad_parameters=VAD_PARAMETERS, condition_on_previous_text=False,
             )
-            return [Word(float(w.start), float(w.end), str(w.word)) for seg in segments for w in (seg.words or [])]
+            words = [Word(float(w.start), float(w.end), str(w.word)) for seg in segments for w in (seg.words or [])]
+            return snap_to_speech(words, activity(audio))
         except SubtitleError:
             raise
         except RuntimeError as exc:  # for example missing CUDA libraries, found only at the first encode

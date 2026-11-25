@@ -9,8 +9,22 @@ cloned voice in both languages with VieNeu and Chatterbox, and a voice per
 scene or speaker with a `voice_mix` policy; see [docs/voices.md](docs/voices.md)),
 generated visuals (Manim diagrams and scenes, animated code, VHS terminal
 recordings), subtitles, loudness normalisation, a quality gate for rendered videos, Shorts cut from
-each video, a work dir with a size cap that is cleaned after upload, and the hand-off to YouTube as
-private, scheduled drafts.
+each video, a work dir with a size cap that is cleaned after upload, the hand-off to YouTube as
+private, scheduled drafts, and one command that runs every step from a topic file.
+
+## One command
+
+```sh
+just video samples/pilot-cstr/cstr-en.topic.json              # script -> scenes -> voice -> visuals -> render -> subtitles -> gate -> shorts
+just video samples/pilot-cstr/cstr-vi.topic.json --stand-in   # a preset voice reads the narrator's lines while no reference clip is set
+```
+
+A topic file names the script (a scenes.json with the narration), its `factcheck.md` and a casting preset from
+[`voices.json`](voices.json). The run stops at the first failing step and says how to resume (`--from <step>`); the
+video, its gate report and Shorts land in `~/.cache/nghiep-motion-studio/work/<job>/`. No LLM or paid API is called.
+The narrator is the owner's cloned voice: set `MOTION_STUDIO_REF_WAV_EN` (English) and `MOTION_STUDIO_REF_WAV`
+(Vietnamese), or pass `--stand-in`, which is written into the video's metadata. Details: "One command" in
+[docs/spec.md](docs/spec.md).
 
 ## Quick start
 

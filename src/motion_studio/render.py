@@ -84,6 +84,7 @@ class RenderOptions:
     visuals_dir: Path | None = None  # cache for generated clips; default <scenes dir>/.cache/visuals
     rebuild_visuals: bool = False  # build generated clips even when cached
     normalize_audio: bool = True  # two-pass loudnorm on the final mix; False keeps the mix as it is (drafts)
+    metadata: dict[str, str] = field(default_factory=dict)  # extra container tags, e.g. {"comment": "..."}
 
     def __post_init__(self) -> None:
         if self.font is not None and (not self.font or any(c in _FONT_FORBIDDEN for c in self.font)):
@@ -98,6 +99,11 @@ class RenderOptions:
             raise ValueError("jobs must be >= 0 (0 = automatic)")
         if not 0 <= self.crf <= 51:
             raise ValueError("crf must be between 0 and 51")
+        for key, value in self.metadata.items():
+            if not re.fullmatch(r"[a-z][a-z0-9_]{0,31}", key) or key == "title":
+                raise ValueError(f"metadata key {key!r} must be a lower-case tag name other than title")
+            if not isinstance(value, str) or "\n" in value or len(value) > 500:
+                raise ValueError(f"metadata {key!r} must be one line of at most 500 characters")
 
 
 @dataclass(frozen=True)
@@ -396,6 +402,8 @@ def mux_cmd(scenes: Scenes, lang: str, out_path: Path, opts: RenderOptions, audi
         "-c:a", "aac", "-b:a", opts.audio_bitrate, "-ar", str(SAMPLE_RATE), "-ac", "2",
         "-metadata", f"title={scenes.doc['title'][lang]}",
     ]
+    for key, value in sorted(opts.metadata.items()):
+        cmd += ["-metadata", f"{key}={value}"]
     if lang in LANG_639_2:
         cmd += ["-metadata:s:a:0", f"language={LANG_639_2[lang]}"]
     return cmd + ["-movflags", "+faststart", "-f", "mp4", str(out_path)]

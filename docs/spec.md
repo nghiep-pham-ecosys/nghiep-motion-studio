@@ -5,8 +5,9 @@ renderer (step 4, issue 6), the voice step with per-line timing (step 3,
 issue 7), generated visuals (step 2, issue 8), subtitles (step 5,
 issue 9), the quality gate (step 6, issue 10), the work dir that keeps
 renders off the local disk (issue 22), Shorts (part of step 7, issue 11) and
-the upload to YouTube as private, scheduled drafts (step 8, issue 12).
-Everything else is planned.
+the upload to YouTube as private, scheduled drafts (step 8, issue 12), and
+one command from a topic file to a gated video with its Shorts (`motion-studio
+video`, issue 13). Everything else is planned.
 
 ## Goal
 
@@ -35,7 +36,7 @@ Vietnamese videos come from the same file and differ only in voice and text.
 
 | # | Step | Input -> output | Free-first tool | Status |
 |---|------|-----------------|-----------------|--------|
-| 1 | Script | topic + outline -> `scenes.json` (EN + VI narration) | LLM inside the Claude subscription (offline/mock mode in tests) | planned |
+| 1 | Script | topic + outline -> `scenes.json` (EN + VI narration) | written in a Claude Code session (inside the subscription); `motion-studio video` reads it from the topic file and calls no LLM | **built** as an input (topic file, see "One command") |
 | 2 | Visuals | `scenes.json` -> one image or clip per scene | Manim CE (diagrams from data, custom scenes, animated code), VHS (terminal recordings), SVG/code-drawn images | **built** for the generated kinds (`motion-studio visuals`, also run by `render`) |
 | 3 | Voice | narration per language -> WAV per scene, written into `audio`, plus per-line timing | EN: Kokoro-82M or a Chatterbox clone of the author's own voice; VI: VieNeu-TTS v3 Turbo presets or a clone of the author's own voice; a voice per scene or speaker (all local; licences in `docs/voices.md`) | **built** (`motion-studio narrate`, `just voices`) |
 | 4 | Assembly | `scenes.json` + visuals + audio -> 1080p MP4 per language | ffmpeg (title cards, fit and Ken Burns on images, clips, frame-exact audio, two-pass `loudnorm` on the final mix) | **built** (`motion-studio render`) |
@@ -226,6 +227,124 @@ mix as it is (quick drafts; `"status": "off"`).
 
 Character consistency (when characters are drawn): a fixed character sheet is
 reused for every scene and stored next to `scenes.json`.
+
+## One command (issue 13)
+
+`motion-studio video <topic file>` (or `just video <topic file>`) makes one
+video with no hand step: it copies the script into a job folder of the work
+dir and runs the existing commands in order, stopping at the first step that
+fails. Example: `samples/pilot-cstr/` (a dialogue on the CSTR unit of
+process-sim-lab, one topic file and one scenes file per language).
+
+| # | Step | What runs | Python |
+|---|------|-----------|--------|
+| 1 | `script` | read the topic file and the scenes file; write `<job>/script.md` (who says what, by chapter) and print the length at 150 words per minute; check the tools the later steps need | system |
+| 2 | `scenes` | copy the scenes file (as `scenes.json`), every file it names and `factcheck.md` into `<job>/`; cast the voices; validate; check the fact check against the narration (when the gate will run) | system |
+| 3 | `voice` | `narrate <job>/scenes.json --lang <lang>`, one process per language, so each model is closed before the next | TTS venv |
+| 4 | `visuals` | `visuals` (skipped when no scene has a generated visual) | system |
+| 5 | `render` | first the planned length from the narration audio: outside the gate's window it stops here, with how many words to add or cut; then `render --metadata comment=<cast>` | system |
+| 6 | `subtitles` | `subtitles <video> --check-drift` (faster-whisper) | TTS venv |
+| 7 | `gate` | `gate <video> --scenes <job>/scenes.json` | system |
+| 8 | `shorts` | `shorts <video> --scenes <job>/scenes.json --count <n>` | system |
+
+The issue listed visuals before voice and subtitles before render. Here the
+voice comes first because a generated clip is fitted to its scene, and a
+narrated scene lasts as long as its audio: clips built before narration would
+all be built again by `render`. The drift check needs the rendered audio, so
+it follows `render` (which writes the SRT from the narration timing).
+
+**Topic file** (JSON, `src/motion_studio/schema/topic.schema.json`; paths
+relative to the topic file):
+
+```json
+{
+  "version": 1,
+  "job": "pilot-cstr-en",
+  "topic": "The CSTR unit of process-sim-lab",
+  "scenes": "scenes.en.json",
+  "factcheck": "factcheck.en.md",
+  "languages": ["en"],
+  "cast": {"en": {"preset": "male-female", "guest": "af_heart"}},
+  "shorts": 3
+}
+```
+
+Optional: `assets` (extra files to copy, such as a module a Manim script
+imports), `voices` (default: the nearest `voices.json` up from the topic
+file), `stand_in` (see below), `gate` (`min_s`, `max_s`: a changed window is
+for samples and tests; `stage-upload` refuses that gate report). The script
+is the scenes file itself: its narration is written beforehand (in a Claude
+Code session, P5: no paid API), and `video` never calls an LLM. Write short
+sentences: a line that does not fit one subtitle cue (two rows of 42
+characters) is split at a pause the renderer guesses, and in the pilot such
+splits put cues up to 1.5 s off, which fails the drift check; the `script` step
+warns about every long line. A sentence must not end in a single capital letter
+(`... into B.`): the narration splitter reads it as an initial and joins the
+next sentence to it. Every file the
+scenes file names must lie under its folder, so the job folder holds
+everything it needs. The source folder is never written to: narration audio,
+clips and renders go to the job.
+
+**Casting.** `voices.json` (repository root, `schema/voices.schema.json`)
+holds the narrator per language and two presets:
+
+| Preset | Guest EN | Guest VI | Stand-in narrator EN / VI |
+|--------|----------|----------|---------------------------|
+| `male-male` | Kokoro `am_michael` | VieNeu `Minh Đức` | Kokoro `bm_george` / VieNeu `Hải Đăng` |
+| `male-female` | Kokoro `af_heart` (or `bf_emma`) | VieNeu `Trúc Ly` (or `Thùy Dung`) | Kokoro `am_michael` / VieNeu `Minh Đức` |
+
+The narrator is the owner's clone: English `clone-en` with the voice
+`clone-standard` (the original Chatterbox, not Turbo), Vietnamese `clone`.
+The `scenes` step writes two speakers into the job's scenes.json:
+`narrator` (read by every scene without a speaker, through the `narrator`
+policy of `voice_mix`) and `guest` (scenes with `"speaker": "guest"`). A
+Vietnamese clone next to a VieNeu guest is cast as `vieneu` with the voice
+`clone`, so one model reads both voices. A preset's stand-in never equals one
+of its guest voices (checked when the file is read).
+
+**Stand-in narrator.** The clone engines read their reference clip from
+`MOTION_STUDIO_REF_WAV_EN` (English) and `MOTION_STUDIO_REF_WAV`
+(Vietnamese), named by `ref_env` in `voices.json`; the clip never enters the
+repository or the job. When the variable is unset, `video` stops before
+anything runs and says which variable to set. With `--stand-in` (or
+`"stand_in": true` in the topic file) the preset's stand-in voice reads the
+narrator's lines instead; this is printed as a `WARN`, written into the mp4's
+`comment` tag (`stand-in narrator: kokoro am_michael reads the narrator's
+lines in place of the owner's clone (MOTION_STUDIO_REF_WAV_EN is not set)`)
+and into the run report. A variable that names a missing file is an error,
+stand-in or not.
+
+**Report and re-runs.** `<job>/<job>.video.json` records the cast, every step
+(command, exit code, seconds, summary), the failed step and the outputs
+(video, SRT, gate report, Shorts); it is written after each step. On a failure
+the run prints the step and how to resume: fix the cause and run the same
+command with `--from <step>` (script and scenes always run; narration audio of
+unchanged scenes is kept, and narrate and the visuals cache reuse what did not
+change). `--until <step>` stops early, `--lang` makes one language,
+`--dry-run` prints the cast and the commands. The render step encodes one
+scene at a time (`--jobs 1`, the default of `video`): on the 10 GB laptop two
+parallel 1080p encodes (about 1.3 GB each, an image with a camera move is
+scaled to 2160 lines first) took available memory down to 1.3 GB next to other
+work; `--jobs N` allows more. The run holds the job's render
+lock, so the size cap never strips the job while it runs.
+
+**Pilot (2026-11-25).** Both pilots ran with `--stand-in`: no reference clip
+was set on the machine, so a preset voice read the narrator's lines (the mp4
+`comment` tag and the report say so). Nghiep reviews both before anything is
+staged.
+
+| Video | Cast | Length | Gate | Shorts | Step times |
+|-------|------|--------|------|--------|------------|
+| `pilot-cstr-en.en.mp4` | male-female: stand-in Kokoro `am_michael`, guest `af_heart` | 799.3 s | passed: -14.3 LUFS, true peak -1.6 dBTP, drift median 10 ms, p90 50 ms, 22 claims | 3 (59.1, 58.4, 55.3 s) | voice 75 s, visuals 341 s, render 276 s, drift 37 s, gate 33 s, Shorts 97 s |
+| `pilot-cstr-vi.vi.mp4` | male-male: stand-in VieNeu `Hải Đăng`, guest `Minh Đức` | 638.3 s | passed: -14.2 LUFS, true peak -1.4 dBTP, drift median 30 ms, p90 120 ms, 25 claims | 3 (54.7, 55.6, 50.6 s) | voice 26 s (27 new lines, 187 cached), visuals 139 s, render 237 s, drift 55 s, gate 29 s, Shorts 126 s |
+
+What the pilot taught: the first English render failed the drift check
+(p90 1390 ms) because of long sentences split into several cues and Whisper's
+word starts after pauses (see "Subtitles"); short sentences and
+`snap_to_speech` fixed both. The first Vietnamese run stopped at the length
+check (555.7 s): the Vietnamese pilot runs at about 230 syllables per minute of video, the English one at
+about 130 words, so a 10-minute Vietnamese script needs about 2,400 words
+(syllables), and the hint now uses the voice's own pace.
 
 ## Work dir and disk (issue 22)
 
@@ -589,6 +708,13 @@ scenes, narrated with `just narrate <file> en kokoro af_heart` and
 |-------|----------------------------------|----------------------------------|------|-------------------------------|
 | tiny | 100 / 120 / 390 / 390 ms | 100 / 113 / 210 / 210 ms | fails (EN p90) | 2.4 s |
 | base (default) | 10 / 70 / 230 / 230 ms | 25 / 43 / 90 / 90 ms | passes | 3.1 s |
+
+After a pause, faster-whisper often starts the next word where the speech
+before the pause ended, so a word "starts" inside the silence (seen on the
+CSTR pilot: 1.0-1.5 s early after the 1.2 s gaps between Kokoro sentences). The
+recogniser therefore moves a word with less than half of its 10 ms frames
+voiced to the next speech onset, when that comes before the next recognised
+word (`subtitles.snap_to_speech`); every other word keeps Whisper's time.
 
 `base` is the smallest model that passes, and `tiny` also carries a +100 ms
 bias of its own. `--align` without narration timing gave cue starts within

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/nghiep-pham-ecosys/nghiep-motion-studio/topic.schema.json",
+  "title": "Topic file of one video (motion-studio video)",
+  "description": "Everything `motion-studio video` needs to make one video without a hand step: the script (a scenes.json), its fact check, the casting and the gate window. Paths are relative to the topic file.",
+  "type": "object",
+  "required": ["version", "job", "scenes", "factcheck", "cast"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {"const": 1},
+    "job": {
+      "description": "Name of the job folder in the work dir and of every output (<job>.<lang>.mp4).",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*(?![\\s\\S])",
+      "maxLength": 64
+    },
+    "topic": {"description": "One line on what the video is about (for the report).", "type": "string", "maxLength": 200},
+    "scenes": {
+      "description": "The script: a scenes.json with the narration of every scene. Copied into the job folder as scenes.json.",
+      "$ref": "#/$defs/path"
+    },
+    "factcheck": {
+      "description": "The fact check of that narration (the gate's format). Copied into the job folder as factcheck.md.",
+      "$ref": "#/$defs/path"
+    },
+    "assets": {
+      "description": "Extra files to copy next to the job's scenes.json (paths relative to the scenes file's folder), e.g. a module a Manim script imports. Files named by visuals and audio are copied anyway.",
+      "type": "array",
+      "maxItems": 64,
+      "items": {"$ref": "#/$defs/path"}
+    },
+    "languages": {
+      "description": "Languages to make (default: every language of the scenes file).",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/lang"}
+    },
+    "cast": {
+      "description": "Casting per language: a preset of the voices config, and optionally which of its guest voices to use (default: the first).",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"$ref": "#/$defs/lang"},
+      "additionalProperties": {
+        "type": "object",
+        "required": ["preset"],
+        "additionalProperties": false,
+        "properties": {
+          "preset": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*(?![\\s\\S])"},
+          "guest": {"type": "string", "minLength": 1, "maxLength": 64}
+        }
+      }
+    },
+    "voices": {
+      "description": "The voices config (default: the nearest voices.json in the topic file's folder or a parent folder).",
+      "$ref": "#/$defs/path"
+    },
+    "stand_in": {
+      "description": "true: when the narrator's reference clip is not set, read the narrator's lines with the preset's stand-in voice instead of stopping (same as --stand-in).",
+      "type": "boolean"
+    },
+    "shorts": {"description": "How many Shorts to cut (default 3).", "type": "integer", "minimum": 1, "maximum": 6},
+    "gate": {
+      "description": "Length window of the gate in seconds (default 600-1200). A changed window is for samples and tests: stage-upload refuses its gate report.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "min_s": {"type": "number", "exclusiveMinimum": 0},
+        "max_s": {"type": "number", "exclusiveMinimum": 0}
+      }
+    }
+  },
+  "$defs": {
+    "lang": {"type": "string", "pattern": "^[a-z]{2}(?![\\s\\S])"},
+    "path": {"type": "string", "minLength": 1, "pattern": "^(?![/\\\\])(?![A-Za-z]:)"}
+  }
+}

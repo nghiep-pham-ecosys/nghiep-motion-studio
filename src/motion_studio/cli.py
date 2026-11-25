@@ -1,4 +1,4 @@
-"""Command line: ``motion-studio validate|render|narrate|subtitles|gate|shorts|stage-upload|...``."""
+"""Command line: ``motion-studio video|validate|render|narrate|subtitles|gate|shorts|stage-upload|...``."""
 
 from __future__ import annotations
 
@@ -43,6 +43,13 @@ def _crf(text: str) -> int:
     return value
 
 
+def _tag(text: str) -> tuple[str, str]:
+    key, sep, value = text.partition("=")
+    if not sep:
+        raise argparse.ArgumentTypeError("use KEY=VALUE")
+    return key.strip(), value
+
+
 def _cmd_validate(args: argparse.Namespace) -> int:
     status = 0
     for path in args.files:
@@ -71,6 +78,7 @@ def _cmd_render(args: argparse.Namespace) -> int:
         opts = RenderOptions(
             preset=args.preset, crf=args.crf, jobs=args.jobs, font=args.font, theme=args.theme,
             visuals_dir=args.visuals_dir, rebuild_visuals=args.rebuild_visuals, normalize_audio=not args.no_loudnorm,
+            metadata=dict(args.metadata or []),
         )
     except ValueError as exc:
         print(f"FAIL {exc}", file=sys.stderr)
@@ -547,6 +555,21 @@ def _cmd_finish_upload(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_video(args: argparse.Namespace) -> int:
+    from .pipeline import STEPS, Pipeline, PipelineError, load_topic
+
+    try:
+        topic = load_topic(args.topic)
+        pipe = Pipeline(topic, langs=args.lang, stand_in=args.stand_in,
+                        tts_python=Path(args.tts_python).expanduser() if args.tts_python else None,
+                        jobs=args.jobs, from_step=args.from_step or STEPS[0], until_step=args.until or STEPS[-1])
+        report = pipe.run(dry_run=args.dry_run)
+    except (PipelineError, WorkDirError, OSError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    return 0 if report.ok else 1
+
+
 def _cmd_disk(_: argparse.Namespace) -> int:
     try:
         report = workdir.disk_report(workdir.work_dir(), workdir.cap_bytes())
@@ -576,6 +599,25 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = p.add_subparsers(dest="command", required=True)
 
+    from .pipeline import STEPS
+
+    vd = sub.add_parser("video", help="one command from a topic file to a gated video and its Shorts: "
+                        f"{' -> '.join(STEPS)}; stops at the first failing step")
+    vd.add_argument("topic", help="a topic file (JSON; see docs/spec.md, 'One command')")
+    vd.add_argument("--lang", action="append", help="language to make (repeatable); default: the topic file's")
+    vd.add_argument("--stand-in", action="store_true",
+                    help="when the narrator's reference clip is not set, read the narrator's lines with the casting "
+                         "preset's stand-in voice (written into the video's metadata and the report) instead of stopping")
+    vd.add_argument("--from", dest="from_step", choices=STEPS,
+                    help="skip the steps before this one (script and scenes always run); for a re-run after a fix")
+    vd.add_argument("--until", choices=STEPS, help="stop after this step")
+    vd.add_argument("--jobs", type=int, default=1,
+                    help="parallel scene encodes in the render step (default: 1; each 1080p encode can use ~1.3 GB of RAM)")
+    vd.add_argument("--tts-python", help="python of the TTS venv for the voice and subtitles steps "
+                    "(default: $MOTION_STUDIO_TTS_VENV/bin/python, else ~/.cache/nghiep-motion-studio/tts-venv)")
+    vd.add_argument("--dry-run", action="store_true", help="check the topic and the casting, print the steps; run nothing")
+    vd.set_defaults(func=_cmd_video)
+
     v = sub.add_parser("validate", help="check scenes.json files against the schema")
     v.add_argument("files", nargs="+")
     v.add_argument("--no-files", action="store_true", help="skip the check that referenced files exist")
@@ -596,6 +638,8 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("--rebuild-visuals", action="store_true", help="build generated clips even when cached")
     r.add_argument("--no-loudnorm", action="store_true",
                    help="keep the audio mix as it is, without loudness normalisation (drafts; the gate needs it on)")
+    r.add_argument("--metadata", type=_tag, action="append", metavar="KEY=VALUE",
+                   help="extra mp4 tag (repeatable), e.g. comment=stand-in narrator; the title tag comes from scenes.json")
     r.add_argument("--subtitles", choices=["none", "srt", "burn"], default="srt",
                    help="srt: write <name>.<lang>.srt from the narration timing (default); "
                         "burn: also write <name>.<lang>.burned.mp4 with the subtitles drawn in")

@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "job": "pilot-cstr-en",
+  "topic": "The CSTR unit of process-sim-lab, as a dialogue (English, owner and a female voice)",
+  "scenes": "scenes.en.json",
+  "factcheck": "factcheck.en.md",
+  "languages": ["en"],
+  "cast": {"en": {"preset": "male-female", "guest": "af_heart"}},
+  "shorts": 3
+}

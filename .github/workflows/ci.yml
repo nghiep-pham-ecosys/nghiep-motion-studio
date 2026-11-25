@@ -79,7 +79,7 @@ jobs:
       - name: Visual adapters
         run: motion-studio tools
       - name: Validate samples
-        run: motion-studio validate samples/*/scenes.json
+        run: motion-studio validate samples/*/scenes*.json
       - name: Run tests
         env:
           MOTION_STUDIO_REQUIRE_FFMPEG: "1"
