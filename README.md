@@ -9,7 +9,8 @@ cloned voice in both languages with VieNeu and Chatterbox, and a voice per
 scene or speaker with a `voice_mix` policy; see [docs/voices.md](docs/voices.md)),
 generated visuals (Manim diagrams and scenes, animated code, VHS terminal
 recordings), subtitles, loudness normalisation, a quality gate for rendered videos, Shorts cut from
-each video, and a work dir with a size cap that is cleaned after upload.
+each video, a work dir with a size cap that is cleaned after upload, and the hand-off to YouTube as
+private, scheduled drafts.
 
 ## Quick start
 
@@ -66,6 +67,18 @@ just shorts ~/.cache/nghiep-motion-studio/work/demo/demo.en.mp4 --scenes samples
 
 Each clip is 1080x1920 with the chapter title, large burned-in subtitles and audio normalised to -14 LUFS.
 A video too short for three clips is reported (exit 1), never padded.
+
+Upload to YouTube (private and scheduled; see "Upload to YouTube" in [docs/spec.md](docs/spec.md)):
+
+```sh
+just stage-upload ~/.cache/nghiep-motion-studio/work/demo/demo.en.mp4 --scenes samples/demo/scenes.json --publish-at 2026-12-01T19:00:00+07:00 --shorts
+# after the batch is approved, lab-to-prod's youtube-upload workflow uploads it (private, publishAt)
+just finish-upload ~/.cache/nghiep-motion-studio/work/demo/demo.en.staged.json   # upload.json, then the cleanup
+```
+
+`stage-upload` refuses a video whose quality gate did not pass. It puts the mp4, its SRT and the metadata (title,
+description with chapters, tags, the "made with AI" label) on a draft release, which is not public. This repository
+holds no YouTube token.
 
 Disk (renders stay off the local disk; see "Work dir and disk" in [docs/spec.md](docs/spec.md)):
 

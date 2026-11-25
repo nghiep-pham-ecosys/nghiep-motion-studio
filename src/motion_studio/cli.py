@@ -1,4 +1,4 @@
-"""Command line: ``motion-studio validate|render|narrate|subtitles|gate|...``."""
+"""Command line: ``motion-studio validate|render|narrate|subtitles|gate|shorts|stage-upload|...``."""
 
 from __future__ import annotations
 
@@ -501,6 +501,52 @@ def _cmd_clean(args: argparse.Namespace) -> int:
         return 1
 
 
+def _cmd_stage_upload(args: argparse.Namespace) -> int:
+    from .publish import PublishError, build, stage
+
+    try:
+        text = Path(args.description_file).read_text(encoding="utf-8") if args.description_file else None
+        tags = [t for t in (args.tags or "").split(",") if t.strip()]
+        common = dict(text=text, tags=tags, shorts=args.shorts, shorts_every_days=args.shorts_every_days,
+                      allow_gate_limits=args.allow_gate_limits)
+        if args.dry_run:
+            tag, manifest, files = build(Path(args.video), Path(args.scenes), args.publish_at, **common)
+            print(json.dumps(manifest, indent=2, ensure_ascii=False))
+            print(f"OK   dry run: {len(files)} file(s) would go to the draft release {tag}; nothing staged")
+            return 0
+        staged = stage(Path(args.video), Path(args.scenes), args.publish_at, repo=args.repo, **common)
+    except (PublishError, ScenesError, WorkDirError, OSError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    for item in staged.manifest["items"]:
+        print(f"OK   {item['key']}: {item['title']!r}, private until {item['publish_at']}")
+    print(f"OK   staged {len(staged.files)} file(s) and manifest.json on the draft release {staged.tag} "
+          f"of {staged.repo} (not public)")
+    print(f"     record: {staged.record}")
+    print(f"     next, after the batch is approved: gh workflow run youtube-upload.yml --repo {staged.repo} "
+          f"-f tag={staged.tag} -f live=true; then motion-studio finish-upload {staged.record}")
+    return 0
+
+
+def _cmd_finish_upload(args: argparse.Namespace) -> int:
+    from .publish import PublishError, finish
+
+    try:
+        done = finish(Path(args.staged), result_file=Path(args.result) if args.result else None, run_id=args.run,
+                      clean=not args.no_clean, copy_to=args.copy_to)
+    except (PublishError, WorkDirError, OSError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    for entry in done.files:
+        print(f"OK   {entry['path']} -> {entry['remote_id']} (private until {entry['publish_at']})")
+    print(f"OK   upload record: {done.record}")
+    if done.cleaned:
+        print(f"OK   {done.cleaned.job}: removed {len(done.cleaned.deleted)} file(s), {workdir.human(done.cleaned.freed)}")
+    if done.note:
+        print(f"NOTE {done.note}")
+    return 0
+
+
 def _cmd_disk(_: argparse.Namespace) -> int:
     try:
         report = workdir.disk_report(workdir.work_dir(), workdir.cap_bytes())
@@ -641,6 +687,33 @@ def build_parser() -> argparse.ArgumentParser:
                    help=f"with --after-upload: copy the master mp4s there with rclone first (default: "
                         f"${workdir.CLOUD_COPY_ENV}; off when unset)")
     c.set_defaults(func=_cmd_clean)
+
+    su = sub.add_parser("stage-upload", help="put a gated video (and its Shorts) on a draft release of lab-to-prod "
+                        "for the youtube-upload workflow; private and scheduled, never public")
+    su.add_argument("video", help="the clean <work dir>/<job>/<job>.<lang>.mp4 whose .gate.json passed")
+    su.add_argument("--scenes", required=True, help="the scenes.json it was rendered from (title and chapters)")
+    su.add_argument("--publish-at", required=True,
+                    help="when YouTube makes it public, ISO 8601 with offset, e.g. 2026-12-01T19:00:00+07:00")
+    su.add_argument("--description-file", help="text for the top of the description (chapters and the AI label follow)")
+    su.add_argument("--tags", help="comma-separated tags")
+    su.add_argument("--shorts", action="store_true", help="also stage the Shorts cut from this video")
+    su.add_argument("--shorts-every-days", type=float, default=1.0,
+                    help="Short n goes public n times this many days after the video (default: 1)")
+    su.add_argument("--repo", help="owner/name of the release repository (default: $MOTION_STUDIO_RELEASE_REPO, "
+                    "else nghiep-pham-ecosys/lab-to-prod)")
+    su.add_argument("--allow-gate-limits", action="store_true", help="accept a gate run with changed limits (test uploads only)")
+    su.add_argument("--dry-run", action="store_true", help="check and print the manifest; call nothing")
+    su.set_defaults(func=_cmd_stage_upload)
+
+    fu = sub.add_parser("finish-upload", help="after the youtube-upload workflow: write <job>/upload.json from its "
+                        "result and clean the job once every video is uploaded")
+    fu.add_argument("staged", help="the <job>.<lang>.staged.json written by stage-upload")
+    fu.add_argument("--result", help="a result.json already downloaded (default: the workflow run's artifact, via gh)")
+    fu.add_argument("--run", help="the workflow run id (default: the newest successful live run for the tag)")
+    fu.add_argument("--no-clean", action="store_true", help="write the upload record only")
+    fu.add_argument("--copy-to", metavar="REMOTE:PATH", help=f"copy the master mp4s with rclone before the cleanup "
+                    f"(default: ${workdir.CLOUD_COPY_ENV}; off when unset)")
+    fu.set_defaults(func=_cmd_finish_upload)
 
     d = sub.add_parser("disk", help="print the work dir size and the free space on the Windows drive of the WSL disk")
     d.set_defaults(func=_cmd_disk)

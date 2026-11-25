@@ -121,3 +121,13 @@ gate video scenes *args:
 # Cut 3 Shorts (45-60 s, 9:16, large subtitles) at chapter marks into the job's shorts/ folder, e.g. just shorts ~/.cache/nghiep-motion-studio/work/rag/rag.en.mp4 --scenes samples/rag/scenes.json
 shorts video *args:
     python3 -m motion_studio shorts "{{video}}" {{args}}
+
+# Stage a gated video on a draft release of lab-to-prod for the youtube-upload workflow (private, scheduled), e.g.
+# just stage-upload ~/.cache/nghiep-motion-studio/work/rag/rag.en.mp4 --scenes samples/rag/scenes.json --publish-at 2026-12-01T19:00:00+07:00 --shorts
+stage-upload video *args:
+    python3 -m motion_studio stage-upload "{{video}}" {{args}}
+
+# After the youtube-upload workflow: write the job's upload.json and clean it once every video is up, e.g.
+# just finish-upload ~/.cache/nghiep-motion-studio/work/rag/rag.en.staged.json
+finish-upload staged *args:
+    python3 -m motion_studio finish-upload "{{staged}}" {{args}}
