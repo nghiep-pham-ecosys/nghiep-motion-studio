@@ -7,7 +7,8 @@ issue 9), the quality gate (step 6, issue 10), the work dir that keeps
 renders off the local disk (issue 22), Shorts (part of step 7, issue 11) and
 the upload to YouTube as private, scheduled drafts (step 8, issue 12), and
 one command from a topic file to a gated video with its Shorts (`motion-studio
-video`, issue 13). Everything else is planned.
+video`, issue 13), and a full English lesson as an animated two-person dialogue
+(`motion-studio lesson`, issue 31). Everything else is planned.
 
 ## Goal
 
@@ -345,6 +346,85 @@ word starts after pauses (see "Subtitles"); short sentences and
 check (555.7 s): the Vietnamese pilot runs at about 230 syllables per minute of video, the English one at
 about 130 words, so a 10-minute Vietnamese script needs about 2,400 words
 (syllables), and the hint now uses the voice's own pace.
+
+## English lesson as a dialogue (issue 31)
+
+`motion-studio lesson <file>` (or `just lesson <file>`) turns one daily
+English lesson into one 20-30 minute video, an audio-only file and Shorts.
+The lesson file is public-safe Markdown copied from the study book
+(`samples/lesson-2026-11-26/ai-eng-p3.lesson.md`): (a) a words table, (b) a
+script marked with `/` (short pause), `//` (long pause) and `**bold**`, (c) a
+model interview answer (`**Label:** text` paragraphs, the frame as `**a → b**`,
+a follow-up with a Vietnamese hint after `→`), (d) IELTS Speaking (Part 1 and
+3 as `**Q: ...**` and the answer, the Part 2 cue card in italics, useful
+phrases as `a · b · c`), (e) IELTS Writing Task 2 (the prompt in bold, the
+essay, `- **Label:** note` bullets). An optional `<lesson>.vi.tsv`
+(`English<TAB>Vietnamese` per sentence) adds a Vietnamese line under those
+sentences.
+
+**Parts, in order** (one chapter each): Intro, Words, Listen, Shadowing,
+Listen again, Model answer, Follow-up, IELTS Speaking (band 7), IELTS Writing
+(band 7), Recap. Every scene is one line of one of two original characters
+(`samples/characters/`, `sheet.svg` shows every pose): Lan (her: teacher,
+interviewer, examiner; Kokoro `af_heart`) and Minh (him: learner, candidate;
+Kokoro `am_michael`). Words and recap: she says the word and the example, he
+repeats (the example slowly); script and shadowing: he reads, she gives the
+pause cue; model answer and follow-up: she asks, he answers; IELTS Speaking:
+she is the examiner, he the candidate; IELTS Writing: he reads the essay with
+the paragraph on the board, she explains the band 7 notes. Backgrounds per
+part: classroom, desk, interview room, exam room. Slow lines use the same
+voice at speed 0.8 (`am_michael@0.8`: Kokoro takes a speed after `@`). Both
+voices are preset AI voices, never the clone; every scene shows "AI voice"
+and the description says so.
+
+**Pauses.** A repeat pause lasts `scale` x the line's length + `add_s`: `/`
+1.0 x + 0.5 s, `//` 1.2 x + 1.2 s, a word 1.0 x + 1.2 s, a slow example
+1.0 x + 0.8 s, an answer or Part 2 sentence 1.0 x + 0.7 s; the follow-up
+question waits 20 s and the Part 2 cue card 60 s. A pause shows a cue ("Your
+turn") in a bubble at her side and a shrinking countdown bar.
+
+**The `dialogue` visual** (a generated kind, `visuals/dialogue.py`, ffmpeg
+only). The scene's narration is measured per video frame (RMS); the
+speaker's mouth is closed, half or fully open by that loudness against the
+clip's own loud level (95th percentile of voiced frames), so it follows its
+own audio. The speaker glows and sways a little while the audio lasts; both
+characters blink; the listener nods while the other speaks. Each distinct
+pose is drawn once from the character SVG (groups `glow`, `head`, `eyes-*`,
+`mouth-0..2`) and cached in `<job>/visuals/dialogue-sprites/`; one ffmpeg run
+per scene lays the pose runs (concat demuxer) over the background, board and
+caption (one SVG per scene). The clip lasts narration + 0.5 s, or narration +
+0.25 s + the pause, and stretches its scene; `video`'s length check counts the
+pauses. librsvg's premultiplied alpha is undone (`unpremultiply`) so
+half-transparent pixels keep their colour.
+
+**Runs.** The command writes the source into `<work dir>/<job>/lesson/`
+(scenes.json, a topic file with the gate window 1200-1800 s, a voices config
+whose narrator is a preset voice, the character files and `factcheck.md`),
+then runs the `video` steps. A reviewed `<lesson>.factcheck.md` next to the
+lesson is copied; without one a draft with unchecked claims is written. The
+fact check is a person's review, so the gate's `fact-check` stays red until
+Nghiep ticks the claims (the scenes step refuses an unticked one when the
+gate is selected: run `--until subtitles` and gate by hand until then). After
+the render it writes `<job>.en.m4a` (the AAC track with one chapter per part),
+`<job>.en.description.txt` (intro, chapters from the timeline, the AI label),
+`<job>.en.intro.txt` (the top text for `stage-upload --description-file`) and
+`<job>.en-vi.srt` (the SRT with the Vietnamese line under the cues that have
+one). The `.srt` itself stays English only: the drift check matches its words
+to the audio.
+
+**Drift with repeated sentences.** A lesson says most sentences two or three
+times, and one global word match paired cues with the same words minutes
+away (pilot: median 20 ms but p90 120 s). The drift check now matches cues in
+60 s stretches against the words heard within 10 s of them
+(`subtitles.local_matches`), and a first word still more than 1 s off is
+looked up again within 3 s of its cue, taking the occurrence whose next words
+also match (`subtitles.anchor`). Speech further off than that counts as
+unmatched, so a real offset still fails (at least half the cues must match).
+
+**Pilot (2026-11-26).** `ai-eng-p3`: 276 scenes, 1754.5 s; voice 35 s,
+visuals 486 s, render 508 s, drift 51 s; duration, loudness (-14.3 LUFS, true
+peak -1.6 dBTP), black frames and drift (median 20 ms, p90 260 ms, 309 of 354
+cues) pass; fact-check waits for Nghiep; 3 Shorts (59.9, 58.5, 59.3 s).
 
 ## Work dir and disk (issue 22)
 

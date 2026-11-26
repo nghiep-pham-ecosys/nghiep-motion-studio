@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <!-- Exam room (IELTS Speaking). Original flat background for nghiep-motion-studio. -->
+  <rect width="1920" height="1080" fill="#ede9fe"/>
+  <rect y="840" width="1920" height="240" fill="#c4b5fd"/>
+  <rect y="832" width="1920" height="12" fill="#7c3aed" opacity="0.4"/>
+  <circle cx="230" cy="220" r="110" fill="#ffffff" stroke="#4c1d95" stroke-width="14"/>
+  <path d="M230 220 L230 145 M230 220 L285 250" stroke="#4c1d95" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="230" cy="220" r="10" fill="#4c1d95"/>
+  <rect x="1580" y="110" width="270" height="340" rx="8" fill="#f5f3ff" stroke="#6d28d9" stroke-width="8"/>
+  <path d="M1580 160 L1850 160 M1580 210 L1850 210 M1580 260 L1850 260 M1580 310 L1850 310 M1580 360 L1850 360 M1580 410 L1850 410" stroke="#c4b5fd" stroke-width="6"/>
+</svg>

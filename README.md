@@ -26,6 +26,13 @@ The narrator is the owner's cloned voice: set `MOTION_STUDIO_REF_WAV_EN` (Englis
 (Vietnamese), or pass `--stand-in`, which is written into the video's metadata. Details: "One command" in
 [docs/spec.md](docs/spec.md).
 
+```sh
+just lesson samples/lesson-2026-11-26/ai-eng-p3.lesson.md     # one English lesson -> a 20-30 min dialogue video, an m4a, Shorts
+```
+
+A lesson is played by two original animated characters ([`samples/characters/`](samples/characters/sheet.svg)) with
+preset AI voices; the speaker's mouth follows its own audio. Details: "English lesson as a dialogue" in the spec.
+
 ## Quick start
 
 Needs Python 3.12, `jsonschema` and ffmpeg 6.1+ on PATH.

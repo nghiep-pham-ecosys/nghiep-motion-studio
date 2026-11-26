@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <!-- Study desk with a board (script, shadowing, IELTS Writing). Original flat background for nghiep-motion-studio. -->
+  <rect width="1920" height="1080" fill="#dcfce7"/>
+  <rect y="850" width="1920" height="230" fill="#a16207"/>
+  <rect y="842" width="1920" height="14" fill="#713f12"/>
+  <rect x="70" y="100" width="300" height="260" rx="10" fill="#fcd34d" stroke="#92400e" stroke-width="10"/>
+  <rect x="100" y="130" width="110" height="80" fill="#fef9c3" transform="rotate(-4 155 170)"/>
+  <rect x="230" y="150" width="110" height="80" fill="#bfdbfe" transform="rotate(5 285 190)"/>
+  <rect x="140" y="240" width="120" height="90" fill="#fbcfe8" transform="rotate(3 200 285)"/>
+  <path d="M1700 100 L1700 330" stroke="#334155" stroke-width="10"/>
+  <path d="M1640 330 L1760 330 L1730 270 L1670 270 Z" fill="#f59e0b"/>
+  <ellipse cx="1700" cy="345" rx="70" ry="12" fill="#fde68a" opacity="0.8"/>
+  <rect x="1780" y="420" width="70" height="80" rx="10" fill="#e11d48"/>
+  <path d="M1850 440 Q1880 460 1850 480" stroke="#e11d48" stroke-width="10" fill="none"/>
+</svg>

@@ -45,6 +45,10 @@ DEFAULT_MODEL = "base"  # the smallest model that met MAX_DRIFT_S on the sample 
 LANDSCAPE_CHARS = 42  # characters per row; two rows per cue
 PORTRAIT_CHARS = 20
 MIN_CUE_S = 1.0
+DRIFT_WINDOW_S = 60.0  # cues matched together (see local_matches)
+DRIFT_MARGIN_S = 10.0  # how far from its cues a recognised word may lie and still match
+RECHECK_S = 1.0  # a first word matched further than this from its cue is looked up again near the cue (anchor)
+ANCHOR_REACH_S = 3.0  # how far from the cue start that lookup searches; further off counts as unmatched
 CUE_GAP_S = 0.04
 
 
@@ -416,9 +420,64 @@ class DriftReport:
         return json.dumps({**asdict(self), "ok": self.ok}, indent=2, ensure_ascii=False) + "\n"
 
 
+def local_matches(cues: list[Cue], words: list[Word], window_s: float = DRIFT_WINDOW_S,
+                  margin_s: float = DRIFT_MARGIN_S) -> list[tuple[int | None, int | None]]:
+    """``match_words`` per stretch of ``window_s`` of cues, against the words heard within ``margin_s`` of it.
+
+    A video that says the same sentences several times (a lesson: listen, listen again, repeat after me) makes
+    one global match pair a cue with the same words minutes away. Matching near the cue's own time avoids that;
+    a cue whose speech is further off than ``margin_s`` finds no words and counts as unmatched, so a large
+    offset still fails the gate (at least half the cues must match).
+    """
+    out: list[tuple[int | None, int | None]] = [(None, None)] * len(cues)
+    order = sorted(range(len(cues)), key=lambda k: cues[k].start_s)
+    i = 0
+    while i < len(order):
+        t0 = cues[order[i]].start_s
+        j = i
+        while j < len(order) and cues[order[j]].start_s < t0 + window_s:
+            j += 1
+        group = order[i:j]
+        lo, hi = t0 - margin_s, max(cues[k].end_s for k in group) + margin_s
+        near = [k for k, w in enumerate(words) if lo <= w.start_s <= hi]
+        found = match_words([cues[k].text.replace("\n", " ") for k in group], [words[k] for k in near])
+        for k, (first, last) in zip(group, found):
+            out[k] = (near[first] if first is not None else None, near[last] if last is not None else None)
+        i = j
+    return out
+
+
+def anchor(cue: Cue, words: list[Word], reach_s: float = ANCHOR_REACH_S) -> int | None:
+    """The recognised word within ``reach_s`` of the cue start that best starts the cue's text, or None.
+
+    A candidate equals the cue's first word; it scores one more for each of the next three words that also
+    match, and the closest of the best wins. Used when the sequence match put a cue's first word on the same
+    word said elsewhere ("It", "and" or a repeated sentence a few seconds away).
+    """
+    toks = [t for t in (normalise(w) for w in cue.text.split()) if t]
+    if not toks:
+        return None
+    heard = [normalise(w.text) for w in words]
+    best: tuple[tuple[int, float], int] | None = None
+    for k, w in enumerate(words):
+        if abs(w.start_s - cue.start_s) > reach_s or heard[k] != toks[0]:
+            continue
+        following = [h for h in heard[k + 1:k + 8] if h][:3]
+        score = 1 + sum(1 for a, b in zip(toks[1:4], following) if a == b)
+        key = (score, -abs(w.start_s - cue.start_s))
+        if best is None or key > best[0]:
+            best = (key, k)
+    return best[1] if best else None
+
+
 def drift(cues: list[Cue], words: list[Word], lang: str = "", model: str = "") -> DriftReport:
-    """Compare each cue start with the recognised start of its first word."""
-    pairs = match_words([c.text.replace("\n", " ") for c in cues], words)
+    """Compare each cue start with the recognised start of its first word (matched near the cue, see local_matches
+    and anchor)."""
+    pairs = []
+    for cue, (first, last) in zip(cues, local_matches(cues, words)):
+        if first is None or abs(words[first].start_s - cue.start_s) > RECHECK_S:
+            first = anchor(cue, words)
+        pairs.append((first, last))
     rows = []
     for cue, (first, _) in zip(cues, pairs):
         if first is not None:

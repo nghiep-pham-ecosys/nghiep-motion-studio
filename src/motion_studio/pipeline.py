@@ -171,9 +171,13 @@ class Cast:
     stand_in: bool = False
     reason: str = ""  # why the stand-in reads (which variable is unset)
     owner: dict[str, str] = field(default_factory=dict)  # the narrator voice the stand-in replaces
+    cloned: bool = True  # the narrator is the owner's clone (its config names a reference clip); False: a preset voice
 
     def note(self) -> str:
         """One line for the video's metadata and the report."""
+        if not self.cloned:
+            return (f"AI voices: narrator {self.narrator['engine']} {self.narrator['voice']}, "
+                    f"guest {self.guest['engine']} {self.guest['voice']} (preset voices, no clone)")
         if not self.stand_in:
             return f"narrator: owner's clone ({self.narrator['engine']} {self.narrator['voice']})"
         return (f"stand-in narrator: {self.narrator['engine']} {self.narrator['voice']} reads the narrator's lines "
@@ -228,7 +232,7 @@ def resolve_cast(voices: Mapping[str, Any], cast: Mapping[str, str], lang: str, 
     if narrator["engine"] == "clone" and guest["engine"] == "vieneu":
         narrator = {"engine": "vieneu", "voice": narrator["voice"]}  # one VieNeu model reads both voices
     return Cast(lang=lang, preset=name, narrator=narrator, guest=_voice(guest), stand_in=stand_in, reason=reason,
-                owner=_voice(owner))
+                owner=_voice(owner), cloned=bool(env_name))
 
 
 # --- script and scenes -------------------------------------------------------------------------------------------------
@@ -285,6 +289,8 @@ def referenced_files(doc: Mapping[str, Any]) -> list[str]:
         visual = scene["visual"]
         if visual["kind"] in FILE_KINDS and "src" in visual:
             found.append(visual["src"])
+        if visual["kind"] == "dialogue":
+            found += [visual["scenery"], visual["cast"]["her"], visual["cast"]["him"]]
         for rel in scene.get("audio", {}).values():
             found.append(rel)
     return list(dict.fromkeys(found))
@@ -361,7 +367,18 @@ def planned_seconds(scenes: Scenes, lang: str, tail_s: float = 0.5) -> float:
             return probe_duration(path)
 
     timeline = plan(scenes, lang, RenderOptions(tail_s=tail_s), audio_length=length)
-    return sum(t.duration_s for t in timeline)
+    total = 0.0
+    for timing in timeline:
+        scene = scenes.scenes[timing.index]
+        seconds = timing.duration_s
+        if scene["visual"]["kind"] == "dialogue":  # its clip adds the pause after the narration
+            from .visuals.dialogue import clip_seconds
+
+            rel = scene.get("audio", {}).get(lang)
+            speech = length(scenes.resolve(rel)) if rel else 0.0
+            seconds = max(seconds, clip_seconds(scene["visual"], speech, seconds))
+        total += seconds
+    return total
 
 
 # --- the run -----------------------------------------------------------------------------------------------------------

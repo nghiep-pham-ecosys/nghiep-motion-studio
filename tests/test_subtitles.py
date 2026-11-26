@@ -401,5 +401,45 @@ class WhisperTest(unittest.TestCase):
         self.assertTrue(all(isinstance(w, Word) and isinstance(w.start_s, float) for w in heard))
 
 
+class LocalMatchTests(unittest.TestCase):
+    """Repeated sentences (a lesson says each one several times) match the words near each cue, not far away."""
+
+    def test_repeated_text_matches_its_own_occurrence(self):
+        from motion_studio.subtitles import Cue, Word, drift, local_matches
+
+        text = "the judge passed all five posts"
+        cues, words = [], []
+        for start in (10.0, 400.0, 800.0):  # the same sentence three times, minutes apart
+            cues.append(Cue(start, start + 2.0, text))
+            for n, w in enumerate(text.split()):
+                words.append(Word(start + 0.05 + 0.3 * n, start + 0.3 + 0.3 * n, w))
+        pairs = local_matches(cues, words)
+        self.assertEqual([words[f].start_s for f, _ in pairs], [10.05, 400.05, 800.05])
+        report = drift(cues, words, "en", "test")
+        self.assertTrue(report.ok, report.summary())
+        self.assertEqual(report.max_abs_s, 0.05)
+
+    def test_a_short_first_word_said_nearby_is_anchored_to_its_own_cue(self):
+        from motion_studio.subtitles import Cue, Word, drift
+
+        said = [(5.0, "and it works"), (7.0, "it was never asked"), (9.0, "and it passed")]
+        cues = [Cue(t, t + 1.5, text) for t, text in said]
+        words = []
+        for t, text in said:
+            for n, w in enumerate(text.split()):
+                words.append(Word(t + 0.1 + 0.25 * n, t + 0.3 + 0.25 * n, w))
+        words.insert(0, Word(0.5, 0.7, "it"))  # an extra "it" seconds earlier
+        report = drift(cues, words, "en", "test")
+        self.assertEqual(report.matched, 3)
+        self.assertEqual(report.max_abs_s, 0.1, report.worst)
+
+    def test_speech_far_from_its_cue_is_unmatched_and_fails(self):
+        from motion_studio.subtitles import Cue, Word, drift
+
+        cues = [Cue(10.0 + 5 * k, 12.0 + 5 * k, f"word{k} two") for k in range(4)]
+        words = [Word(c.start_s + 30.0, c.start_s + 30.3, c.text.split()[0]) for c in cues]  # 30 s late
+        self.assertFalse(drift(cues, words, "en", "test").ok)
+
+
 if __name__ == "__main__":
     unittest.main()
