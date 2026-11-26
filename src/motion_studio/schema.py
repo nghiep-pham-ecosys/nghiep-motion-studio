@@ -107,7 +107,8 @@ def _message(err: Any) -> str:
     if err.validator == "pattern" and err.validator_value == load_schema()["$defs"]["path"]["pattern"]:
         return f"{where}: must be a relative path (got {err.instance!r})"
     if err.validator == "pattern" and err.validator_value.startswith("\\.") and err.validator_value.endswith("(?![\\s\\S])"):
-        ext = err.validator_value[1:].split("(", 1)[0]
+        ext = err.validator_value[1:].split("(?!", 1)[0]
+        ext = {"(jpe?g|png)": ".jpg, .jpeg or .png"}.get(ext[1:], ext) if ext.startswith(".(") else ext
         return f"{where}: must be a {ext} file (got {err.instance!r})"
     return f"{where}: {err.message}"
 
@@ -190,6 +191,8 @@ def semantic_errors(doc: dict[str, Any], base_dir: Path | None = None) -> list[s
                 for key, rel in [("scenery", visual["scenery"]), *((f"cast/{k}", v) for k, v in visual["cast"].items())]:
                     if not (base_dir / rel).is_file():
                         errs.append(f"{where}/visual/{key}: file not found: {rel}")
+            if visual["kind"] == "illustrated" and not (base_dir / visual["image"]).is_file():
+                errs.append(f"{where}/visual/image: file not found: {visual['image']}")
             for lang, rel in audio.items():
                 if not (base_dir / rel).is_file():
                     errs.append(f"{where}/audio/{lang}: file not found: {rel}")

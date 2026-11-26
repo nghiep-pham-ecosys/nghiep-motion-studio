@@ -134,7 +134,8 @@
             {"$ref": "#/$defs/visual_diagram"},
             {"$ref": "#/$defs/visual_code"},
             {"$ref": "#/$defs/visual_terminal"},
-            {"$ref": "#/$defs/visual_dialogue"}
+            {"$ref": "#/$defs/visual_dialogue"},
+            {"$ref": "#/$defs/visual_illustrated"}
           ]
         }
       }
@@ -324,6 +325,29 @@
             "cue": {"type": "string", "minLength": 1, "maxLength": 30}
           }
         },
+        "background": {"$ref": "#/$defs/color"}
+      }
+    },
+    "visual_illustrated": {
+      "description": "A still of the illustrated lesson library (JPEG or PNG) with a slow push-in towards focus (the speaker), a large speech bubble on the side of the one named by talk (the caption, with its second line), labels, a board card on the other side and a pause after the narration (scale x its length + add_s seconds, with a cue and a countdown bar). The clip lasts narration + 0.5 s + pause, so the scene is stretched to it.",
+      "type": "object",
+      "required": ["kind", "image", "talk"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"const": "illustrated"},
+        "image": {"allOf": [{"$ref": "#/$defs/path"}, {"pattern": "\\.(jpe?g|png)(?![\\s\\S])"}]},
+        "focus": {
+          "description": "Where the camera moves to, as a share of the width and height (the speaker's face).",
+          "type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number", "minimum": 0, "maximum": 1}
+        },
+        "talk": {"description": "Who speaks this scene's narration: the bubble sits on that side.", "enum": ["her", "him"]},
+        "name": {"description": "The speaker's name on the bubble.", "type": "string", "maxLength": 30},
+        "part": {"description": "Label at the top left, e.g. 2 · Words.", "type": "string", "maxLength": 60},
+        "label": {"description": "Label at the top right, e.g. AI voice.", "type": "string", "maxLength": 40},
+        "badge": {"description": "Second label at the top right, e.g. Made with AI.", "type": "string", "maxLength": 40},
+        "caption": {"$ref": "#/$defs/visual_dialogue/properties/caption"},
+        "board": {"$ref": "#/$defs/visual_dialogue/properties/board"},
+        "pause": {"$ref": "#/$defs/visual_dialogue/properties/pause"},
         "background": {"$ref": "#/$defs/color"}
       }
     },

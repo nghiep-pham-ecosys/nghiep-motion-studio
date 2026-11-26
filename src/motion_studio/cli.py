@@ -1,4 +1,4 @@
-"""Command line: ``motion-studio video|lesson|validate|render|narrate|subtitles|gate|shorts|stage-upload|...``."""
+"""Command line: ``motion-studio video|lesson|images-library|validate|render|narrate|subtitles|gate|shorts|stage-upload|...``."""
 
 from __future__ import annotations
 
@@ -581,16 +581,18 @@ def _cmd_video(args: argparse.Namespace) -> int:
 
 
 def _cmd_lesson(args: argparse.Namespace) -> int:
+    from .images import ImagesError
     from .lesson import LessonError, job_name, load_lesson, write_extras, write_source
     from .pipeline import STEPS, Pipeline, PipelineError, load_topic
 
     path = Path(args.file)
     try:
         lesson = load_lesson(path)
-        job = job_name(path, lesson)
+        job = job_name(path, lesson, args.look)
         out = Path(args.out) if args.out else workdir.job_dir(job, workdir.work_dir()) / "lesson"
         src = write_source(path, out, characters=Path(args.characters) if args.characters else None,
-                           shorts=args.shorts)
+                           shorts=args.shorts, look=args.look,
+                           library=Path(args.library).expanduser() if args.library else None)
         scenes = json.loads(src.scenes.read_text(encoding="utf-8"))["scenes"]
         print(f"OK   {src.topic}: {len(scenes)} scene(s) in 10 parts for the job {job}")
         if not src.factcheck_ready:
@@ -607,7 +609,7 @@ def _cmd_lesson(args: argparse.Namespace) -> int:
         if STEPS.index(args.until or STEPS[-1]) < STEPS.index("render"):
             return 0  # the audio file and the description need the render
         extras = write_extras(lesson, Path(report.job_dir), job)
-    except (LessonError, PipelineError, WorkDirError, OSError, ValueError, KeyError) as exc:
+    except (LessonError, ImagesError, PipelineError, WorkDirError, OSError, ValueError, KeyError) as exc:
         print(f"FAIL {exc}", file=sys.stderr)
         return 1
     print(f"OK   audio only: {extras.audio}")
@@ -616,6 +618,30 @@ def _cmd_lesson(args: argparse.Namespace) -> int:
     if extras.bilingual:
         print(f"OK   subtitles with the Vietnamese lines: {extras.bilingual}")
     return 0
+
+
+def _cmd_images_library(args: argparse.Namespace) -> int:
+    from .images import SPEC, ImagesError, default_library, expand, images_python, load_spec, run_worker, worker_cmd
+
+    spec = Path(args.spec) if args.spec else SPEC
+    out = Path(args.out).expanduser() if args.out else default_library()
+    try:
+        portraits, shots = expand(load_spec(spec))
+    except ImagesError as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    unknown = [s for s in args.only if s not in {x.id for x in portraits + shots}]
+    if unknown:
+        print(f"FAIL unknown shot id(s): {', '.join(unknown)}", file=sys.stderr)
+        return 1
+    if args.dry_run:
+        for shot in portraits + shots:
+            print(f"{shot.id:24} seed {shot.seed:5}  {shot.prompt}")
+        print(f"OK   {len(portraits)} portraits and {len(shots)} shots into {out}")
+        return 0
+    python = Path(args.python).expanduser() if args.python else images_python()
+    return run_worker(worker_cmd(python, spec, out, only=args.only, force=args.force, sheet_only=args.sheet_only,
+                                 candidates=args.candidates))
 
 
 def _cmd_disk(_: argparse.Namespace) -> int:
@@ -672,6 +698,12 @@ def build_parser() -> argparse.ArgumentParser:
     ls.add_argument("--out", help="folder for the generated topic, scenes and fact check (default: <work dir>/<job>/lesson)")
     ls.add_argument("--characters", help="folder with the character and background SVGs (default: the nearest "
                     "characters/ folder at or above the lesson file)")
+    ls.add_argument("--look", choices=("flat", "illustrated"), default="flat",
+                    help="flat: the SVG characters (default); illustrated: 3D-cartoon stills of the image library "
+                         "(build it first with images-library), a slow move on the speaker and a speech bubble; "
+                         "its job name ends in -3d")
+    ls.add_argument("--library", help="the image library folder (default: $MOTION_STUDIO_LIBRARY, else "
+                    "~/.cache/nghiep-motion-studio/library)")
     ls.add_argument("--shorts", type=int, default=3, help="how many Shorts (default: 3)")
     ls.add_argument("--build-only", action="store_true", help="write the topic, scenes and fact check; run nothing")
     ls.add_argument("--from", dest="from_step", choices=STEPS, help="as for video: skip the steps before this one")
@@ -680,6 +712,21 @@ def build_parser() -> argparse.ArgumentParser:
     ls.add_argument("--tts-python", help="python of the TTS venv (default: as for video)")
     ls.add_argument("--dry-run", action="store_true", help="write the source, print the steps; run nothing")
     ls.set_defaults(func=_cmd_lesson)
+
+    il = sub.add_parser("images-library", help="draw the illustrated lesson library (2 portraits, 5 places x 8 shots) "
+                        "on the local GPU with SDXL base 1.0 and the IP-Adapter, plus library.json and a contact sheet")
+    il.add_argument("--spec", help="the prompts file (default: samples/library/prompts.json)")
+    il.add_argument("--out", help="the library folder (default: $MOTION_STUDIO_LIBRARY, else "
+                    "~/.cache/nghiep-motion-studio/library)")
+    il.add_argument("--only", action="append", default=[], help="draw only this shot id (repeatable)")
+    il.add_argument("--force", action="store_true", help="redraw images that already exist")
+    il.add_argument("--sheet-only", action="store_true", help="only rewrite the contact sheet")
+    il.add_argument("--candidates", type=int, default=0, help="draw N seeds of each --only shot into "
+                    "<library>/candidates/ to pick one for the seeds of the prompts file (the library is left alone)")
+    il.add_argument("--python", help="python of the images venv (default: $MOTION_STUDIO_IMAGES_VENV/bin/python, "
+                    "else ~/.cache/nghiep-motion-studio/images-venv; `just images-setup` makes it)")
+    il.add_argument("--dry-run", action="store_true", help="list every shot with its seed and prompt; draw nothing")
+    il.set_defaults(func=_cmd_images_library)
 
     v = sub.add_parser("validate", help="check scenes.json files against the schema")
     v.add_argument("files", nargs="+")
