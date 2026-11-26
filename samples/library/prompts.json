@@ -1,0 +1,179 @@
+{
+  "version": 1,
+  "about": "Prompts of the illustrated lesson library: two original characters (Lan and Minh) in five places, 8 shots per place, generated once on a local GPU (motion-studio images-library) and reused by every lesson. No studio, film, channel or real person is named; both characters are adults in ordinary clothes.",
+  "models": {
+    "base": {
+      "repo": "stabilityai/stable-diffusion-xl-base-1.0",
+      "files": "fp16 variant",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "url": "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0"
+    },
+    "ip_adapter": {
+      "repo": "h94/IP-Adapter",
+      "file": "sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors",
+      "license": "Apache-2.0",
+      "url": "https://huggingface.co/h94/IP-Adapter"
+    },
+    "image_encoder": {
+      "repo": "h94/IP-Adapter",
+      "file": "models/image_encoder (OpenCLIP ViT-H/14, LAION-2B)",
+      "license": "Apache-2.0 (repo); the ViT-H/14 weights are MIT (LAION)",
+      "url": "https://huggingface.co/h94/IP-Adapter"
+    }
+  },
+  "generate": {
+    "width": 1344,
+    "height": 768,
+    "steps": 28,
+    "guidance": 6.0,
+    "ip_scale": 0.5,
+    "ip_scale_both": 0.4
+  },
+  "output": {
+    "width": 1920,
+    "height": 1080,
+    "format": "jpg",
+    "quality": 92
+  },
+  "style": "3d animated movie still, cartoon style, warm cinematic light",
+  "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+  "characters": {
+    "her": {
+      "name": "Lan",
+      "look": "a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse",
+      "short": "a young woman in a yellow cardigan",
+      "portrait_seed": 1101,
+      "face": [
+        0.547,
+        0.3,
+        0.64
+      ]
+    },
+    "him": {
+      "name": "Minh",
+      "look": "a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt",
+      "short": "a young man with glasses in a dark blue sweater",
+      "portrait_seed": 2207,
+      "face": [
+        0.577,
+        0.38,
+        0.72
+      ]
+    }
+  },
+  "portrait": "close-up portrait of {look}, stylized 3d cartoon character, big expressive eyes, friendly smile, facing the camera, plain warm grey background",
+  "places": {
+    "classroom": {
+      "setting": "a bright classroom with a clean whiteboard, wooden desks and big windows",
+      "her": "standing by the whiteboard",
+      "him": "sitting at a desk with a notebook"
+    },
+    "interview": {
+      "setting": "a modern office meeting room with a glass wall and a plant",
+      "her": "sitting at the table with a folder",
+      "him": "sitting across the table"
+    },
+    "exam": {
+      "setting": "a quiet test room with a small table, two chairs and a wall clock",
+      "her": "sitting at the table holding papers",
+      "him": "sitting upright across the table"
+    },
+    "desk": {
+      "setting": "a cozy study corner with a desk, a laptop and a cork board",
+      "her": "standing by the desk",
+      "him": "at the desk with a laptop"
+    },
+    "cafe": {
+      "setting": "a warm cafe with wooden tables and plants",
+      "her": "at a cafe table with a coffee",
+      "him": "at a cafe table with a tea"
+    }
+  },
+  "shots": {
+    "both-her": {
+      "who": "both",
+      "talk": "her",
+      "focus": [
+        0.34,
+        0.42
+      ],
+      "prompt": "two people talking, {her_short} on the left {her_pose}, speaking, {him_short} on the right {him_pose}, listening, medium wide shot, {setting}"
+    },
+    "both-him": {
+      "who": "both",
+      "talk": "him",
+      "focus": [
+        0.66,
+        0.42
+      ],
+      "prompt": "two people talking, {her_short} on the left {her_pose}, listening, {him_short} on the right {him_pose}, speaking, medium wide shot, {setting}"
+    },
+    "her-1": {
+      "who": "her",
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium close-up of {her_look}, {her_pose}, talking, warm smile, on the left of the frame, {setting}"
+    },
+    "her-2": {
+      "who": "her",
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium shot of {her_look}, {her_pose}, explaining with an open hand, three-quarter view, {setting}"
+    },
+    "her-listen": {
+      "who": "her",
+      "talk": "him",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "close-up of {her_look}, {her_pose}, listening, gentle smile, on the left of the frame, {setting}"
+    },
+    "him-1": {
+      "who": "him",
+      "talk": "him",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium close-up of {him_look}, {him_pose}, talking, friendly smile, on the right of the frame, {setting}"
+    },
+    "him-2": {
+      "who": "him",
+      "talk": "him",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium shot of {him_look}, {him_pose}, explaining with one hand raised, three-quarter view, {setting}"
+    },
+    "him-listen": {
+      "who": "him",
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "close-up of {him_look}, {him_pose}, listening, nodding, on the right of the frame, {setting}"
+    }
+  },
+  "seed_base": 3400,
+  "seeds": {
+    "interview-both-him": 5501,
+    "exam-both-her": 5600,
+    "desk-both-her": 5700,
+    "cafe-both-her": 5800
+  },
+  "skip": [
+    "classroom-both-him",
+    "desk-both-him",
+    "cafe-both-him"
+  ],
+  "review": "Two-shots were drawn with --candidates 3 and checked by eye (2026-11-26): seeds lists the ones chosen; skip lists two-shots with no clean seed (clothes swapped or a third person), whose place uses its other two-shot for both speakers."
+}

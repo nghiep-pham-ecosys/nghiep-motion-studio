@@ -101,7 +101,7 @@ class SchemaTest(unittest.TestCase):
             self.assertEqual(self.errors(visual), [], visual)
 
     def test_unknown_kind_lists_every_kind(self):
-        self.assertInvalid({"kind": "hologram"}, "use title, image, video, manim, diagram, code, terminal or dialogue")
+        self.assertInvalid({"kind": "hologram"}, "use title, image, video, manim, diagram, code, terminal, dialogue or illustrated")
 
     def test_errors_are_reported_against_the_declared_kind(self):
         self.assertInvalid({"kind": "diagram", "nodes": [{"id": "a", "label": "x", "col": 9, "row": 0}]}, "col")
@@ -360,14 +360,14 @@ class ToolLookupTest(unittest.TestCase):
             self.assertEqual(manim_command(), ["/opt/venv/bin/python", "-m", "manim"])
 
     def test_every_kind_reports_a_status(self):
-        self.assertEqual(set(missing_tools()), {"manim", "diagram", "code", "terminal", "dialogue"})
+        self.assertEqual(set(missing_tools()), {"manim", "diagram", "code", "terminal", "dialogue", "illustrated"})
 
     def test_cli_tools_prints_one_line_per_kind(self):
         out = io.StringIO()
         with redirect_stdout(out):
             status = cli.main(["tools"])
         lines = out.getvalue().splitlines()
-        self.assertEqual(len(lines), 5)
+        self.assertEqual(len(lines), 6)
         self.assertEqual(status, 0 if all(line.startswith("OK") for line in lines) else 1)
 
 

@@ -33,6 +33,14 @@ just lesson samples/lesson-2026-11-26/ai-eng-p3.lesson.md     # one English less
 A lesson is played by two original animated characters ([`samples/characters/`](samples/characters/sheet.svg)) with
 preset AI voices; the speaker's mouth follows its own audio. Details: "English lesson as a dialogue" in the spec.
 
+```sh
+just images-setup && just images-library                       # once: 3D-cartoon stills of both characters on the local GPU
+just lesson samples/lesson-2026-11-26/ai-eng-p3.lesson.md --look illustrated
+```
+
+The illustrated look shows those stills ([contact sheet](samples/library/contact-sheet.jpg)) with a slow camera move on
+the speaker and a large speech bubble. Details: "Illustrated look" in the spec.
+
 ## Quick start
 
 Needs Python 3.12, `jsonschema` and ffmpeg 6.1+ on PATH.

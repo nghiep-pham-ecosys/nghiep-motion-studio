@@ -426,6 +426,98 @@ visuals 486 s, render 508 s, drift 51 s; duration, loudness (-14.3 LUFS, true
 peak -1.6 dBTP), black frames and drift (median 20 ms, p90 260 ms, 309 of 354
 cues) pass; fact-check waits for Nghiep; 3 Shorts (59.9, 58.5, 59.3 s).
 
+## Illustrated look (issue 34)
+
+`motion-studio lesson <file> --look illustrated` plays the same lesson (same
+lines, voices, pauses and chapters) over warm 3D-cartoon stills of the two
+characters instead of the flat SVGs; `--look flat` (the default until
+Nghiep approves the characters on the contact sheet) keeps the old look. The
+illustrated job is named `<job>-3d`, so both renders can sit side by side.
+
+**The library** is drawn once on the local GPU (RTX 4070, 8 GB) and reused by
+every lesson: `just images-setup` (a venv with CUDA torch 2.11 and diffusers
+0.39 in `~/.cache/nghiep-motion-studio/images-venv`), then
+`just images-library`. Prompts, seeds and models are in
+`samples/library/prompts.json`; images go to
+`~/.cache/nghiep-motion-studio/library` (never git) with `library.json` (model,
+revision, licence, seed, prompt, file and sha256 per shot) and
+`contact-sheet.jpg`. A copy of both lives in `samples/library/` (the sheet is
+a small preview under 2 MB). Contents: a reference portrait per character,
+then 5 places (classroom, cafe, interview room, test room, study desk) x up
+to 8 shots (two-shot with her speaking, two-shot with him speaking, two
+angles of each speaker, each one listening) at 1920 x 1080.
+
+| Model | Use | Licence |
+|---|---|---|
+| [SDXL base 1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0) (fp16 files) | every image | CreativeML Open RAIL++-M: commercial use allowed, with its use restrictions |
+| [IP-Adapter plus-face SDXL ViT-H](https://huggingface.co/h94/IP-Adapter) | the same face in every shot | Apache-2.0 |
+| OpenCLIP ViT-H/14 image encoder (in the same repo) | encodes the portraits for the IP-Adapter | Apache-2.0 repo; MIT weights (LAION) |
+
+No other checkpoint, LoRA or VAE is used, no paid API and no web service.
+Prompts never name a studio, film, channel or person; both characters are
+adults in ordinary clothes (Lan: mustard cardigan; Minh: glasses, navy
+sweater). Consistency comes from three things: the same look words in every
+prompt (clothes included), one seed family (`seed_base` + 100 x place +
+shot) and the face IP-Adapter on a square crop of the character's face in
+the portrait (`face` in the prompts file; scale 0.5, in a two-shot both
+faces at 0.4 with a left and a right mask). The plus adapter on the whole
+portrait was tried first: it copied the portrait's grey backdrop and pose
+into every shot. SDXL still swaps clothes between the two people of a
+two-shot now and then, so `--candidates 3 --only <id>` draws three seeds of a
+shot into `<library>/candidates/` and the one chosen goes under `seeds` in the
+prompts file (seed + 1000 x k). A two-shot with no clean seed goes under
+`skip`: either two-shot of a place serves both speakers (the camera moves to
+the one who talks), so the place uses its other two-shot. Review of
+2026-11-26: 30 candidates, 4 seeds chosen, 3 two-shots skipped (classroom,
+desk and cafe with him speaking), so the library has 37 stills.
+
+**One model on the GPU at a time** (`images_worker.py`, run in the images
+venv): the text encoders encode every prompt and leave; SDXL draws the two
+portraits; the IP-Adapter image encoder encodes them and leaves; SDXL with the
+IP-Adapter draws the shots. SDXL draws at 1344 x 768 (an SDXL size) in 28
+DPM++ 2M Karras steps, guidance 6; the VAE decodes in bf16 in 512 px tiles
+(the default fp32 upcast failed on this GPU under WSL, and fp16 overflows);
+Pillow scales to 1920 x 1080 (JPEG, quality 92). About 20 s per still. An
+image whose prompt, seed and size did not change is kept; `--only <id>
+--force` redraws one.
+
+**The `illustrated` visual** (`visuals/illustrated.py`, ffmpeg only): the
+still at 2x the output size and `zoompan` pushing in slowly (ease-out, 3 % +
+1.2 % per second of the clip, at most 12 %) towards `focus` (the speaker's
+side in a two-shot, the upper centre in a single shot, since SDXL does not
+reliably place one person left or right), kept inside the picture; one transparent SVG per scene on top: the
+part label, "AI voice" and "Made with AI" chips, a large speech bubble at the
+bottom on the speaker's side (52 px sentence, 38 px Vietnamese line, shrinks
+to fit, the speaker's name on its edge, a tail pointing up at the speaker),
+and the board as a card in the bottom corner beside the bubble, on the other
+side (faces sit in the upper half, so the card never hides the listener of a
+two-shot; a long word shrinks to the card's width). A board that only repeats the
+paragraph around the line is left out (the bubble shows the line); word
+cards, questions, lists and notes stay. The pause cue sits on the bubble's
+edge and the countdown bar fills inside it. Clip length and pauses are the
+same as the `dialogue` kind.
+
+**Which still** (`images.pick_shots`): each part has a place (intro, words,
+recap: classroom; listen, shadowing, listen again: cafe; model answer and
+follow-up: interview room; IELTS Speaking: test room; IELTS Writing: desk).
+The first line of a part opens on a two-shot (its speaker's, else the
+other one); then the
+speaker's close-up, a second angle, the two-shot and the listener's reaction
+take turns, and a still never follows itself. A missing still falls back to
+another shot of the same place. Only the stills a lesson uses are copied into
+its job (`lesson/library/`). Lip-sync is out of scope.
+
+**Pilot (2026-11-26, illustrated).** `ai-eng-p3 --look illustrated`: 276
+scenes on 35 of the 37 stills, 1754.5 s. Library: 2 portraits and 37 stills
+in 748 s (about 16 s a still, 5.7 GiB on the GPU), after 30 two-shot
+candidates. Pipeline: visuals 979 s (twice the flat look: the 2x zoom per
+frame), render 746 s, subtitles 66 s. The gate run by hand needs the
+lesson's window (`--min-s 1200 --max-s 1800`): duration, loudness (-14.3
+LUFS, true peak -1.7 dBTP), black frames and drift (median 20 ms, p90 210
+ms, 315 of 354 cues) pass; fact-check waits for Nghiep. 3 Shorts (59.8,
+58.5, 59.4 s). The look stays opt-in until Nghiep approves the two
+characters on `samples/library/contact-sheet.jpg`.
+
 ## Work dir and disk (issue 22)
 
 The laptop has about 30 GB free on each Windows drive, and the WSL disk lives
