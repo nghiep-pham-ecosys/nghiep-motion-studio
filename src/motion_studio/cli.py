@@ -516,10 +516,12 @@ def _cmd_stage_upload(args: argparse.Namespace) -> int:
         text = Path(args.description_file).read_text(encoding="utf-8") if args.description_file else None
         tags = [t for t in (args.tags or "").split(",") if t.strip()]
         common = dict(text=text, tags=tags, shorts=args.shorts, shorts_every_days=args.shorts_every_days,
-                      allow_gate_limits=args.allow_gate_limits)
+                      allow_gate_limits=args.allow_gate_limits, playlist=args.playlist,
+                      topic=Path(args.topic) if args.topic else None)
         if args.dry_run:
             tag, manifest, files = build(Path(args.video), Path(args.scenes), args.publish_at, **common)
             print(json.dumps(manifest, indent=2, ensure_ascii=False))
+            print(_playlist_line(manifest))
             print(f"OK   dry run: {len(files)} file(s) would go to the draft release {tag}; nothing staged")
             return 0
         staged = stage(Path(args.video), Path(args.scenes), args.publish_at, repo=args.repo, **common)
@@ -528,12 +530,20 @@ def _cmd_stage_upload(args: argparse.Namespace) -> int:
         return 1
     for item in staged.manifest["items"]:
         print(f"OK   {item['key']}: {item['title']!r}, private until {item['publish_at']}")
+    print(_playlist_line(staged.manifest))
     print(f"OK   staged {len(staged.files)} file(s) and manifest.json on the draft release {staged.tag} "
           f"of {staged.repo} (not public)")
     print(f"     record: {staged.record}")
     print(f"     next, after the batch is approved: gh workflow run youtube-upload.yml --repo {staged.repo} "
           f"-f tag={staged.tag} -f live=true; then motion-studio finish-upload {staged.record}")
     return 0
+
+
+def _playlist_line(manifest: dict) -> str:
+    block = manifest["items"][0].get("playlist")
+    if not block:
+        return "NOTE no playlist: pass --playlist <title> or --topic, or set playlists.by_language in voices.json"
+    return f"OK   playlist {block['title']!r} ({block['privacy']}) for every item"
 
 
 def _cmd_finish_upload(args: argparse.Namespace) -> int:
@@ -746,6 +756,9 @@ def build_parser() -> argparse.ArgumentParser:
     su.add_argument("--repo", help="owner/name of the release repository (default: $MOTION_STUDIO_RELEASE_REPO, "
                     "else nghiep-pham-ecosys/lab-to-prod)")
     su.add_argument("--allow-gate-limits", action="store_true", help="accept a gate run with changed limits (test uploads only)")
+    su.add_argument("--playlist", metavar="TITLE", help="YouTube playlist for the video and its Shorts (found by title "
+                    "or created; default: the topic file's preset, else the language's preset in voices.json)")
+    su.add_argument("--topic", help="the video's topic file: its playlist preset and voices config")
     su.add_argument("--dry-run", action="store_true", help="check and print the manifest; call nothing")
     su.set_defaults(func=_cmd_stage_upload)
 

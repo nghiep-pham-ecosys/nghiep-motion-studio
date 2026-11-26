@@ -27,5 +27,25 @@
         "vi": {"engine": "vieneu", "voice": "Minh Đức"}
       }
     }
+  },
+  "playlists": {
+    "by_language": {"en": "process-sim-en", "vi": "process-sim-vi"},
+    "presets": {
+      "process-sim-en": {
+        "title": "Process Simulation Lab — Python from scratch",
+        "description": "Chemical process simulation in Python, built step by step from scratch: models, solvers and plots.",
+        "privacy": "public"
+      },
+      "process-sim-vi": {
+        "title": "Mô phỏng quá trình hoá học bằng Python",
+        "description": "Mô phỏng các quá trình hoá học bằng Python, xây dựng từng bước từ đầu: mô hình, bộ giải và đồ thị.",
+        "privacy": "public"
+      },
+      "english-for-engineers": {
+        "title": "English for engineers — learn with me",
+        "description": "English lessons for engineers: words, listening, shadowing, interview answers and IELTS samples, with AI voices.",
+        "privacy": "public"
+      }
+    }
   }
 }

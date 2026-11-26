@@ -25,6 +25,9 @@ from motion_studio.publish import GATE_CHECKS, Gh, PublishError  # noqa: E402
 
 NOW = dt.datetime(2026, 11, 26, 9, 0, tzinfo=dt.timezone(dt.timedelta(hours=7)))
 WHEN = "2026-12-01T19:00:00+07:00"
+EN_PLAYLIST = "Process Simulation Lab — Python from scratch"
+VI_PLAYLIST = "Mô phỏng quá trình hoá học bằng Python"
+LESSON_PLAYLIST = "English for engineers — learn with me"
 CHAPTERS = [("intro", "Intro", 0.0, 40.0), ("why", "Why it matters", 40.0, 300.0), ("how", "How it works", 340.0, 400.0)]
 
 
@@ -352,6 +355,113 @@ class PublishTest(unittest.TestCase):
         self.assertEqual(code, 0, out)
         self.assertIn("demo.en.mp4 -> VID00000001", out)
         self.assertIn("removed", out)
+
+    # --- playlist: --playlist, the topic file's preset, the language's preset ------------------------------------
+
+    def write_topic(self, name="demo.topic.json", **extra):
+        doc = {"version": 1, "job": "demo", "scenes": "scenes.json", "factcheck": "factcheck.md",
+               "cast": {"en": {"preset": "male-male"}}, **extra}
+        path = Path(self.tmp.name) / "topics" / name
+        path.parent.mkdir(exist_ok=True)
+        path.write_text(json.dumps(doc), encoding="utf-8")
+        return path
+
+    def write_voices(self, folder: Path, playlists):
+        doc = json.loads((ROOT / "voices.json").read_text(encoding="utf-8"))
+        if playlists is None:
+            doc.pop("playlists")
+        else:
+            doc["playlists"] = playlists
+        folder.mkdir(exist_ok=True)
+        (folder / "voices.json").write_text(json.dumps(doc, ensure_ascii=False), encoding="utf-8")
+        return folder / "voices.json"
+
+    def test_the_language_preset_of_the_checkout_is_the_default_for_the_video_and_its_shorts(self):
+        self.make_shorts()
+        staged, fake = self.stage(shorts=True)
+        items = fake.releases["yt-demo-en"]["manifest"]["items"]
+        self.assertEqual(len(items), 3)
+        for item in items:
+            self.assertEqual(set(item["playlist"]), {"title", "description", "privacy"})
+            self.assertEqual((item["playlist"]["title"], item["playlist"]["privacy"]), (EN_PLAYLIST, "public"))
+        self.assertEqual(staged.manifest["items"][0]["playlist"]["title"], EN_PLAYLIST)
+
+    def test_vietnamese_default_and_the_named_lesson_preset(self):
+        block, where = publish.choose_playlist("vi", "demo", self.scenes)
+        self.assertEqual(block["title"], VI_PLAYLIST)
+        self.assertIn("default for vi", where)
+        voices = json.loads((ROOT / "voices.json").read_text(encoding="utf-8"))
+        self.assertEqual(voices["playlists"]["presets"]["english-for-engineers"]["title"], LESSON_PLAYLIST)
+
+    def test_the_flag_wins_and_keeps_a_matching_preset_description(self):
+        topic = self.write_topic(playlist="english-for-engineers")
+        tag, manifest, _ = publish.build(self.video, self.scenes, WHEN, now=NOW, playlist="My own list", topic=topic)
+        self.assertEqual(manifest["items"][0]["playlist"], {"title": "My own list", "description": "", "privacy": "public"})
+        _, manifest, _ = publish.build(self.video, self.scenes, WHEN, now=NOW, playlist=f" {VI_PLAYLIST} ")
+        block = manifest["items"][0]["playlist"]
+        self.assertEqual(block["title"], VI_PLAYLIST)
+        self.assertTrue(block["description"])
+        with self.assertRaisesRegex(PublishError, "title must be"):
+            publish.build(self.video, self.scenes, WHEN, now=NOW, playlist="a <b>")
+
+    def test_the_topic_file_picks_a_preset(self):
+        topic = self.write_topic(playlist="english-for-engineers")
+        self.make_shorts()
+        staged, fake = self.stage(shorts=True, topic=topic)
+        titles = {i["playlist"]["title"] for i in fake.releases["yt-demo-en"]["manifest"]["items"]}
+        self.assertEqual(titles, {LESSON_PLAYLIST})
+
+    def test_a_topic_without_playlist_uses_the_language_preset_of_its_own_voices_config(self):
+        voices = self.write_voices(Path(self.tmp.name) / "topics", {
+            "by_language": {"en": "mine"}, "presets": {"mine": {"title": "Topic voices list", "privacy": "unlisted"}}})
+        topic = self.write_topic()
+        self.assertEqual(voices.parent, topic.parent)
+        block, where = publish.choose_playlist("en", "demo", self.scenes, topic=topic)
+        self.assertEqual(block, {"title": "Topic voices list", "description": "", "privacy": "unlisted"})
+        self.assertIn("default for en (mine)", where)
+
+    def test_topic_file_refusals(self):
+        with self.assertRaisesRegex(PublishError, "not 'demo'"):
+            publish.choose_playlist("en", "demo", self.scenes, topic=self.write_topic(job="other"))
+        with self.assertRaisesRegex(PublishError, "preset 'nope'"):
+            publish.choose_playlist("en", "demo", self.scenes, topic=self.write_topic(playlist="nope"))
+        with self.assertRaisesRegex(PublishError, "is invalid"):
+            publish.choose_playlist("en", "demo", self.scenes, topic=self.write_topic(playlist="Not A Preset Name"))
+        fake = FakeGh()
+        with self.assertRaisesRegex(PublishError, "preset 'nope'"):
+            self.stage(fake, topic=self.write_topic(playlist="nope"))
+        self.assertEqual(fake.cmds, [], "a bad playlist choice stops before any gh call")
+
+    def test_no_playlist_when_no_voices_config_sets_one(self):
+        with mock.patch.object(publish, "REPO_VOICES", Path(self.tmp.name) / "missing.json"):
+            _, manifest, _ = publish.build(self.video, self.scenes, WHEN, now=NOW)
+            self.assertNotIn("playlist", manifest["items"][0])
+            self.write_voices(self.job, None)  # the nearest voices.json above the scenes file, without playlists
+            block, where = publish.choose_playlist("en", "demo", self.scenes)
+        self.assertIsNone(block)
+        self.assertIn("no playlist for en", where)
+
+    def test_bad_playlist_presets_are_refused_by_the_schema(self):
+        for preset in ({"title": " padded"}, {"title": "x" * 151}, {"title": "ok", "privacy": "secret"},
+                       {"title": "ok", "id": "x"}):
+            with self.subTest(preset):
+                self.write_voices(self.job, {"presets": {"bad": preset}, "by_language": {"en": "bad"}})
+                with self.assertRaisesRegex(PublishError, "is invalid"):
+                    publish.choose_playlist("en", "demo", self.scenes)
+
+    def test_cli_playlist_flag_and_default_line(self):
+        with mock.patch.object(publish.Gh, "__call__", side_effect=AssertionError("no gh call in a dry run")):
+            code, out, _ = self.run_cli("stage-upload", str(self.video), "--scenes", str(self.scenes),
+                                        "--publish-at", "2099-12-01T19:00:00+07:00", "--playlist", "My own list",
+                                        "--dry-run")
+            self.assertEqual(code, 0, out)
+            self.assertIn('"playlist": {', out)
+            self.assertIn("OK   playlist 'My own list' (public) for every item", out)
+            topic = self.write_topic(playlist="english-for-engineers")
+            code, out, _ = self.run_cli("stage-upload", str(self.video), "--scenes", str(self.scenes),
+                                        "--publish-at", "2099-12-01T19:00:00+07:00", "--topic", str(topic), "--dry-run")
+            self.assertEqual(code, 0, out)
+            self.assertIn(f"OK   playlist {LESSON_PLAYLIST!r}", out)
 
 
 if __name__ == "__main__":

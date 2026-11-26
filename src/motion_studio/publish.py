@@ -9,6 +9,10 @@ secrets live. This module does the two local halves (docs/spec.md, "Upload to Yo
     language, publish time, the "made with AI" label), then puts the mp4, its SRT and ``manifest.json`` (plus the
     Shorts, if asked) on a DRAFT release of lab-to-prod. Draft releases and their assets are visible only to people
     with push access. Writes ``<job>/<job>.<lang>.staged.json`` with the release tag and the manifest.
+    Every item (the video and its Shorts) carries the same ``playlist`` block ``{title, description, privacy}``:
+    ``--playlist <title>``, else the topic file's ``playlist`` preset (``--topic``), else the preset of the
+    video's language in voices.json (``playlists.by_language``). lab-to-prod finds that playlist by title or
+    creates it, then adds the video.
 
 ``finish`` (``motion-studio finish-upload``)
     Reads ``result.json`` of the workflow run (its artifact ``youtube-upload-<tag>``, or a file), writes
@@ -53,6 +57,10 @@ MAX_DESCRIPTION = 5000  # bytes
 MAX_TAGS = 500  # characters, counting quotes around tags with spaces and the commas
 MIN_CHAPTERS = 3  # YouTube shows chapters only with 3 or more, the first at 0:00, each at least 10 s
 MIN_CHAPTER_S = 10
+MAX_PLAYLIST_TITLE = 150  # characters (lab-to-prod checks the same limits)
+MAX_PLAYLIST_DESCRIPTION = 5000  # bytes
+PLAYLIST_PRIVACY = ("public", "unlisted", "private")
+REPO_VOICES = Path(__file__).resolve().parents[2] / "voices.json"  # the checkout's voices.json, when there is one
 AI_NOTE = ("Made with AI: the narration is a synthetic (text-to-speech) voice and the visuals are generated from "
            "code; the script was drafted with AI assistance and fact-checked by me.")
 
@@ -185,6 +193,82 @@ def check_text(title: str, description: str, tags: list[str], what: str) -> None
         raise PublishError(f"{what}: " + "; ".join(problems))
 
 
+def playlist_block(title: str, description: str = "", privacy: str = "public") -> dict[str, str]:
+    """The manifest's ``playlist`` block, checked: ``{"title", "description", "privacy"}``."""
+    problems = []
+    if not isinstance(title, str) or not title.strip() or title != title.strip() or len(title) > MAX_PLAYLIST_TITLE \
+            or re.search(r"[<>]", title):
+        problems.append(f"title must be 1-{MAX_PLAYLIST_TITLE} characters without < or > or outer spaces")
+    if not isinstance(description, str) or len(description.encode("utf-8")) > MAX_PLAYLIST_DESCRIPTION \
+            or re.search(r"[<>]", description):
+        problems.append(f"description must be at most {MAX_PLAYLIST_DESCRIPTION} bytes without < or >")
+    if privacy not in PLAYLIST_PRIVACY:
+        problems.append(f"privacy must be one of {', '.join(PLAYLIST_PRIVACY)}")
+    if problems:
+        raise PublishError(f"playlist {title!r}: " + "; ".join(problems))
+    return {"title": title, "description": description, "privacy": privacy}
+
+
+def _voices(path: Path | None) -> dict[str, Any] | None:
+    from .pipeline import PipelineError, load_voices
+
+    if path is None:
+        return None
+    try:
+        return load_voices(path)
+    except PipelineError as exc:
+        raise PublishError(str(exc)) from exc
+
+
+def _preset(voices: dict[str, Any] | None, name: str, where: str) -> dict[str, str]:
+    presets = ((voices or {}).get("playlists") or {}).get("presets") or {}
+    if name not in presets:
+        raise PublishError(f"{where} names the playlist preset {name!r}, but the voices config has "
+                           f"{', '.join(sorted(presets)) or 'no playlist presets'}")
+    p = presets[name]
+    return playlist_block(p["title"], p.get("description", ""), p.get("privacy", "public"))
+
+
+def choose_playlist(lang: str, job: str, scenes_file: Path, title: str | None = None,
+                    topic: Path | None = None) -> tuple[dict[str, str] | None, str]:
+    """``(playlist block or None, where it came from)``. Order: ``title`` (``--playlist``), the topic file's
+    ``playlist`` preset, the language's preset in the voices config. The voices config is the topic file's (its
+    ``voices``, else the nearest voices.json), or else the nearest voices.json above the scenes file, or else the
+    checkout's."""
+    from .pipeline import PipelineError, _read_json, find_voices_config
+
+    voices_path: Path | None = None
+    choice = None
+    if topic is not None:
+        topic = Path(topic).resolve()
+        try:
+            doc = _read_json(topic, "topic.schema.json", "topic file")
+        except PipelineError as exc:
+            raise PublishError(str(exc)) from exc
+        if doc["job"] != job:
+            raise PublishError(f"{topic.name} is the topic file of job {doc['job']!r}, not {job!r}")
+        voices_path = topic.parent / doc["voices"] if "voices" in doc else find_voices_config(topic.parent)
+        choice = doc.get("playlist")
+    if voices_path is None:
+        voices_path = find_voices_config(Path(scenes_file).resolve().parent) \
+            or (REPO_VOICES if REPO_VOICES.is_file() else None)
+    if title is not None:
+        title = title.strip()
+        voices = _voices(voices_path) if voices_path else None
+        for p in (((voices or {}).get("playlists") or {}).get("presets") or {}).values():
+            if p["title"] == title:  # a preset's title: keep its description and privacy
+                return playlist_block(title, p.get("description", ""), p.get("privacy", "public")), "--playlist"
+        return playlist_block(title), "--playlist"
+    voices = _voices(voices_path)
+    if choice:
+        return _preset(voices, choice, topic.name), f"preset {choice} of {topic.name}"
+    name = (((voices or {}).get("playlists") or {}).get("by_language") or {}).get(lang)
+    if name:
+        return _preset(voices, name, f"playlists.by_language.{lang}"), f"default for {lang} ({name})"
+    where = f"in {voices_path}" if voices_path else "(no voices.json found)"
+    return None, f"no playlist for {lang} {where}"
+
+
 def _asset(path: Path) -> Path:
     if not path.is_file():
         raise PublishError(f"{path} is missing")
@@ -251,8 +335,10 @@ def short_items(job: Path, stem: str, lang: str, title: str, text: str, tags: li
 
 def build(video: Path, scenes_file: Path, publish_at: str, text: str | None = None, tags: list[str] | None = None,
           shorts: bool = False, shorts_every_days: float = 1.0, allow_gate_limits: bool = False,
-          now: _dt.datetime | None = None) -> tuple[str, dict[str, Any], list[Path]]:
-    """Check everything and build ``(tag, manifest, files)``; touches nothing outside this machine."""
+          now: _dt.datetime | None = None, playlist: str | None = None,
+          topic: Path | None = None) -> tuple[str, dict[str, Any], list[Path]]:
+    """Check everything and build ``(tag, manifest, files)``; touches nothing outside this machine.
+    ``playlist`` is a playlist title (``--playlist``), ``topic`` the video's topic file (see :func:`choose_playlist`)."""
     video = Path(video)
     job_name, lang = video_parts(video)
     job = video.resolve().parent
@@ -287,6 +373,10 @@ def build(video: Path, scenes_file: Path, publish_at: str, text: str | None = No
         more, more_files = short_items(job, job_name, lang, title, text, tags, when, shorts_every_days)
         items += more
         files += more_files
+    block, _ = choose_playlist(lang, job_name, scenes_file, playlist, topic)
+    if block:
+        for item in items:  # the Shorts go to the same playlist as their video
+            item["playlist"] = dict(block)
     tag = f"yt-{job_name}-{lang}"
     return tag, {"version": VERSION, "tag": tag, "job": job_name, "items": items}, files
 
@@ -305,12 +395,13 @@ def _release(gh: Gh, tag: str, repo: str) -> dict[str, Any] | None:
 
 def stage(video: Path, scenes_file: Path, publish_at: str, gh: Gh | None = None, repo: str | None = None,
           text: str | None = None, tags: list[str] | None = None, shorts: bool = False, shorts_every_days: float = 1.0,
-          allow_gate_limits: bool = False, now: _dt.datetime | None = None) -> Staged:
+          allow_gate_limits: bool = False, now: _dt.datetime | None = None, playlist: str | None = None,
+          topic: Path | None = None) -> Staged:
     """Build the manifest and put the batch on a draft release; write ``<job>.<lang>.staged.json`` on success."""
     gh = gh or Gh()
     repo = repo_name(repo)
     tag, manifest, files = build(video, scenes_file, publish_at, text, tags, shorts, shorts_every_days,
-                                 allow_gate_limits, now)
+                                 allow_gate_limits, now, playlist, topic)
     job = Path(video).resolve().parent
     with workdir.active_job(job):  # the cap or a cleanup must not delete the files while they go up
         release = _release(gh, tag, repo)

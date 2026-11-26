@@ -53,9 +53,40 @@
           }
         }
       }
+    },
+    "playlists": {
+      "description": "YouTube playlists for stage-upload: named presets, and the preset each language uses when neither --playlist nor the topic file names one.",
+      "type": "object",
+      "required": ["presets"],
+      "additionalProperties": false,
+      "properties": {
+        "by_language": {
+          "type": "object",
+          "propertyNames": {"$ref": "#/$defs/lang"},
+          "additionalProperties": {"$ref": "#/$defs/name"}
+        },
+        "presets": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {"$ref": "#/$defs/name"},
+          "additionalProperties": {"$ref": "#/$defs/playlist"}
+        }
+      }
     }
   },
   "$defs": {
+    "name": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*(?![\\s\\S])", "maxLength": 64},
+    "playlist": {
+      "description": "Written as is into each manifest item's playlist block (lab-to-prod finds the playlist by exact title, or creates it).",
+      "type": "object",
+      "required": ["title"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {"type": "string", "minLength": 1, "maxLength": 150, "pattern": "^[^<>\\s](?:[^<>]*[^<>\\s])?(?![\\s\\S])"},
+        "description": {"type": "string", "maxLength": 5000, "pattern": "^[^<>]*(?![\\s\\S])"},
+        "privacy": {"enum": ["public", "unlisted", "private"]}
+      }
+    },
     "lang": {"type": "string", "pattern": "^[a-z]{2}(?![\\s\\S])"},
     "engine": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*(?![\\s\\S])", "maxLength": 32},
     "voice_id": {"type": "string", "minLength": 1, "pattern": "\\S", "maxLength": 64},
