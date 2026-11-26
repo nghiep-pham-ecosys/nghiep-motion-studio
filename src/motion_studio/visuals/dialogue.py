@@ -360,14 +360,31 @@ def _layout(items: list[tuple[str, str]], width: float, height: float, theme: Th
         scale *= 0.92
 
 
-def _chip(x: float, y: float, text: str, theme: Theme, fill: str, colour: str, right: bool = False) -> str:
-    size = 30
-    w = _width(((text, True),), size) + 44
+CHIP = (30, 52)  # font size and height of a label chip (part label, speaker's name)
+AI_CHIP = (20, 36)  # the AI disclosure chips ("AI voice", "Made with AI"): smaller, top right
+AI_CHIP_OPACITY = 0.55  # and fainter, but always shown
+
+
+def chip_svg(x: float, y: float, text: str, theme: Theme, fill: str, colour: str, right: bool = False,
+             small: bool = False, fill_opacity: float = 1.0) -> tuple[str, float]:
+    """A rounded label (SVG) and its width; ``small`` is the faint AI disclosure chip."""
+    size, height = AI_CHIP if small else CHIP
+    pad = 22 * size / CHIP[0]
+    w = _width(((text, True),), size) + 2 * pad
     if right:
         x -= w
-    return (f'<rect x="{x:.1f}" y="{y}" width="{w:.1f}" height="52" rx="26" fill="{fill}"/>'
-            f'<text x="{x + 22:.1f}" y="{y + 37}" font-family="{theme.font}" font-size="{size}" font-weight="bold" '
-            f'fill="{colour}">{escape(text)}</text>')
+    opacity = f' fill-opacity="{fill_opacity}"' if fill_opacity < 1 else ""
+    svg = (f'<rect x="{x:.1f}" y="{y}" width="{w:.1f}" height="{height}" rx="{height / 2:g}" fill="{fill}"{opacity}/>'
+           f'<text x="{x + pad:.1f}" y="{y + height / 2 + size * 0.37:.1f}" font-family="{theme.font}" '
+           f'font-size="{size}" font-weight="bold" fill="{colour}">{escape(text)}</text>')
+    if small:
+        svg = f'<g opacity="{AI_CHIP_OPACITY}">{svg}</g>'
+    return svg, w
+
+
+def _chip(x: float, y: float, text: str, theme: Theme, fill: str, colour: str, right: bool = False,
+          small: bool = False) -> str:
+    return chip_svg(x, y, text, theme, fill, colour, right, small)[0]
 
 
 def _inner_svg(text: str) -> str:
@@ -386,7 +403,8 @@ def scene_svg(visual: dict[str, Any], scenery: str, theme: Theme, width: int, he
     if visual.get("part"):
         parts.append(_chip(40, 28, visual["part"], theme, theme.text, theme.background))
     if visual.get("label"):
-        parts.append(_chip(BASE_W - 40, 28, visual["label"], theme, theme.accent, "#ffffff", right=True))
+        parts.append(_chip(BASE_W - 40, 36, visual["label"], theme, theme.accent, "#ffffff", right=True,
+                           small=True))
     board = visual.get("board")
     if board:
         x, y, w, h = BOARD
@@ -482,7 +500,7 @@ def _concat(entries: list[tuple[Path, int]], fps: int) -> str:
 
 class DialogueAdapter(Adapter):
     kind = KIND
-    version = "1"
+    version = "2"  # 2: a smaller, fainter AI voice chip
     paced = False  # the clip has its own length: narration + tail + pause
     reads_run = True  # the build sees the target length and the language (through the audio)
 

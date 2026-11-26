@@ -170,15 +170,9 @@ def bar_box(bubble: Box) -> Box:
     return Box(bubble.x + BUBBLE_PAD[0], bubble.y + bubble.h - BUBBLE_PAD[1] + 8, bubble.w - 2 * BUBBLE_PAD[0], BAR_H)
 
 
-def _chip(x: float, y: float, text: str, theme: Theme, fill: str, colour: str, right: bool = False) -> tuple[str, float]:
-    size = 30
-    w = D._width(((text, True),), size) + 44
-    if right:
-        x -= w
-    svg = (f'<rect x="{x:.1f}" y="{y}" width="{w:.1f}" height="52" rx="26" fill="{fill}" fill-opacity="0.92"/>'
-           f'<text x="{x + 22:.1f}" y="{y + 37}" font-family="{theme.font}" font-size="{size}" font-weight="bold" '
-           f'fill="{colour}">{escape(text)}</text>')
-    return svg, w
+def _chip(x: float, y: float, text: str, theme: Theme, fill: str, colour: str, right: bool = False,
+          small: bool = False) -> tuple[str, float]:
+    return D.chip_svg(x, y, text, theme, fill, colour, right, small, fill_opacity=0.92)
 
 
 def overlay_svg(visual: dict[str, Any], theme: Theme, width: int, height: int) -> str:
@@ -196,9 +190,9 @@ def overlay_svg(visual: dict[str, Any], theme: Theme, width: int, height: int) -
     right = BASE_W - 40
     for key, fill, colour in (("label", theme.accent, "#ffffff"), ("badge", theme.text, theme.background)):
         if visual.get(key):
-            svg, w = _chip(right, 28, visual[key], theme, fill, colour, right=True)
+            svg, w = _chip(right, 36, visual[key], theme, fill, colour, right=True, small=True)
             parts.append(svg)
-            right -= w + 14
+            right -= w + 10
     board = compact_board(visual.get("board"))
     if board:
         inner_top = 96 if board.get("title") else 36
@@ -260,7 +254,7 @@ def speech_seconds(path: Path, fps: int) -> float:
 
 class IllustratedAdapter(Adapter):
     kind = KIND
-    version = "3"  # 2: the board card sits in the bottom corner; 3: a long card title shrinks
+    version = "4"  # 2: the board card sits in the bottom corner; 3: a long card title shrinks; 4: small AI chips
     paced = False  # narration + tail + pause
     reads_run = True
 

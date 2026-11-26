@@ -165,15 +165,22 @@
   },
   "seed_base": 3400,
   "seeds": {
-    "interview-both-him": 5501,
+    "classroom-her-2": 5403,
+    "classroom-her-listen": 4404,
+    "interview-both-her": 8500,
+    "interview-both-him": 14501,
+    "interview-her-1": 4502,
     "exam-both-her": 5600,
+    "exam-her-1": 6602,
     "desk-both-her": 5700,
-    "cafe-both-her": 5800
+    "desk-her-listen": 4704,
+    "cafe-both-her": 7800,
+    "cafe-her-2": 4803
   },
   "skip": [
     "classroom-both-him",
     "desk-both-him",
     "cafe-both-him"
   ],
-  "review": "Two-shots were drawn with --candidates 3 and checked by eye (2026-11-26): seeds lists the ones chosen; skip lists two-shots with no clean seed (clothes swapped or a third person), whose place uses its other two-shot for both speakers."
+  "review": "Two-shots were drawn with --candidates 3 and checked by eye (2026-11-26): seeds lists the ones chosen; skip lists two-shots with no clean seed (clothes swapped or a third person), whose place uses its other two-shot for both speakers. Hair pass (2026-11-26, issue 37): nine stills where Lan's hair ran past her shoulders were drawn again with --candidates (4 to 10 seeds each) and the seed whose hair matches the portrait (shoulder-length, curled under) was kept; the other stills and both portraits are unchanged."
 }

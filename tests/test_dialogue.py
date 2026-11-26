@@ -156,6 +156,9 @@ class TextTests(unittest.TestCase):
         for needle in ("2 · Words", "AI voice", "A &amp; ", ">B<", "nghĩa", "Word 1", "rubric"):
             self.assertIn(needle, svg)
         self.assertNotIn("<!--", svg)
+        self.assertIn('<g opacity="0.55">', svg)  # the AI voice chip: small and faint, never left out
+        self.assertRegex(svg, r'height="36" rx="18"[^>]*/><text [^>]*font-size="20"[^>]*>AI voice<')
+        self.assertRegex(svg, r'height="52" rx="26"[^>]*/><text [^>]*font-size="30"[^>]*>2 · Words<')
 
     def test_long_board_text_shrinks_to_fit(self) -> None:
         blocks = D._layout([("body", "word " * 400)], 900, 500, LIGHT)

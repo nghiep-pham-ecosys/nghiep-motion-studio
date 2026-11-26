@@ -7,6 +7,7 @@ is not tested here: torch and diffusers exist only in the images venv.
 import json
 import math
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -249,6 +250,19 @@ class LayoutTests(unittest.TestCase):
         for text in ("Minh", "3 · Listen", "AI voice", "Made with AI", "Mỗi ngày.", "widget", "<polygon"):
             self.assertIn(text, svg)
         self.assertNotIn("<image", svg)  # the still is laid under the overlay by ffmpeg, not embedded
+
+    def test_ai_chips_are_small_and_faint_but_shown(self) -> None:
+        visual = {"kind": "illustrated", "image": "a.jpg", "talk": "her", "part": "3 · Listen",
+                  "label": "AI voice", "badge": "Made with AI", "caption": {"text": "Hi."}}
+        svg = V.overlay_svg(visual, LIGHT, 1920, 1080)
+        for text in ("AI voice", "Made with AI"):
+            chip = re.search(r'<g opacity="([0-9.]+)"><rect [^>]*height="(\d+)" rx="(\d+)"[^>]*/><text [^>]*'
+                             r'font-size="(\d+)"[^>]*>' + re.escape(text) + "<", svg)
+            self.assertIsNotNone(chip, text)
+            self.assertEqual(chip.groups(), ("0.55", "36", "18", "20"))
+        part = re.search(r'<rect [^>]*height="(\d+)"[^>]*/><text [^>]*font-size="(\d+)"[^>]*>3 · Listen<', svg)
+        self.assertEqual(part.groups(), ("52", "30"))  # the part label keeps its size
+        self.assertNotIn('opacity="0.55"><rect x="40', svg)
 
     def test_the_camera_move_is_slow_and_bounded(self) -> None:
         self.assertAlmostEqual(V.zoom_amount(0), V.ZOOM_MIN)
