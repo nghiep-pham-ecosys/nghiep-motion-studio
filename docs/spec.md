@@ -492,7 +492,8 @@ still at 2x the output size and `zoompan` pushing in slowly (ease-out, 3 % +
 1.2 % per second of the clip, at most 12 %) towards `focus` (the speaker's
 side in a two-shot, the upper centre in a single shot, since SDXL does not
 reliably place one person left or right), kept inside the picture; one transparent SVG per scene on top: the
-part label, "AI voice" and "Made with AI" chips, a large speech bubble at the
+part label, small faint "AI voice" and "Made with AI" chips (20 px, 55 % opacity,
+top right; the AI disclosure is never left out), a large speech bubble at the
 bottom on the speaker's side (52 px sentence, 38 px Vietnamese line, shrinks
 to fit, the speaker's name on its edge, a tail pointing up at the speaker),
 and the board as a card in the bottom corner beside the bubble, on the other
@@ -522,7 +523,12 @@ lesson's window (`--min-s 1200 --max-s 1800`): duration, loudness (-14.3
 LUFS, true peak -1.7 dBTP), black frames and drift (median 20 ms, p90 210
 ms, 315 of 354 cues) pass; fact-check waits for Nghiep. 3 Shorts (59.8,
 58.5, 59.4 s). The look stays opt-in until Nghiep approves the two
-characters on `samples/library/contact-sheet.jpg`.
+characters on `samples/library/contact-sheet.jpg`. Rendered again
+after the hair pass and the smaller AI chips (issue 37): visuals 973 s,
+render 707 s, subtitles 58 s; duration 1754.5 s, loudness (-14.3 LUFS, true
+peak -1.7 dBTP), black frames and drift (median 20 ms, p90 200 ms, 300 of 354
+cues) pass, fact-check waits; no card title touches its card; 3 Shorts (59.8,
+58.5, 59.4 s).
 
 ## Work dir and disk (issue 22)
 
