@@ -60,6 +60,12 @@
       "type": "boolean"
     },
     "shorts": {"description": "How many Shorts to cut (default 3).", "type": "integer", "minimum": 1, "maximum": 6},
+    "playlist": {
+      "description": "Name of a playlist preset in the voices config (playlists.presets), e.g. english-for-engineers. stage-upload --topic puts the video and its Shorts in it (default: the preset of the video's language, playlists.by_language).",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*(?![\\s\\S])",
+      "maxLength": 64
+    },
     "gate": {
       "description": "Length window of the gate in seconds (default 600-1200). A changed window is for samples and tests: stage-upload refuses its gate report.",
       "type": "object",

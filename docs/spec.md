@@ -532,6 +532,16 @@ token. Three steps:
    and inside the loudness targets, newer than the video) is an item too:
    title `<chapter, else video title> #Shorts`, its own SRT, public
    `--shorts-every-days` (1) x n days after the video.
+   Every item (the video and its Shorts) carries the same `playlist` block
+   `{title, description, privacy}`: `--playlist <title>` (a preset's title
+   keeps that preset's description), else the `playlist` preset named by the
+   topic file (`--topic`), else the preset of the video's language in
+   voices.json (`playlists.by_language`: EN `Process Simulation Lab — Python
+   from scratch`, VI `Mô phỏng quá trình hoá học bằng Python`). The preset
+   `english-for-engineers` (`English for engineers — learn with me`) is for
+   the lesson videos. lab-to-prod finds the playlist by exact title among the
+   channel's playlists, creates it when missing (public by default), and adds
+   each video once.
    The mp4s, SRTs and `manifest.json` go up as assets of the **draft**
    release `yt-<job>-<lang>` of lab-to-prod (`gh release create --draft`,
    `gh release upload --clobber`; manifest last). Draft releases and their
