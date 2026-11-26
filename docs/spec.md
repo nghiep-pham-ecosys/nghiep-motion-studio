@@ -469,7 +469,13 @@ prompts file (seed + 1000 x k). A two-shot with no clean seed goes under
 `skip`: either two-shot of a place serves both speakers (the camera moves to
 the one who talks), so the place uses its other two-shot. Review of
 2026-11-26: 30 candidates, 4 seeds chosen, 3 two-shots skipped (classroom,
-desk and cafe with him speaking), so the library has 37 stills.
+desk and cafe with him speaking), so the library has 37 stills. Hair pass
+(issue 37): the face adapter keeps the face but not always the hair, and in
+nine stills Lan's hair ran past her shoulders. Each was drawn again with 4
+to 10 candidate seeds and the one whose hair matches the portrait
+(shoulder-length, curled under) went under `seeds`; the other stills and both
+portraits stayed as they were. Two of the chosen two-shots still show a
+little colour bleed in the shirt under the cardigan or sweater.
 
 **One model on the GPU at a time** (`images_worker.py`, run in the images
 venv): the text encoders encode every prompt and leave; SDXL draws the two

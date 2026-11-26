@@ -128,7 +128,7 @@
       ],
       "prompt": "medium shot of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, standing by the whiteboard, explaining with an open hand, three-quarter view, a bright classroom with a clean whiteboard, wooden desks and big windows, 3d animated movie still, cartoon style, warm cinematic light",
       "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3403,
+      "seed": 5403,
       "ip": [
         "her"
       ],
@@ -137,8 +137,8 @@
       "width": 1344,
       "height": 768,
       "file": "classroom-her-2.jpg",
-      "params_hash": "2c8d5add878bedb1",
-      "sha256": "e7387c55a7592a98864a315d21f4118895eaa425caa29b5b3d60e5e22550b950",
+      "params_hash": "48ceea5a1e459f04",
+      "sha256": "3b68490528eaefbceb97f94037069be0cccda0ae6d0db0bc44c5c235f3202c82",
       "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
       "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
     },
@@ -154,7 +154,7 @@
       ],
       "prompt": "close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, standing by the whiteboard, listening, gentle smile, on the left of the frame, a bright classroom with a clean whiteboard, wooden desks and big windows, 3d animated movie still, cartoon style, warm cinematic light",
       "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3404,
+      "seed": 4404,
       "ip": [
         "her"
       ],
@@ -163,8 +163,8 @@
       "width": 1344,
       "height": 768,
       "file": "classroom-her-listen.jpg",
-      "params_hash": "061b8dd8e48fc00b",
-      "sha256": "439c70297944521aa8db8739727643d0b56117dc0547cfe7591f9acdac12df6e",
+      "params_hash": "4297224506af17f9",
+      "sha256": "587874a2bdb1ff1ac7e6dde5214da0c11bbb0872bff2c0f33400d02bb2eb945f",
       "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
       "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
     },
@@ -258,7 +258,7 @@
       ],
       "prompt": "two people talking, a young woman in a yellow cardigan on the left sitting at the table with a folder, speaking, a young man with glasses in a dark blue sweater on the right sitting across the table, listening, medium wide shot, a modern office meeting room with a glass wall and a plant, 3d animated movie still, cartoon style, warm cinematic light",
       "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3500,
+      "seed": 8500,
       "ip": [
         "her",
         "him"
@@ -268,8 +268,8 @@
       "width": 1344,
       "height": 768,
       "file": "interview-both-her.jpg",
-      "params_hash": "b2c33a332776f129",
-      "sha256": "e3482c3089704bb806b7a1180eb6d6b9e39cfbd3798e576a73e831b1b505c299",
+      "params_hash": "d7a9c0955373cead",
+      "sha256": "3fffd155067c5b44efb1fecb91f440e7ea28cab19de62d32fee66bc7b1b4d6d9",
       "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
       "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
     },
@@ -285,7 +285,7 @@
       ],
       "prompt": "two people talking, a young woman in a yellow cardigan on the left sitting at the table with a folder, listening, a young man with glasses in a dark blue sweater on the right sitting across the table, speaking, medium wide shot, a modern office meeting room with a glass wall and a plant, 3d animated movie still, cartoon style, warm cinematic light",
       "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 5501,
+      "seed": 14501,
       "ip": [
         "her",
         "him"
@@ -295,8 +295,8 @@
       "width": 1344,
       "height": 768,
       "file": "interview-both-him.jpg",
-      "params_hash": "ae0b753090feda38",
-      "sha256": "aca10dc4dcd78cadf242f683aa9e51ff65e3601c481ea68c65fc47a43c196478",
+      "params_hash": "ef44bd408bf3a875",
+      "sha256": "a70024aa9d00deaffd358f963b6c0eed67a55678b59ebcd2db2544a03bbfbb89",
       "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
       "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
     },
@@ -312,7 +312,7 @@
       ],
       "prompt": "medium close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, sitting at the table with a folder, talking, warm smile, on the left of the frame, a modern office meeting room with a glass wall and a plant, 3d animated movie still, cartoon style, warm cinematic light",
       "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3502,
+      "seed": 4502,
       "ip": [
         "her"
       ],
@@ -321,8 +321,8 @@
       "width": 1344,
       "height": 768,
       "file": "interview-her-1.jpg",
-      "params_hash": "8c642d9a79f0924a",
-      "sha256": "0764d0f677cd9faa9f791367e1193eccf0081436c15dac8c6e5873a2ed2481de",
+      "params_hash": "4be90970be01eb76",
+      "sha256": "f70f6674374cd6060c9f5993473bf993ecc2463f6c0243d1c00927b972800d83",
       "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
       "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
     },
@@ -522,7 +522,7 @@
       ],
       "prompt": "medium close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, sitting at the table holding papers, talking, warm smile, on the left of the frame, a quiet test room with a small table, two chairs and a wall clock, 3d animated movie still, cartoon style, warm cinematic light",
       "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3602,
+      "seed": 6602,
       "ip": [
         "her"
       ],
@@ -531,8 +531,8 @@
       "width": 1344,
       "height": 768,
       "file": "exam-her-1.jpg",
-      "params_hash": "5b4eb665ea405250",
-      "sha256": "b2400d15dc7e1a1defc7e921bff77a3cb3b2a01613263c78ad3cf6cc33e38b8e",
+      "params_hash": "c9c5315d252954a5",
+      "sha256": "e1a57b89c0e56272bd1b4bf0de95b47622882be80ba6531eb897f4263b782f81",
       "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
       "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
     },
@@ -757,7 +757,7 @@
       ],
       "prompt": "close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, standing by the desk, listening, gentle smile, on the left of the frame, a cozy study corner with a desk, a laptop and a cork board, 3d animated movie still, cartoon style, warm cinematic light",
       "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3704,
+      "seed": 4704,
       "ip": [
         "her"
       ],
@@ -766,8 +766,8 @@
       "width": 1344,
       "height": 768,
       "file": "desk-her-listen.jpg",
-      "params_hash": "01728fafc7aed4e1",
-      "sha256": "40a04ec5187c80cac009dd81daf50690c0485b1fdec61205e3ffe8d669f7f75b",
+      "params_hash": "225baf34f00e8d47",
+      "sha256": "e2300f5c60266ce543b37e8b1f28211a341c5653450117600f62c6f2ec34bf58",
       "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
       "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
     },
@@ -861,7 +861,7 @@
       ],
       "prompt": "two people talking, a young woman in a yellow cardigan on the left at a cafe table with a coffee, speaking, a young man with glasses in a dark blue sweater on the right at a cafe table with a tea, listening, medium wide shot, a warm cafe with wooden tables and plants, 3d animated movie still, cartoon style, warm cinematic light",
       "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 5800,
+      "seed": 7800,
       "ip": [
         "her",
         "him"
@@ -871,8 +871,8 @@
       "width": 1344,
       "height": 768,
       "file": "cafe-both-her.jpg",
-      "params_hash": "4df1f9373ff0d2e8",
-      "sha256": "7fe5b1494d638124b3c6b6cf365e908a3ee78be83d674e89988f75bd7c6ae531",
+      "params_hash": "a0e3613ea53d016b",
+      "sha256": "43d60f2f7717c0be0dbf81229efe5f05d8fbbc8a49d194d9c790a519e702005d",
       "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
       "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
     },
@@ -914,7 +914,7 @@
       ],
       "prompt": "medium shot of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, at a cafe table with a coffee, explaining with an open hand, three-quarter view, a warm cafe with wooden tables and plants, 3d animated movie still, cartoon style, warm cinematic light",
       "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3803,
+      "seed": 4803,
       "ip": [
         "her"
       ],
@@ -923,8 +923,8 @@
       "width": 1344,
       "height": 768,
       "file": "cafe-her-2.jpg",
-      "params_hash": "11fdda7a7b1307e6",
-      "sha256": "2bc9549042b8a643be46002b6ee3ec7c32415d7978f7a7c17975a6c79079f144",
+      "params_hash": "80cc8c628c52be1e",
+      "sha256": "b095eb774485ee110c8701d88d75fbbc352cbfd67196f50dec4ffbba1bf64f21",
       "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
       "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
     },
