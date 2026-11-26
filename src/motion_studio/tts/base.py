@@ -56,13 +56,17 @@ class TTSAdapter(ABC):
         if not text.strip():
             raise TTSError("cannot synthesise empty text")
         known = {v.id for v in self.voices() if v.lang == lang}
-        if voice not in known:
+        if self.base_voice(voice) not in known:
             raise TTSError(f"{self.engine}: no {lang} voice {voice!r} (has {', '.join(sorted(known)) or 'none'})")
         samples, rate = self.generate(text, voice, lang)
         frames = write_wav(out_path, samples, rate)
         if frames == 0:
             raise TTSError(f"{self.engine}: voice {voice!r} returned no audio for {text[:40]!r}")
         return LineAudio(path=Path(out_path), duration_s=frames / rate, sample_rate=rate)
+
+    def base_voice(self, voice: str) -> str:
+        """The listed voice id behind ``voice`` (an engine may accept variants, such as Kokoro's ``af_heart@0.8``)."""
+        return voice
 
     def cache_tag(self) -> str:
         """Settings that change the sound for the same text and voice (reference clip, seed, speed).

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <!-- Classroom (words, recap). Original flat background for nghiep-motion-studio. -->
+  <rect width="1920" height="1080" fill="#fef3c7"/>
+  <rect y="820" width="1920" height="260" fill="#fde68a"/>
+  <rect y="812" width="1920" height="12" fill="#d97706" opacity="0.35"/>
+  <rect x="70" y="120" width="300" height="240" rx="10" fill="#bae6fd" stroke="#92400e" stroke-width="12"/>
+  <path d="M220 120 L220 360 M70 240 L370 240" stroke="#92400e" stroke-width="8"/>
+  <circle cx="300" cy="180" r="26" fill="#fef9c3"/>
+  <rect x="1580" y="150" width="270" height="20" rx="6" fill="#b45309"/>
+  <rect x="1600" y="96" width="40" height="54" fill="#0284c7"/>
+  <rect x="1646" y="84" width="34" height="66" fill="#059669"/>
+  <rect x="1686" y="104" width="46" height="46" fill="#db2777"/>
+  <rect x="1740" y="90" width="30" height="60" fill="#7c3aed"/>
+  <rect x="1580" y="290" width="270" height="20" rx="6" fill="#b45309"/>
+  <rect x="1606" y="232" width="56" height="58" fill="#ea580c"/>
+  <rect x="1670" y="226" width="36" height="64" fill="#0284c7"/>
+  <circle cx="1790" cy="262" r="28" fill="#16a34a"/>
+  <rect x="1772" y="262" width="36" height="28" fill="#a16207"/>
+</svg>

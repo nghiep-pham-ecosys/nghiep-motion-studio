@@ -36,6 +36,11 @@ validate:
 video topic *args:
     python3 -m motion_studio video "{{topic}}" --tts-python "{{tts_python}}" {{args}}
 
+# One English lesson to one 20-30 min dialogue video, an m4a and Shorts, e.g.
+# just lesson samples/lesson-2026-11-26/ai-eng-p3.lesson.md --until subtitles
+lesson file *args:
+    python3 -m motion_studio lesson "{{file}}" --tts-python "{{tts_python}}" {{args}}
+
 # Render the 3-scene sample (EN and VI) into the work dir (<work dir>/three-scenes/)
 sample:
     python3 -m motion_studio render samples/three-scenes/scenes.json

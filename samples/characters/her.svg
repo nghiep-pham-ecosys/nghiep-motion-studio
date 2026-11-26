@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="700" viewBox="0 0 440 700">
+  <!-- "Lan": the teacher, interviewer and examiner of the English lessons. Original flat character drawn for
+       nghiep-motion-studio. The dialogue visual switches the groups glow, eyes-open / eyes-closed and
+       mouth-0 / mouth-1 / mouth-2, and moves the group head (a nod). -->
+  <g id="glow" display="none">
+    <ellipse cx="220" cy="430" rx="214" ry="300" fill="#fcd34d" opacity="0.75"/>
+  </g>
+  <g id="body">
+    <path d="M30 700 C34 560 86 478 168 452 L272 452 C354 478 406 560 410 700 Z" fill="#0f766e"/>
+    <path d="M168 452 L220 540 L272 452 Z" fill="#e9b48f"/>
+    <path d="M160 455 L220 548 L196 454 Z" fill="#f0fdfa"/>
+    <path d="M280 455 L220 548 L244 454 Z" fill="#f0fdfa"/>
+    <circle cx="220" cy="600" r="7" fill="#99f6e4"/>
+    <circle cx="220" cy="650" r="7" fill="#99f6e4"/>
+    <rect x="192" y="352" width="56" height="104" rx="22" fill="#e9b48f"/>
+  </g>
+  <g id="head">
+    <path d="M102 362 C92 250 104 112 220 98 C336 112 348 250 338 362 C322 372 300 370 290 352 L150 352 C140 370 118 372 102 362 Z" fill="#2b1d16"/>
+    <circle cx="127" cy="262" r="17" fill="#e9b48f"/>
+    <circle cx="313" cy="262" r="17" fill="#e9b48f"/>
+    <circle cx="127" cy="290" r="7" fill="#f59e0b"/>
+    <circle cx="313" cy="290" r="7" fill="#f59e0b"/>
+    <ellipse cx="220" cy="252" rx="94" ry="112" fill="#f3c6a0"/>
+    <path d="M124 238 C122 150 172 118 224 118 C282 118 322 152 318 232 C296 196 254 176 206 182 C172 186 144 206 124 238 Z" fill="#2b1d16"/>
+    <path d="M164 218 Q182 208 200 216" stroke="#2b1d16" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M240 216 Q258 208 276 218" stroke="#2b1d16" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <g id="eyes-open">
+      <ellipse cx="182" cy="250" rx="10" ry="13" fill="#1f2937"/>
+      <ellipse cx="258" cy="250" rx="10" ry="13" fill="#1f2937"/>
+      <circle cx="185" cy="245" r="3.5" fill="#ffffff"/>
+      <circle cx="261" cy="245" r="3.5" fill="#ffffff"/>
+    </g>
+    <g id="eyes-closed" display="none">
+      <path d="M170 252 Q182 262 194 252" stroke="#1f2937" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M246 252 Q258 262 270 252" stroke="#1f2937" stroke-width="5" fill="none" stroke-linecap="round"/>
+    </g>
+    <path d="M220 262 Q212 288 222 292" stroke="#c98a66" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <circle cx="164" cy="296" r="15" fill="#fb7185" opacity="0.35"/>
+    <circle cx="276" cy="296" r="15" fill="#fb7185" opacity="0.35"/>
+    <g id="mouth-0">
+      <path d="M198 318 Q220 334 242 318" stroke="#9f1239" stroke-width="5" fill="none" stroke-linecap="round"/>
+    </g>
+    <g id="mouth-1" display="none">
+      <path d="M199 314 Q220 311 241 314 Q237 336 220 337 Q203 336 199 314 Z" fill="#7f1d1d"/>
+      <path d="M205 329 Q220 337 235 329 Q229 336 220 336 Q211 336 205 329 Z" fill="#fb7185"/>
+    </g>
+    <g id="mouth-2" display="none">
+      <path d="M195 309 Q220 305 245 309 Q243 352 220 354 Q197 352 195 309 Z" fill="#7f1d1d"/>
+      <path d="M201 311 Q220 308 239 311 L237 318 Q220 315 203 318 Z" fill="#ffffff"/>
+      <path d="M205 340 Q220 352 235 340 Q231 351 220 352 Q209 351 205 340 Z" fill="#fb7185"/>
+    </g>
+  </g>
+</svg>

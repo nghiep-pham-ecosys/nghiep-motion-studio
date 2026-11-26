@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <!-- Interview room (model answer, follow-up). Original flat background for nghiep-motion-studio. -->
+  <rect width="1920" height="1080" fill="#e0f2fe"/>
+  <rect x="60" y="90" width="330" height="380" rx="8" fill="#0c4a6e"/>
+  <rect x="80" y="110" width="290" height="340" fill="#7dd3fc"/>
+  <rect x="100" y="300" width="50" height="150" fill="#0369a1"/>
+  <rect x="160" y="250" width="60" height="200" fill="#075985"/>
+  <rect x="230" y="320" width="45" height="130" fill="#0369a1"/>
+  <rect x="285" y="270" width="65" height="180" fill="#0c4a6e"/>
+  <rect y="860" width="1920" height="220" fill="#94a3b8"/>
+  <rect y="852" width="1920" height="14" fill="#64748b"/>
+  <rect x="1600" y="120" width="230" height="160" rx="10" fill="#ffffff" stroke="#64748b" stroke-width="8"/>
+  <path d="M1630 240 L1680 200 L1720 220 L1790 160" stroke="#0284c7" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <rect x="1690" y="290" width="50" height="8" fill="#64748b"/>
+  <circle cx="1810" cy="420" r="40" fill="#22c55e"/>
+  <rect x="1790" y="430" width="40" height="60" rx="6" fill="#b45309"/>
+</svg>

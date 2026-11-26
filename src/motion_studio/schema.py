@@ -186,6 +186,10 @@ def semantic_errors(doc: dict[str, Any], base_dir: Path | None = None) -> list[s
                     errs.append(f"{where}/visual/src: file not found: {visual['src']}")
                 elif visual["kind"] == "terminal":
                     errs += _tape_errors(visual, f"{where}/visual", base_dir)
+            if visual["kind"] == "dialogue":
+                for key, rel in [("scenery", visual["scenery"]), *((f"cast/{k}", v) for k, v in visual["cast"].items())]:
+                    if not (base_dir / rel).is_file():
+                        errs.append(f"{where}/visual/{key}: file not found: {rel}")
             for lang, rel in audio.items():
                 if not (base_dir / rel).is_file():
                     errs.append(f"{where}/audio/{lang}: file not found: {rel}")

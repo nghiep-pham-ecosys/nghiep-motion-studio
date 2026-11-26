@@ -44,6 +44,7 @@ class BuildRequest:
     background: str
     target_s: float  # the scene's planned length; templates fit their motion inside it
     theme: Theme = LIGHT  # colours and fonts of the clip
+    audio: Path | None = None  # the scene's narration audio in ``lang`` (the dialogue kind moves a mouth with it)
 
     def source(self) -> Path | None:
         """The visual's source file, if it has one."""

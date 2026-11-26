@@ -1,4 +1,4 @@
-"""Command line: ``motion-studio video|validate|render|narrate|subtitles|gate|shorts|stage-upload|...``."""
+"""Command line: ``motion-studio video|lesson|validate|render|narrate|subtitles|gate|shorts|stage-upload|...``."""
 
 from __future__ import annotations
 
@@ -580,6 +580,44 @@ def _cmd_video(args: argparse.Namespace) -> int:
     return 0 if report.ok else 1
 
 
+def _cmd_lesson(args: argparse.Namespace) -> int:
+    from .lesson import LessonError, job_name, load_lesson, write_extras, write_source
+    from .pipeline import STEPS, Pipeline, PipelineError, load_topic
+
+    path = Path(args.file)
+    try:
+        lesson = load_lesson(path)
+        job = job_name(path, lesson)
+        out = Path(args.out) if args.out else workdir.job_dir(job, workdir.work_dir()) / "lesson"
+        src = write_source(path, out, characters=Path(args.characters) if args.characters else None,
+                           shorts=args.shorts)
+        scenes = json.loads(src.scenes.read_text(encoding="utf-8"))["scenes"]
+        print(f"OK   {src.topic}: {len(scenes)} scene(s) in 10 parts for the job {job}")
+        if not src.factcheck_ready:
+            print(f"WARN no reviewed fact check next to {path.name}: wrote a draft with unchecked claims to "
+                  f"{src.folder / 'factcheck.md'}; check them, set Reviewed-by and Narration: {src.narration}, and "
+                  f"save it as {path.name.replace('.lesson.md', '')}.factcheck.md", file=sys.stderr)
+        if args.build_only:
+            return 0
+        pipe = Pipeline(load_topic(src.topic), tts_python=Path(args.tts_python).expanduser() if args.tts_python else None,
+                        jobs=args.jobs, from_step=args.from_step or STEPS[0], until_step=args.until or STEPS[-1])
+        report = pipe.run(dry_run=args.dry_run)
+        if args.dry_run or not report.ok:
+            return 0 if report.ok else 1
+        if STEPS.index(args.until or STEPS[-1]) < STEPS.index("render"):
+            return 0  # the audio file and the description need the render
+        extras = write_extras(lesson, Path(report.job_dir), job)
+    except (LessonError, PipelineError, WorkDirError, OSError, ValueError, KeyError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    print(f"OK   audio only: {extras.audio}")
+    print(f"OK   description (chapters, AI voice label): {extras.description}")
+    print(f"     top text for stage-upload --description-file: {extras.intro}")
+    if extras.bilingual:
+        print(f"OK   subtitles with the Vietnamese lines: {extras.bilingual}")
+    return 0
+
+
 def _cmd_disk(_: argparse.Namespace) -> int:
     try:
         report = workdir.disk_report(workdir.work_dir(), workdir.cap_bytes())
@@ -627,6 +665,21 @@ def build_parser() -> argparse.ArgumentParser:
                     "(default: $MOTION_STUDIO_TTS_VENV/bin/python, else ~/.cache/nghiep-motion-studio/tts-venv)")
     vd.add_argument("--dry-run", action="store_true", help="check the topic and the casting, print the steps; run nothing")
     vd.set_defaults(func=_cmd_video)
+
+    ls = sub.add_parser("lesson", help="one English lesson file -> one 20-30 min video played by two animated "
+                        "characters, an audio-only m4a, a description with chapters and Shorts (runs the video steps)")
+    ls.add_argument("file", help="a lesson file, e.g. samples/lesson-2026-11-26/ai-eng-p3.lesson.md")
+    ls.add_argument("--out", help="folder for the generated topic, scenes and fact check (default: <work dir>/<job>/lesson)")
+    ls.add_argument("--characters", help="folder with the character and background SVGs (default: the nearest "
+                    "characters/ folder at or above the lesson file)")
+    ls.add_argument("--shorts", type=int, default=3, help="how many Shorts (default: 3)")
+    ls.add_argument("--build-only", action="store_true", help="write the topic, scenes and fact check; run nothing")
+    ls.add_argument("--from", dest="from_step", choices=STEPS, help="as for video: skip the steps before this one")
+    ls.add_argument("--until", choices=STEPS, help="as for video: stop after this step")
+    ls.add_argument("--jobs", type=int, default=1, help="parallel scene encodes in the render step (default: 1)")
+    ls.add_argument("--tts-python", help="python of the TTS venv (default: as for video)")
+    ls.add_argument("--dry-run", action="store_true", help="write the source, print the steps; run nothing")
+    ls.set_defaults(func=_cmd_lesson)
 
     v = sub.add_parser("validate", help="check scenes.json files against the schema")
     v.add_argument("files", nargs="+")

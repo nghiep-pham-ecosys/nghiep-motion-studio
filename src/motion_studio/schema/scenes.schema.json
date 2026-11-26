@@ -133,7 +133,8 @@
             {"$ref": "#/$defs/visual_manim"},
             {"$ref": "#/$defs/visual_diagram"},
             {"$ref": "#/$defs/visual_code"},
-            {"$ref": "#/$defs/visual_terminal"}
+            {"$ref": "#/$defs/visual_terminal"},
+            {"$ref": "#/$defs/visual_dialogue"}
           ]
         }
       }
@@ -256,6 +257,71 @@
             "prefixItems": [{"type": "integer", "minimum": 1}, {"type": "integer", "minimum": 1}],
             "minItems": 2,
             "maxItems": 2
+          }
+        },
+        "background": {"$ref": "#/$defs/color"}
+      }
+    },
+    "visual_dialogue": {
+      "description": "Two original characters on a background, drawn from SVG files; the one named by talk speaks the scene's narration: its mouth follows the loudness of the scene's audio, it sways and glows, the other blinks and nods. Optional part label, caption, board and a pause after the narration (scale x its length + add_s seconds, with a cue and a countdown bar). The clip lasts narration + 0.5 s + pause, so the scene is stretched to it.",
+      "type": "object",
+      "required": ["kind", "scenery", "cast", "talk"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"const": "dialogue"},
+        "scenery": {"description": "Background SVG (1920 x 1080 canvas).", "allOf": [{"$ref": "#/$defs/path"}, {"pattern": "\\.svg(?![\\s\\S])"}]},
+        "cast": {
+          "description": "The character SVG of each side (440 x 700 canvas with the groups glow, head, eyes-open, eyes-closed, mouth-0, mouth-1, mouth-2).",
+          "type": "object",
+          "required": ["her", "him"],
+          "additionalProperties": false,
+          "properties": {
+            "her": {"allOf": [{"$ref": "#/$defs/path"}, {"pattern": "\\.svg(?![\\s\\S])"}]},
+            "him": {"allOf": [{"$ref": "#/$defs/path"}, {"pattern": "\\.svg(?![\\s\\S])"}]}
+          }
+        },
+        "talk": {"description": "Who speaks this scene's narration.", "enum": ["her", "him"]},
+        "part": {"description": "Label at the top left, e.g. 2 · Words.", "type": "string", "maxLength": 60},
+        "label": {"description": "Label at the top right, e.g. AI voice.", "type": "string", "maxLength": 40},
+        "caption": {
+          "description": "The current sentence in the caption box; **x** marks a word in the accent colour; sub is a second line (e.g. the Vietnamese meaning).",
+          "type": "object",
+          "required": ["text"],
+          "additionalProperties": false,
+          "properties": {
+            "text": {"type": "string", "minLength": 1, "maxLength": 600},
+            "sub": {"type": "string", "minLength": 1, "maxLength": 600}
+          }
+        },
+        "board": {
+          "description": "A panel above the caption: a title and lines of text in a style (big, vi, body, dim, bullet, small).",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "title": {"type": "string", "maxLength": 80},
+            "lines": {
+              "type": "array",
+              "maxItems": 16,
+              "items": {
+                "type": "object",
+                "required": ["text"],
+                "additionalProperties": false,
+                "properties": {
+                  "text": {"type": "string", "minLength": 1, "maxLength": 1200},
+                  "style": {"enum": ["big", "vi", "body", "dim", "bullet", "small"]}
+                }
+              }
+            }
+          }
+        },
+        "pause": {
+          "description": "Silence after the narration: scale x the narration length + add_s seconds; cue (e.g. Your turn) shows with a countdown bar.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "scale": {"type": "number", "minimum": 0, "maximum": 4},
+            "add_s": {"type": "number", "minimum": 0, "maximum": 120},
+            "cue": {"type": "string", "minLength": 1, "maxLength": 30}
           }
         },
         "background": {"$ref": "#/$defs/color"}
