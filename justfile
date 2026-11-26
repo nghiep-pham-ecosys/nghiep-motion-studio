@@ -38,6 +38,7 @@ video topic *args:
 
 # One English lesson to one 20-30 min dialogue video, an m4a and Shorts, e.g.
 # just lesson samples/lesson-2026-11-26/ai-eng-p3.lesson.md --until subtitles
+# (--look illustrated: the 3D-cartoon stills of the image library, after `just images-library`)
 lesson file *args:
     python3 -m motion_studio lesson "{{file}}" --tts-python "{{tts_python}}" {{args}}
 
@@ -63,6 +64,23 @@ clone-en-setup:
     uv pip install -p "{{clone_en_python}}" torch==2.11.0 torchaudio==2.11.0 --index-url https://download.pytorch.org/whl/cu128
     uv pip install -p "{{clone_en_python}}" --no-deps "chatterbox-tts==0.1.7"
     uv pip install -p "{{clone_en_python}}" "numpy>=1.26,<2" "librosa==0.11.0" "transformers==5.2.0" "diffusers==0.29.0" "safetensors==0.5.3" "resemble-perth==1.0.1" "s3tokenizer==0.3.0" "conformer==0.3.2" "omegaconf" "pyloudnorm" "einops" "scipy" torch==2.11.0 torchaudio==2.11.0 --extra-index-url https://download.pytorch.org/whl/cu128 --index-strategy unsafe-best-match
+
+# The image venv (torch, diffusers) for the illustrated lesson library; models download on first use into
+# ~/.cache/nghiep-motion-studio/hf (SDXL base 1.0 fp16 and the IP-Adapter plus ViT-H: about 10 GB, no token)
+images_venv := env_var_or_default("MOTION_STUDIO_IMAGES_VENV", home_directory() / ".cache/nghiep-motion-studio/images-venv")
+images_python := images_venv / "bin/python"
+
+# Create the image venv (CUDA torch, diffusers, Pillow)
+images-setup:
+    [ -x "{{images_python}}" ] || uv venv -p 3.12 "{{images_venv}}"
+    uv pip install -p "{{images_python}}" torch==2.11.0 --index-url https://download.pytorch.org/whl/cu128
+    uv pip install -p "{{images_python}}" "diffusers==0.39.0" "transformers==4.57.6" "accelerate==1.16.0" "safetensors==0.8.0" "pillow==13.0.0" "numpy>=1.26"
+
+# Draw the illustrated lesson library on the GPU (2 portraits, 5 places x 8 shots, library.json, contact sheet) into
+# ~/.cache/nghiep-motion-studio/library; existing images with the same prompt and seed are kept, e.g.
+# just images-library --only cafe-him-1 --force
+images-library *args:
+    python3 -m motion_studio images-library --python "{{images_python}}" {{args}}
 
 # Build the voice comparison page in out/voices (set MOTION_STUDIO_REF_WAV to a clean 6-8 s WAV to add the cloned voices; MOTION_STUDIO_REF_WAV_EN for an English clip)
 voices:

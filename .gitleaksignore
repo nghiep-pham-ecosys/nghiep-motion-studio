@@ -1,0 +1,3 @@
+# False positives: per-shot cache hashes named "key" in an earlier commit of the image library manifest (now "params_hash"). Not secrets.
+c3fbec3eddd0be2fdebe3d2c739e0989605d348b:samples/library/library.json:generic-api-key:402
+c3fbec3eddd0be2fdebe3d2c739e0989605d348b:samples/library/library.json:generic-api-key:454

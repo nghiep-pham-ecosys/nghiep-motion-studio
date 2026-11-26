@@ -23,8 +23,15 @@ use the same voice at speed 0.8 (``af_heart@0.8``). Repeat silences come from
 the ``pause`` of each dialogue visual: ``scale`` x the line's length +
 ``add_s``.
 
+Two looks: ``flat`` (the SVG characters and rooms of ``samples/characters``,
+the ``dialogue`` visual) and ``illustrated`` (3D-cartoon stills of the same
+two characters from the library that ``motion-studio images-library`` draws
+on the local GPU, the ``illustrated`` visual: a slow push-in on the speaker
+and a big speech bubble). ``illustrate`` picks a still per line
+(``images.pick_shots``) in the place of the part (``PLACES``).
+
 ``write_source`` writes the scenes, a topic file, a voices config, the fact
-check and the character files into a folder; ``run`` hands that topic to the
+check and the character files (or the stills used) into a folder; ``run`` hands that topic to the
 ``video`` pipeline (voice, visuals, render, subtitles, gate, Shorts) and then
 writes the audio-only file (m4a with chapters), the description with chapter
 timestamps and a bilingual SRT where a Vietnamese line exists.
@@ -42,6 +49,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .gate import narration_hash
+from .images import Library, focus_for, load_library, pick_shots
 from .narrate import split_lines
 
 HER, HIM = "her", "him"
@@ -50,6 +58,11 @@ STAND_IN = "bm_george"  # required by the voices schema; never read: the narrato
 SLOW = 0.8
 NAMES = {HER: "Lan", HIM: "Minh"}
 AI_LABEL = "AI voice"
+AI_BADGE = "Made with AI"
+LOOKS = ("flat", "illustrated")
+# The library place of each part in the illustrated look (the flat look keeps the scenery of PARTS).
+PLACES = {"intro": "classroom", "words": "classroom", "listen": "cafe", "shadowing": "cafe", "listen-again": "cafe",
+          "answer": "interview", "follow-up": "interview", "speaking": "exam", "writing": "desk", "recap": "classroom"}
 GATE_WINDOW = (1200.0, 1800.0)  # 20-30 minutes
 CHARACTER_FILES = ("her.svg", "him.svg", "classroom.svg", "interview.svg", "exam.svg", "desk.svg")
 PARTS = (  # (key, chapter, scenery)
@@ -389,6 +402,7 @@ class Builder:
         self.lesson = lesson
         self.characters = characters
         self.scenes: list[dict[str, Any]] = []
+        self.parts: list[str] = []  # the part key of each scene
         self.part_index = 0
         self.part_key = ""
         self.counter: dict[str, int] = {}
@@ -432,6 +446,7 @@ class Builder:
             scene["chapter"] = {"en": self._chapter_pending}
             self._chapter_pending = ""
         self.scenes.append(scene)
+        self.parts.append(key)
         return scene
 
 
@@ -449,8 +464,17 @@ def _paragraph_board(title: str, paragraph: str, current: str) -> dict[str, Any]
     return _board(title, ("body", _bold_part(paragraph, current)))
 
 
-def build_scenes(lesson: Lesson, characters: str = "characters") -> dict[str, Any]:
-    """The scenes.json of the whole lesson: ten parts, two characters, one line per scene."""
+def build_scenes(lesson: Lesson, characters: str = "characters", look: str = "flat",
+                 library: Library | None = None, stills: str = "library") -> dict[str, Any]:
+    """The scenes.json of the whole lesson: ten parts, two characters, one line per scene.
+
+    ``look="illustrated"`` swaps each scene's flat ``dialogue`` visual for an
+    ``illustrated`` one with a still of ``library`` (referenced under ``stills/``).
+    """
+    if look not in LOOKS:
+        raise LessonError(f"unknown look {look!r}: use {' or '.join(LOOKS)}")
+    if look == "illustrated" and library is None:
+        raise LessonError("the illustrated look needs the image library")
     b = Builder(lesson, characters)
     n_words = len(lesson.words)
     her_name, his_name = NAMES[HER], NAMES[HIM]
@@ -609,6 +633,8 @@ def build_scenes(lesson: Lesson, characters: str = "characters") -> dict[str, An
     b.say(HER, "That's all for today. See you in the next lesson.")
     b.say(HIM, "Bye, and keep practising.")
 
+    if look == "illustrated":
+        illustrate(b.scenes, b.parts, library, stills)
     voice = lambda who, slow: {"en": {"engine": "kokoro", "voice": VOICES[who] + (f"@{SLOW:g}" if slow else "")}}  # noqa: E731
     return {
         "version": 1,
@@ -622,16 +648,40 @@ def build_scenes(lesson: Lesson, characters: str = "characters") -> dict[str, An
     }
 
 
+def illustrate(scenes: list[dict[str, Any]], parts: list[str], library: Library, stills: str = "library") -> None:
+    """Turn each flat ``dialogue`` visual into an ``illustrated`` one (in place): the library still of the line's place
+    and speaker, the camera's focus, the speaker's name and the "Made with AI" badge; text and pause stay."""
+    lines = [(part, PLACES[part], scene["visual"]["talk"]) for scene, part in zip(scenes, parts)]
+    for scene, shot_id in zip(scenes, pick_shots(lines, library)):
+        flat = scene["visual"]
+        entry = library.shots[shot_id]
+        visual: dict[str, Any] = {"kind": "illustrated", "image": f"{stills}/{entry['file']}",
+                                  "focus": focus_for(entry, flat["talk"]), "talk": flat["talk"],
+                                  "name": NAMES[flat["talk"]]}
+        for key in ("part", "label", "caption", "board", "pause"):
+            if key in flat:
+                visual[key] = flat[key]
+        visual["badge"] = AI_BADGE
+        scene["visual"] = visual
+
+
+def stills_used(doc: dict[str, Any]) -> list[str]:
+    """The library files the scenes of ``doc`` show (relative to their folder, e.g. ``library/cafe-him-1.jpg``)."""
+    return list(dict.fromkeys(s["visual"]["image"] for s in doc["scenes"] if s["visual"]["kind"] == "illustrated"))
+
+
 def video_title(lesson: Lesson) -> str:
     topic = lesson.source or plain(lesson.title)
     title = f"English for engineers: {topic}"
     return title if len(title) <= 100 else title[:97].rstrip() + "..."
 
 
-def job_name(path: Path, lesson: Lesson) -> str:
+def job_name(path: Path, lesson: Lesson, look: str = "flat") -> str:
+    """The job of a lesson; the illustrated look gets its own job (``-3d``), so both renders can sit side by side."""
     stem = path.name.replace(".lesson.md", "").replace(".md", "")
     slug = re.sub(r"[^a-z0-9-]+", "-", stem.lower()).strip("-") or "lesson"
-    return f"en-{lesson.date}-{slug}"[:64].rstrip("-")
+    suffix = "-3d" if look == "illustrated" else ""
+    return f"en-{lesson.date}-{slug}"[:64 - len(suffix)].rstrip("-") + suffix
 
 
 # --- the job source folder -------------------------------------------------------------------------------------------
@@ -693,20 +743,30 @@ class Source:
     narration: str  # the 12-character narration hash the fact check must name
 
 
-def write_source(lesson_path: Path, out: Path, characters: Path | None = None, shorts: int = 3) -> Source:
-    """Write scenes.json, topic.json, voices.json, factcheck.md and the character files into ``out``."""
+def write_source(lesson_path: Path, out: Path, characters: Path | None = None, shorts: int = 3, look: str = "flat",
+                 library: Path | None = None) -> Source:
+    """Write scenes.json, topic.json, voices.json, factcheck.md and the character files (flat look) or the library
+    stills the scenes show (illustrated look) into ``out``."""
     lesson_path = Path(lesson_path)
     lesson = load_lesson(lesson_path)
-    characters = characters or find_characters(lesson_path.resolve().parent)
-    if characters is None:
-        raise LessonError(f"no characters folder with {', '.join(CHARACTER_FILES)} next to {lesson_path} "
-                          "or above it; pass --characters")
     out.mkdir(parents=True, exist_ok=True)
-    (out / "characters").mkdir(exist_ok=True)
-    for name in CHARACTER_FILES:
-        shutil.copy2(characters / name, out / "characters" / name)
-    doc = build_scenes(lesson)
-    job = job_name(lesson_path, lesson)
+    if look == "illustrated":
+        lib = load_library(library)
+        doc = build_scenes(lesson, look=look, library=lib)
+        (out / "library").mkdir(exist_ok=True)
+        for rel in stills_used(doc):
+            name = Path(rel).name
+            shutil.copy2(lib.folder / name, out / "library" / name)
+    else:
+        characters = characters or find_characters(lesson_path.resolve().parent)
+        if characters is None:
+            raise LessonError(f"no characters folder with {', '.join(CHARACTER_FILES)} next to {lesson_path} "
+                              "or above it; pass --characters")
+        (out / "characters").mkdir(exist_ok=True)
+        for name in CHARACTER_FILES:
+            shutil.copy2(characters / name, out / "characters" / name)
+        doc = build_scenes(lesson, look=look)
+    job = job_name(lesson_path, lesson, look)
     _write_json(out / "scenes.json", doc)
     _write_json(out / "topic.json", topic_file(job, lesson, shorts))
     _write_json(out / "voices.json", voices_config())
@@ -726,17 +786,19 @@ def _write_json(path: Path, data: Any) -> None:
 # --- after the render: description, audio file, bilingual subtitles -------------------------------------------------
 
 
-def description_intro(lesson: Lesson) -> str:
+def description_intro(lesson: Lesson, illustrated: bool = False) -> str:
     n = len(lesson.words)
     lines = [
-        f"A full English lesson for engineers, played as a conversation between two animated characters, "
+        f"A full English lesson for engineers, played as a conversation between two {'illustrated' if illustrated else 'animated'} characters, "
         f"{NAMES[HER]} and {NAMES[HIM]}: {n} words with Vietnamese meanings, a short story to listen to and shadow, "
         "a model interview answer, and IELTS band 7 samples for speaking and writing. Repeat in the pauses.",
     ]
     if lesson.source:
         lines.append(f"Material: the post \"{lesson.source}\".")
-    lines.append(f"{AI_LABEL}: both voices are synthetic (Kokoro {VOICES[HER]} and {VOICES[HIM]}); the characters "
-                 "are original drawings. An audio-only version of this lesson is made for listening without a screen.")
+    art = ("the characters and places are original 3D-cartoon stills made with AI (Stable Diffusion XL with an "
+           "IP-Adapter, on a local GPU)" if illustrated else "the characters are original drawings")
+    lines.append(f"{AI_LABEL}: both voices are synthetic (Kokoro {VOICES[HER]} and {VOICES[HIM]}); {art}. "
+                 "An audio-only version of this lesson is made for listening without a screen.")
     return "\n\n".join(lines)
 
 
@@ -746,10 +808,14 @@ def chapter_marks(doc: dict[str, Any], timeline: dict[str, Any]) -> list[tuple[i
     return chapters(doc, timeline, "en", doc["title"]["en"])
 
 
+def is_illustrated(doc: dict[str, Any]) -> bool:
+    return any(s["visual"]["kind"] == "illustrated" for s in doc["scenes"])
+
+
 def description(lesson: Lesson, doc: dict[str, Any], timeline: dict[str, Any]) -> str:
     from .publish import describe
 
-    return describe(description_intro(lesson), chapter_marks(doc, timeline))
+    return describe(description_intro(lesson, is_illustrated(doc)), chapter_marks(doc, timeline))
 
 
 def ffmetadata(title: str, marks: list[tuple[int, str]], duration_s: float, comment: str) -> str:
@@ -802,7 +868,7 @@ def write_extras(lesson: Lesson, job: Path, name: str, run: Callable[[list[str]]
     timeline = json.loads(video.with_suffix(".timeline.json").read_text(encoding="utf-8"))
     marks = chapter_marks(doc, timeline)
     intro = job / f"{name}.en.intro.txt"
-    intro.write_text(description_intro(lesson) + "\n", encoding="utf-8")
+    intro.write_text(description_intro(lesson, is_illustrated(doc)) + "\n", encoding="utf-8")
     desc = job / f"{name}.en.description.txt"
     desc.write_text(description(lesson, doc, timeline) + "\n", encoding="utf-8")
     meta = job / f".{name}.ffmetadata"

@@ -27,6 +27,9 @@ clone-en = ["chatterbox-tts==0.1.7", "resemble-perth==1.0.1", "s3tokenizer==0.3.
 # Manim CE for the manim, diagram and code visual kinds. Linux builds it from source:
 # install libcairo2-dev, libpango1.0-dev and pkg-config first.
 visuals = ["manim==0.22.1"]
+# The image worker for the illustrated lesson library (`just images-setup` installs these with CUDA torch 2.11 into
+# its own venv): SDXL base 1.0 (CreativeML Open RAIL++-M) and the IP-Adapter (Apache-2.0) through diffusers.
+images = ["diffusers==0.39.0", "transformers==4.57.6", "accelerate==1.16.0", "safetensors==0.8.0", "pillow==13.0.0"]
 # faster-whisper for the subtitle drift check and alignment (MIT; models go to the Hugging Face cache).
 subtitles = ["faster-whisper==1.2.1", "numpy>=1.26"]
 

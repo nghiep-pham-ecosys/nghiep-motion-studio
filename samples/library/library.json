@@ -1,0 +1,1036 @@
+{
+  "version": 1,
+  "about": "Built by motion-studio images-library from samples/library/prompts.json. Images are original and made with AI on a local GPU; they stay out of git.",
+  "models": {
+    "base": {
+      "repo": "stabilityai/stable-diffusion-xl-base-1.0",
+      "files": "fp16 variant",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "url": "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0",
+      "revision": "462165984030d82259a11f4367a4eed129e94a7b"
+    },
+    "ip_adapter": {
+      "repo": "h94/IP-Adapter",
+      "file": "sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors",
+      "license": "Apache-2.0",
+      "url": "https://huggingface.co/h94/IP-Adapter",
+      "revision": "018e402774aeeddd60609b4ecdb7e298259dc729"
+    },
+    "image_encoder": {
+      "repo": "h94/IP-Adapter",
+      "file": "models/image_encoder (OpenCLIP ViT-H/14, LAION-2B)",
+      "license": "Apache-2.0 (repo); the ViT-H/14 weights are MIT (LAION)",
+      "url": "https://huggingface.co/h94/IP-Adapter",
+      "revision": "018e402774aeeddd60609b4ecdb7e298259dc729"
+    }
+  },
+  "generate": {
+    "width": 1344,
+    "height": 768,
+    "steps": 28,
+    "guidance": 6.0,
+    "ip_scale": 0.5,
+    "ip_scale_both": 0.4
+  },
+  "output": {
+    "width": 1920,
+    "height": 1080,
+    "format": "jpg",
+    "quality": 92
+  },
+  "characters": {
+    "her": {
+      "name": "Lan",
+      "file": "portrait-her.png",
+      "seed": 1101,
+      "prompt": "close-up portrait of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, stylized 3d cartoon character, big expressive eyes, friendly smile, facing the camera, plain warm grey background, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "params_hash": "f774bc04d25e2d84",
+      "sha256": "d69d19bac6ec3dfb1b22b879d3c892c0c8e1e1850a374ba2831a0bd7e269bd03",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    "him": {
+      "name": "Minh",
+      "file": "portrait-him.png",
+      "seed": 2207,
+      "prompt": "close-up portrait of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, stylized 3d cartoon character, big expressive eyes, friendly smile, facing the camera, plain warm grey background, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "params_hash": "0cbe03721ad53fca",
+      "sha256": "dd86e0acc9ebf3861362e6faf1dcf16ae32663c50f5068e8c18da70d663ae11e",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    }
+  },
+  "shots": [
+    {
+      "id": "classroom-both-her",
+      "place": "classroom",
+      "shot": "both-her",
+      "who": "both",
+      "talk": "her",
+      "focus": [
+        0.34,
+        0.42
+      ],
+      "prompt": "two people talking, a young woman in a yellow cardigan on the left standing by the whiteboard, speaking, a young man with glasses in a dark blue sweater on the right sitting at a desk with a notebook, listening, medium wide shot, a bright classroom with a clean whiteboard, wooden desks and big windows, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3400,
+      "ip": [
+        "her",
+        "him"
+      ],
+      "ip_scale": 0.4,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64], [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "classroom-both-her.jpg",
+      "params_hash": "ffc42e9e47f11cbc",
+      "sha256": "1d48a16d8945f14342b3dacfcef29d292743777492f5df53c8fc62b4aa294e9e",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "classroom-her-1",
+      "place": "classroom",
+      "shot": "her-1",
+      "who": "her",
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, standing by the whiteboard, talking, warm smile, on the left of the frame, a bright classroom with a clean whiteboard, wooden desks and big windows, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3402,
+      "ip": [
+        "her"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
+      "width": 1344,
+      "height": 768,
+      "file": "classroom-her-1.jpg",
+      "params_hash": "960dec126ed70066",
+      "sha256": "3318c090bc72d2cc1894f750580c87cfa22ff5b85a5d861414dd7da6cff9363e",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "classroom-her-2",
+      "place": "classroom",
+      "shot": "her-2",
+      "who": "her",
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium shot of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, standing by the whiteboard, explaining with an open hand, three-quarter view, a bright classroom with a clean whiteboard, wooden desks and big windows, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3403,
+      "ip": [
+        "her"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
+      "width": 1344,
+      "height": 768,
+      "file": "classroom-her-2.jpg",
+      "params_hash": "2c8d5add878bedb1",
+      "sha256": "e7387c55a7592a98864a315d21f4118895eaa425caa29b5b3d60e5e22550b950",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "classroom-her-listen",
+      "place": "classroom",
+      "shot": "her-listen",
+      "who": "her",
+      "talk": "him",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, standing by the whiteboard, listening, gentle smile, on the left of the frame, a bright classroom with a clean whiteboard, wooden desks and big windows, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3404,
+      "ip": [
+        "her"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
+      "width": 1344,
+      "height": 768,
+      "file": "classroom-her-listen.jpg",
+      "params_hash": "061b8dd8e48fc00b",
+      "sha256": "439c70297944521aa8db8739727643d0b56117dc0547cfe7591f9acdac12df6e",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "classroom-him-1",
+      "place": "classroom",
+      "shot": "him-1",
+      "who": "him",
+      "talk": "him",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, sitting at a desk with a notebook, talking, friendly smile, on the right of the frame, a bright classroom with a clean whiteboard, wooden desks and big windows, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3405,
+      "ip": [
+        "him"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "classroom-him-1.jpg",
+      "params_hash": "cbb8deee8cec7eae",
+      "sha256": "8ea76a2f689819a7da203aee37d0546f69102146e06014eeb7de7a052f201efb",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "classroom-him-2",
+      "place": "classroom",
+      "shot": "him-2",
+      "who": "him",
+      "talk": "him",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium shot of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, sitting at a desk with a notebook, explaining with one hand raised, three-quarter view, a bright classroom with a clean whiteboard, wooden desks and big windows, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3406,
+      "ip": [
+        "him"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "classroom-him-2.jpg",
+      "params_hash": "d4f8fcf3f87dd4f8",
+      "sha256": "10ae5275714b3dc48cbd335691dc02169c0d3a2955908245e47a83fb8f3c5252",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "classroom-him-listen",
+      "place": "classroom",
+      "shot": "him-listen",
+      "who": "him",
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, sitting at a desk with a notebook, listening, nodding, on the right of the frame, a bright classroom with a clean whiteboard, wooden desks and big windows, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3407,
+      "ip": [
+        "him"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "classroom-him-listen.jpg",
+      "params_hash": "c00fc63d24e09121",
+      "sha256": "9666318a4feddde4c97b7e9799b20d82ae22525a97ce89c4dd020365e85e5642",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "interview-both-her",
+      "place": "interview",
+      "shot": "both-her",
+      "who": "both",
+      "talk": "her",
+      "focus": [
+        0.34,
+        0.42
+      ],
+      "prompt": "two people talking, a young woman in a yellow cardigan on the left sitting at the table with a folder, speaking, a young man with glasses in a dark blue sweater on the right sitting across the table, listening, medium wide shot, a modern office meeting room with a glass wall and a plant, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3500,
+      "ip": [
+        "her",
+        "him"
+      ],
+      "ip_scale": 0.4,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64], [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "interview-both-her.jpg",
+      "params_hash": "b2c33a332776f129",
+      "sha256": "e3482c3089704bb806b7a1180eb6d6b9e39cfbd3798e576a73e831b1b505c299",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "interview-both-him",
+      "place": "interview",
+      "shot": "both-him",
+      "who": "both",
+      "talk": "him",
+      "focus": [
+        0.66,
+        0.42
+      ],
+      "prompt": "two people talking, a young woman in a yellow cardigan on the left sitting at the table with a folder, listening, a young man with glasses in a dark blue sweater on the right sitting across the table, speaking, medium wide shot, a modern office meeting room with a glass wall and a plant, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 5501,
+      "ip": [
+        "her",
+        "him"
+      ],
+      "ip_scale": 0.4,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64], [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "interview-both-him.jpg",
+      "params_hash": "ae0b753090feda38",
+      "sha256": "aca10dc4dcd78cadf242f683aa9e51ff65e3601c481ea68c65fc47a43c196478",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "interview-her-1",
+      "place": "interview",
+      "shot": "her-1",
+      "who": "her",
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, sitting at the table with a folder, talking, warm smile, on the left of the frame, a modern office meeting room with a glass wall and a plant, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3502,
+      "ip": [
+        "her"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
+      "width": 1344,
+      "height": 768,
+      "file": "interview-her-1.jpg",
+      "params_hash": "8c642d9a79f0924a",
+      "sha256": "0764d0f677cd9faa9f791367e1193eccf0081436c15dac8c6e5873a2ed2481de",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "interview-her-2",
+      "place": "interview",
+      "shot": "her-2",
+      "who": "her",
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium shot of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, sitting at the table with a folder, explaining with an open hand, three-quarter view, a modern office meeting room with a glass wall and a plant, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3503,
+      "ip": [
+        "her"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
+      "width": 1344,
+      "height": 768,
+      "file": "interview-her-2.jpg",
+      "params_hash": "6525eaf694f4b60a",
+      "sha256": "f0d8bf7eb82c9d0ad964c60dcecb044b2c99a4b0dd563e90a484fd83f50ceb00",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "interview-her-listen",
+      "place": "interview",
+      "shot": "her-listen",
+      "who": "her",
+      "talk": "him",
+      "focus": [
+        0.36,
+        0.4
+      ],
+      "prompt": "close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, sitting at the table with a folder, listening, gentle smile, on the left of the frame, a modern office meeting room with a glass wall and a plant, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3504,
+      "ip": [
+        "her"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
+      "width": 1344,
+      "height": 768,
+      "file": "interview-her-listen.jpg",
+      "params_hash": "216b65900fed21a7",
+      "sha256": "a56380c39cc7b5711651826b20930aa3e4aeac998992bf538ee5e4595fc34833",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "interview-him-1",
+      "place": "interview",
+      "shot": "him-1",
+      "who": "him",
+      "talk": "him",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, sitting across the table, talking, friendly smile, on the right of the frame, a modern office meeting room with a glass wall and a plant, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3505,
+      "ip": [
+        "him"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "interview-him-1.jpg",
+      "params_hash": "4f9b8272073ec5d1",
+      "sha256": "b8f9a0f0a321687841c17c80814c6c6a728a5367cd515b4f200a2122548c8cc6",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "interview-him-2",
+      "place": "interview",
+      "shot": "him-2",
+      "who": "him",
+      "talk": "him",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium shot of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, sitting across the table, explaining with one hand raised, three-quarter view, a modern office meeting room with a glass wall and a plant, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3506,
+      "ip": [
+        "him"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "interview-him-2.jpg",
+      "params_hash": "72c6376f2c941cff",
+      "sha256": "d66757a6b8d0996c9bd421b88d7f50798493a69ee3c314768c6ef60b2fae1756",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "interview-him-listen",
+      "place": "interview",
+      "shot": "him-listen",
+      "who": "him",
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, sitting across the table, listening, nodding, on the right of the frame, a modern office meeting room with a glass wall and a plant, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3507,
+      "ip": [
+        "him"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "interview-him-listen.jpg",
+      "params_hash": "14da2b50f494683a",
+      "sha256": "08f7f291a5306577246e1eded168ea2b28d13ec0eb1d2c0fc3e10e3f30fcd493",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "exam-both-her",
+      "place": "exam",
+      "shot": "both-her",
+      "who": "both",
+      "talk": "her",
+      "focus": [
+        0.34,
+        0.42
+      ],
+      "prompt": "two people talking, a young woman in a yellow cardigan on the left sitting at the table holding papers, speaking, a young man with glasses in a dark blue sweater on the right sitting upright across the table, listening, medium wide shot, a quiet test room with a small table, two chairs and a wall clock, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 5600,
+      "ip": [
+        "her",
+        "him"
+      ],
+      "ip_scale": 0.4,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64], [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "exam-both-her.jpg",
+      "params_hash": "b81ae22752a0058f",
+      "sha256": "ae429dbbeadc345027ee4d7f26ec57be84893515fd4b5d804ead8ae9369a1e99",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "exam-both-him",
+      "place": "exam",
+      "shot": "both-him",
+      "who": "both",
+      "talk": "him",
+      "focus": [
+        0.66,
+        0.42
+      ],
+      "prompt": "two people talking, a young woman in a yellow cardigan on the left sitting at the table holding papers, listening, a young man with glasses in a dark blue sweater on the right sitting upright across the table, speaking, medium wide shot, a quiet test room with a small table, two chairs and a wall clock, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3601,
+      "ip": [
+        "her",
+        "him"
+      ],
+      "ip_scale": 0.4,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64], [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "exam-both-him.jpg",
+      "params_hash": "b6f7c9ba7fa726b6",
+      "sha256": "5a0a216a4b0671bbf7c07b369bcc8d3f24f00dfe8e7e41cb7290d61388d09427",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "exam-her-1",
+      "place": "exam",
+      "shot": "her-1",
+      "who": "her",
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, sitting at the table holding papers, talking, warm smile, on the left of the frame, a quiet test room with a small table, two chairs and a wall clock, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3602,
+      "ip": [
+        "her"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
+      "width": 1344,
+      "height": 768,
+      "file": "exam-her-1.jpg",
+      "params_hash": "5b4eb665ea405250",
+      "sha256": "b2400d15dc7e1a1defc7e921bff77a3cb3b2a01613263c78ad3cf6cc33e38b8e",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "exam-her-2",
+      "place": "exam",
+      "shot": "her-2",
+      "who": "her",
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium shot of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, sitting at the table holding papers, explaining with an open hand, three-quarter view, a quiet test room with a small table, two chairs and a wall clock, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3603,
+      "ip": [
+        "her"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
+      "width": 1344,
+      "height": 768,
+      "file": "exam-her-2.jpg",
+      "params_hash": "fbf69268796be1ca",
+      "sha256": "3edaee5dfcdd43f0febba7c07c37f0c5d427e7cfb302c31fb155cdbd17888d50",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "exam-her-listen",
+      "place": "exam",
+      "shot": "her-listen",
+      "who": "her",
+      "talk": "him",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, sitting at the table holding papers, listening, gentle smile, on the left of the frame, a quiet test room with a small table, two chairs and a wall clock, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3604,
+      "ip": [
+        "her"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
+      "width": 1344,
+      "height": 768,
+      "file": "exam-her-listen.jpg",
+      "params_hash": "909d06ab51184027",
+      "sha256": "14a43d941a424ef6da88bd171cb03ba96b2dde9f830840a60fba850e9f8ee81d",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "exam-him-1",
+      "place": "exam",
+      "shot": "him-1",
+      "who": "him",
+      "talk": "him",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, sitting upright across the table, talking, friendly smile, on the right of the frame, a quiet test room with a small table, two chairs and a wall clock, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3605,
+      "ip": [
+        "him"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "exam-him-1.jpg",
+      "params_hash": "aa1a18271c82834b",
+      "sha256": "cc69dbaaca7cc28c61c0749e0ba8028ba4d7214946b054e9bf2bb7997f0e2ced",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "exam-him-2",
+      "place": "exam",
+      "shot": "him-2",
+      "who": "him",
+      "talk": "him",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium shot of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, sitting upright across the table, explaining with one hand raised, three-quarter view, a quiet test room with a small table, two chairs and a wall clock, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3606,
+      "ip": [
+        "him"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "exam-him-2.jpg",
+      "params_hash": "fbb78d48e312ff65",
+      "sha256": "3d4c79e1cab5f2d2eead8b42de6f5cf29f7904122e0d156e001577d45689a162",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "exam-him-listen",
+      "place": "exam",
+      "shot": "him-listen",
+      "who": "him",
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, sitting upright across the table, listening, nodding, on the right of the frame, a quiet test room with a small table, two chairs and a wall clock, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3607,
+      "ip": [
+        "him"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "exam-him-listen.jpg",
+      "params_hash": "043ef657b1bc12f3",
+      "sha256": "719dda611b22f2b12fafa1664566e31084dfadda73642913d1977b9260c46482",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "desk-both-her",
+      "place": "desk",
+      "shot": "both-her",
+      "who": "both",
+      "talk": "her",
+      "focus": [
+        0.34,
+        0.42
+      ],
+      "prompt": "two people talking, a young woman in a yellow cardigan on the left standing by the desk, speaking, a young man with glasses in a dark blue sweater on the right at the desk with a laptop, listening, medium wide shot, a cozy study corner with a desk, a laptop and a cork board, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 5700,
+      "ip": [
+        "her",
+        "him"
+      ],
+      "ip_scale": 0.4,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64], [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "desk-both-her.jpg",
+      "params_hash": "00358ae8bdc853f8",
+      "sha256": "49290eace05a327cde0e72151b21425b82355faac06dee8a79137376d077e8e8",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "desk-her-1",
+      "place": "desk",
+      "shot": "her-1",
+      "who": "her",
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, standing by the desk, talking, warm smile, on the left of the frame, a cozy study corner with a desk, a laptop and a cork board, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3702,
+      "ip": [
+        "her"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
+      "width": 1344,
+      "height": 768,
+      "file": "desk-her-1.jpg",
+      "params_hash": "ab6a2526ddc7f051",
+      "sha256": "ce2aa9d639fbd30c409498567c3fd439a98d3c1f7e6a4ae866b31290a49c71f7",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "desk-her-2",
+      "place": "desk",
+      "shot": "her-2",
+      "who": "her",
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium shot of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, standing by the desk, explaining with an open hand, three-quarter view, a cozy study corner with a desk, a laptop and a cork board, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3703,
+      "ip": [
+        "her"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
+      "width": 1344,
+      "height": 768,
+      "file": "desk-her-2.jpg",
+      "params_hash": "3c0c9a6ebb6ced52",
+      "sha256": "f5dbac337e79dec48aa2a59c43c8968963aea176ada4835abb5f7715f03fa44c",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "desk-her-listen",
+      "place": "desk",
+      "shot": "her-listen",
+      "who": "her",
+      "talk": "him",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, standing by the desk, listening, gentle smile, on the left of the frame, a cozy study corner with a desk, a laptop and a cork board, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3704,
+      "ip": [
+        "her"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
+      "width": 1344,
+      "height": 768,
+      "file": "desk-her-listen.jpg",
+      "params_hash": "01728fafc7aed4e1",
+      "sha256": "40a04ec5187c80cac009dd81daf50690c0485b1fdec61205e3ffe8d669f7f75b",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "desk-him-1",
+      "place": "desk",
+      "shot": "him-1",
+      "who": "him",
+      "talk": "him",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, at the desk with a laptop, talking, friendly smile, on the right of the frame, a cozy study corner with a desk, a laptop and a cork board, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3705,
+      "ip": [
+        "him"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "desk-him-1.jpg",
+      "params_hash": "62d13b8cb5acb128",
+      "sha256": "7ec1eb12e54194dd63e6ad16b8523b00983ed99ec06b52449d6b349ee47859b1",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "desk-him-2",
+      "place": "desk",
+      "shot": "him-2",
+      "who": "him",
+      "talk": "him",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium shot of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, at the desk with a laptop, explaining with one hand raised, three-quarter view, a cozy study corner with a desk, a laptop and a cork board, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3706,
+      "ip": [
+        "him"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "desk-him-2.jpg",
+      "params_hash": "c52216378be60860",
+      "sha256": "39eb042af3bd1641144bc726bed2a9050addfafa70e106a69f69bdd7e5b9bebc",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "desk-him-listen",
+      "place": "desk",
+      "shot": "him-listen",
+      "who": "him",
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, at the desk with a laptop, listening, nodding, on the right of the frame, a cozy study corner with a desk, a laptop and a cork board, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3707,
+      "ip": [
+        "him"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "desk-him-listen.jpg",
+      "params_hash": "ea4f3ecaae5898bd",
+      "sha256": "4d244204b0f1435b6dc88117de70a5531a981e4dc4ed8e97df23bc7869a65003",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "cafe-both-her",
+      "place": "cafe",
+      "shot": "both-her",
+      "who": "both",
+      "talk": "her",
+      "focus": [
+        0.34,
+        0.42
+      ],
+      "prompt": "two people talking, a young woman in a yellow cardigan on the left at a cafe table with a coffee, speaking, a young man with glasses in a dark blue sweater on the right at a cafe table with a tea, listening, medium wide shot, a warm cafe with wooden tables and plants, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 5800,
+      "ip": [
+        "her",
+        "him"
+      ],
+      "ip_scale": 0.4,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64], [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "cafe-both-her.jpg",
+      "params_hash": "4df1f9373ff0d2e8",
+      "sha256": "7fe5b1494d638124b3c6b6cf365e908a3ee78be83d674e89988f75bd7c6ae531",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "cafe-her-1",
+      "place": "cafe",
+      "shot": "her-1",
+      "who": "her",
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, at a cafe table with a coffee, talking, warm smile, on the left of the frame, a warm cafe with wooden tables and plants, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3802,
+      "ip": [
+        "her"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
+      "width": 1344,
+      "height": 768,
+      "file": "cafe-her-1.jpg",
+      "params_hash": "a261cafbd198a070",
+      "sha256": "b44dabfd14472e63b48bbf4026701b809b263e7036a0a938f43bc9fd3d85ff57",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "cafe-her-2",
+      "place": "cafe",
+      "shot": "her-2",
+      "who": "her",
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium shot of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, at a cafe table with a coffee, explaining with an open hand, three-quarter view, a warm cafe with wooden tables and plants, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3803,
+      "ip": [
+        "her"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
+      "width": 1344,
+      "height": 768,
+      "file": "cafe-her-2.jpg",
+      "params_hash": "11fdda7a7b1307e6",
+      "sha256": "2bc9549042b8a643be46002b6ee3ec7c32415d7978f7a7c17975a6c79079f144",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "cafe-her-listen",
+      "place": "cafe",
+      "shot": "her-listen",
+      "who": "her",
+      "talk": "him",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, at a cafe table with a coffee, listening, gentle smile, on the left of the frame, a warm cafe with wooden tables and plants, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3804,
+      "ip": [
+        "her"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
+      "width": 1344,
+      "height": 768,
+      "file": "cafe-her-listen.jpg",
+      "params_hash": "4ea7e0b2ec3f0e03",
+      "sha256": "08c98dccfd3a371e61ea3d0df25c058c2d670ebb999bfceb3d7fbd404e02f8b1",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "cafe-him-1",
+      "place": "cafe",
+      "shot": "him-1",
+      "who": "him",
+      "talk": "him",
+      "focus": [
+        0.64,
+        0.4
+      ],
+      "prompt": "medium close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, at a cafe table with a tea, talking, friendly smile, on the right of the frame, a warm cafe with wooden tables and plants, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3805,
+      "ip": [
+        "him"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "cafe-him-1.jpg",
+      "params_hash": "66b00e382fd59343",
+      "sha256": "5c3e83310ad441abc3f6dc0633a2497cc46143d8b60282442e19e8c633bf1194",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "cafe-him-2",
+      "place": "cafe",
+      "shot": "him-2",
+      "who": "him",
+      "talk": "him",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "medium shot of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, at a cafe table with a tea, explaining with one hand raised, three-quarter view, a warm cafe with wooden tables and plants, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3806,
+      "ip": [
+        "him"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "cafe-him-2.jpg",
+      "params_hash": "29aefe46e409a7c3",
+      "sha256": "c70da3e97695868085db84f3dbf8d88c0d091ded830f6f674f2a3d8f7dc77f8a",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    },
+    {
+      "id": "cafe-him-listen",
+      "place": "cafe",
+      "shot": "him-listen",
+      "who": "him",
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "prompt": "close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, at a cafe table with a tea, listening, nodding, on the right of the frame, a warm cafe with wooden tables and plants, 3d animated movie still, cartoon style, warm cinematic light",
+      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "seed": 3807,
+      "ip": [
+        "him"
+      ],
+      "ip_scale": 0.5,
+      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
+      "width": 1344,
+      "height": 768,
+      "file": "cafe-him-listen.jpg",
+      "params_hash": "1c4a6484a4e518a6",
+      "sha256": "917500ea4af2989d6a8ce294cae6ba378a93f780bfb808e54faed1fdac1d5331",
+      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+    }
+  ]
+}
