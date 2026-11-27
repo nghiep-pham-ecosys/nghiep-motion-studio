@@ -42,6 +42,12 @@ video topic *args:
 lesson file *args:
     python3 -m motion_studio lesson "{{file}}" --tts-python "{{tts_python}}" {{args}}
 
+# One lab-to-prod post (or study lesson) and its talk file to one 8-15 min explainer with code and chart cards and
+# 2 Shorts, e.g. just explainer samples/explainer-2026-11-27/2026-11-27-ai-eng-p4 --talk samples/explainer-2026-11-27/ai-eng-p4.talk.md
+# (a first talk: --draft-talk FILE; uses the image library of `just images-library`)
+explainer source *args:
+    python3 -m motion_studio explainer "{{source}}" --tts-python "{{tts_python}}" {{args}}
+
 # Render the 3-scene sample (EN and VI) into the work dir (<work dir>/three-scenes/)
 sample:
     python3 -m motion_studio render samples/three-scenes/scenes.json

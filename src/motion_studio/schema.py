@@ -191,8 +191,11 @@ def semantic_errors(doc: dict[str, Any], base_dir: Path | None = None) -> list[s
                 for key, rel in [("scenery", visual["scenery"]), *((f"cast/{k}", v) for k, v in visual["cast"].items())]:
                     if not (base_dir / rel).is_file():
                         errs.append(f"{where}/visual/{key}: file not found: {rel}")
-            if visual["kind"] == "illustrated" and not (base_dir / visual["image"]).is_file():
+            if visual["kind"] in ("illustrated", "card") and not (base_dir / visual["image"]).is_file():
                 errs.append(f"{where}/visual/image: file not found: {visual['image']}")
+            if visual["kind"] == "card" and visual["panel"].get("src") \
+                    and not (base_dir / visual["panel"]["src"]).is_file():
+                errs.append(f"{where}/visual/panel/src: file not found: {visual['panel']['src']}")
             for lang, rel in audio.items():
                 if not (base_dir / rel).is_file():
                     errs.append(f"{where}/audio/{lang}: file not found: {rel}")

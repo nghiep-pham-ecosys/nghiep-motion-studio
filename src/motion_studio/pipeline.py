@@ -291,8 +291,10 @@ def referenced_files(doc: Mapping[str, Any]) -> list[str]:
             found.append(visual["src"])
         if visual["kind"] == "dialogue":
             found += [visual["scenery"], visual["cast"]["her"], visual["cast"]["him"]]
-        if visual["kind"] == "illustrated":
+        if visual["kind"] in ("illustrated", "card"):
             found.append(visual["image"])
+        if visual["kind"] == "card" and visual["panel"].get("src"):
+            found.append(visual["panel"]["src"])
         for rel in scene.get("audio", {}).values():
             found.append(rel)
     return list(dict.fromkeys(found))
@@ -373,7 +375,7 @@ def planned_seconds(scenes: Scenes, lang: str, tail_s: float = 0.5) -> float:
     for timing in timeline:
         scene = scenes.scenes[timing.index]
         seconds = timing.duration_s
-        if scene["visual"]["kind"] in ("dialogue", "illustrated"):  # its clip adds the pause after the narration
+        if scene["visual"]["kind"] in ("dialogue", "illustrated", "card"):  # its clip adds the pause after the narration
             from .visuals.dialogue import clip_seconds
 
             rel = scene.get("audio", {}).get(lang)

@@ -135,7 +135,8 @@
             {"$ref": "#/$defs/visual_code"},
             {"$ref": "#/$defs/visual_terminal"},
             {"$ref": "#/$defs/visual_dialogue"},
-            {"$ref": "#/$defs/visual_illustrated"}
+            {"$ref": "#/$defs/visual_illustrated"},
+            {"$ref": "#/$defs/visual_card"}
           ]
         }
       }
@@ -348,6 +349,54 @@
         "caption": {"$ref": "#/$defs/visual_dialogue/properties/caption"},
         "board": {"$ref": "#/$defs/visual_dialogue/properties/board"},
         "pause": {"$ref": "#/$defs/visual_dialogue/properties/pause"},
+        "background": {"$ref": "#/$defs/color"}
+      }
+    },
+    "visual_card": {
+      "description": "A full-frame panel (code, program output, a bar chart, points, a flow of boxes or a picture) with the speaker's still as a square inset cropped around focus, the speaker's name, the panel's source note, the caption across the bottom and the part and AI labels. Code and output lines are part of the visual. The clip lasts narration + 0.5 s, so the scene is stretched to it.",
+      "type": "object",
+      "required": ["kind", "image", "talk", "panel"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"const": "card"},
+        "image": {"$ref": "#/$defs/visual_illustrated/properties/image"},
+        "focus": {"$ref": "#/$defs/visual_illustrated/properties/focus"},
+        "talk": {"$ref": "#/$defs/visual_illustrated/properties/talk"},
+        "name": {"$ref": "#/$defs/visual_illustrated/properties/name"},
+        "part": {"$ref": "#/$defs/visual_illustrated/properties/part"},
+        "label": {"$ref": "#/$defs/visual_illustrated/properties/label"},
+        "badge": {"$ref": "#/$defs/visual_illustrated/properties/badge"},
+        "caption": {"$ref": "#/$defs/visual_dialogue/properties/caption"},
+        "panel": {
+          "type": "object",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": {
+            "type": {"enum": ["code", "output", "chart", "points", "flow", "image"]},
+            "title": {"type": "string", "maxLength": 90},
+            "source": {"description": "Where the content comes from, shown under the speaker's name.", "type": "string", "maxLength": 120},
+            "lines": {"description": "code and output: the lines shown.", "type": "array", "maxItems": 40, "items": {"type": "string", "maxLength": 400}},
+            "first_line": {"type": "integer", "minimum": 1},
+            "highlight": {"type": "array", "maxItems": 8, "items": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "integer", "minimum": 1}}},
+            "bars": {
+              "description": "chart: one horizontal bar per item.",
+              "type": "array", "minItems": 1, "maxItems": 6,
+              "items": {
+                "type": "object", "required": ["label", "value"], "additionalProperties": false,
+                "properties": {
+                  "label": {"type": "string", "minLength": 1, "maxLength": 60},
+                  "value": {"type": "number", "minimum": 0},
+                  "text": {"type": "string", "maxLength": 40}
+                }
+              }
+            },
+            "max": {"description": "chart: the value a full bar stands for (drawn as a dashed line).", "type": "number", "exclusiveMinimum": 0},
+            "note": {"type": "string", "maxLength": 120},
+            "items": {"description": "points: the bullet items (**bold** allowed).", "type": "array", "minItems": 1, "maxItems": 8, "items": {"type": "string", "minLength": 1, "maxLength": 200}},
+            "columns": {"description": "flow: columns of boxes, left to right; every box points at every box of the next column.", "type": "array", "minItems": 1, "maxItems": 5, "items": {"type": "array", "minItems": 1, "maxItems": 4, "items": {"type": "string", "minLength": 1, "maxLength": 60}}},
+            "src": {"description": "image: the picture fitted into the panel.", "allOf": [{"$ref": "#/$defs/path"}, {"pattern": "\\.(jpe?g|png)(?![\\s\\S])"}]}
+          }
+        },
         "background": {"$ref": "#/$defs/color"}
       }
     },
