@@ -32,76 +32,140 @@ from test_lesson import LESSON  # noqa: E402
 
 HAVE_FFMPEG = ffmpeg_available()
 REQUIRE_FFMPEG = os.environ.get("MOTION_STUDIO_REQUIRE_FFMPEG") == "1"
-SHOT_NAMES = ("both-her", "both-him", "her-1", "her-2", "her-listen", "him-1", "him-2", "him-listen")
+D_SHOTS = ("both-her", "both-him", "both-her-2", "both-him-2", "her-1", "her-2", "him-1", "him-2")
+A_SHOTS = ("both-her", "both-him", "her-1", "him-1")
+PLACES = ("classroom", "cafe", "interview", "exam", "desk")
 
 
-def fake_library(folder: Path, places=("classroom", "cafe", "interview", "exam", "desk"), skip=()) -> I.Library:
-    """A library.json with every shot of ``places`` (minus ``skip``) and an empty file per shot."""
+def fake_library(folder: Path, places=PLACES, a_places=PLACES, skip=()) -> I.Library:
+    """A version 2 library.json with style D in ``places`` and style A in ``a_places`` (minus ``skip``), and an empty
+    file per shot."""
     folder.mkdir(parents=True, exist_ok=True)
     shots = []
-    for place in places:
-        for name in SHOT_NAMES:
-            sid = f"{place}-{name}"
-            if sid in skip:
-                continue
-            (folder / f"{sid}.jpg").write_bytes(b"")
-            talk = name.split("-")[1] if name.startswith("both") else name.split("-")[0]
-            shots.append({"id": sid, "place": place, "shot": name, "file": f"{sid}.jpg",
-                          "focus": [0.3 if "her" in name else 0.7, 0.4], "talk": talk})
-    (folder / I.MANIFEST).write_text(json.dumps({"version": 1, "shots": shots}), encoding="utf-8")
+    for style, names, where in (("D", D_SHOTS, places), ("A", A_SHOTS, a_places)):
+        for place in where:
+            for name in names:
+                sid = f"{style}-{place}-{name}"
+                if sid in skip:
+                    continue
+                (folder / f"{sid}.jpg").write_bytes(b"")
+                two = name.startswith("both")
+                talk = name.split("-")[1] if two else name.split("-")[0]
+                faces = {"her": [0.3, 0.4], "him": [0.7, 0.4]} if two else {}
+                shots.append({"id": sid, "style": style, "place": place, "shot": name, "file": f"{sid}.jpg",
+                              "who": ["her", "him"] if two else [talk], "talk": talk, "faces": faces,
+                              "focus": faces.get(talk) or [0.32 if talk == "her" else 0.68, 0.36],
+                              "seed": 1, "model": "m", "license": "l"})
+    doc = {"version": 2, "styles": {"D": {"name": "chibi", "share": 0.75}, "A": {"name": "anime", "share": 0.25}},
+           "sources": [], "shots": shots}
+    (folder / I.MANIFEST).write_text(json.dumps(doc), encoding="utf-8")
     return I.load_library(folder)
 
 
 class SpecTests(unittest.TestCase):
     def setUp(self) -> None:
         self.spec = I.load_spec(I.SPEC)
-        self.portraits, self.shots = I.expand(self.spec)
+        self.items = I.expand(self.spec)
+        self.by_id = {it.id: it for it in self.items}
 
-    def test_two_portraits_and_eight_shots_in_five_places(self) -> None:
-        self.assertEqual([p.id for p in self.portraits], ["portrait-her", "portrait-him"])
-        self.assertEqual(len(self.shots), 40 - len(self.spec.get("skip", [])))
-        self.assertEqual({s.place for s in self.shots}, set(L.PLACES.values()))
-        ids = [s.id for s in self.portraits + self.shots]
-        self.assertEqual(len(ids), len(set(ids)))
+    def test_each_style_names_its_model_licence_and_pinned_revision(self) -> None:
+        for style in ("D", "A"):
+            model = I.model_for(self.spec, style)
+            self.assertEqual(model["repo"], "cagliostrolab/animagine-xl-3.1")
+            self.assertRegex(model["revision"], r"^[0-9a-f]{40}$")  # a commit, never a branch name
+            self.assertIn("Open RAIL++-M", model["license"])
+            self.assertTrue(model["url"].startswith("https://huggingface.co/"))
+        for it in self.items:
+            if it.kind != "split":
+                self.assertEqual(it.model, self.spec["styles"][it.style]["model"], it.id)
+        with self.assertRaisesRegex(I.ImagesError, "no style"):
+            I.model_for(self.spec, "Z")
 
-    def test_one_seed_family_and_the_portraits_behind_each_shot(self) -> None:
-        seeds = [s.seed for s in self.shots]
-        self.assertEqual(len(seeds), len(set(seeds)))
-        chosen = self.spec.get("seeds", {})  # a seed picked from --candidates (seed + 1000 x k)
-        for s in self.shots:
-            family = self.spec["seed_base"] + 100 * list(self.spec["places"]).index(s.place) \
-                + list(self.spec["shots"]).index(s.shot)
-            self.assertEqual(s.seed, chosen.get(s.id, family))
-            self.assertEqual((s.seed - family) % 1000, 0)
-        for s in self.shots:
-            self.assertEqual(s.ip, ("her", "him") if s.who == "both" else (s.who,))  # left to right in a two-shot
-            self.assertGreater(s.ip_scale, 0)
+    def test_a_style_with_an_unknown_model_is_refused(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            spec = json.loads(I.SPEC.read_text(encoding="utf-8"))
+            spec["styles"]["A"]["model"] = "sdxl-base"
+            path = Path(tmp) / "p.json"
+            path.write_text(json.dumps(spec), encoding="utf-8")
+            with self.assertRaisesRegex(I.ImagesError, "sdxl-base"):
+                I.load_spec(path)
 
-    def test_prompts_describe_adults_with_the_same_look(self) -> None:
-        looks = {k: v["look"] for k, v in self.spec["characters"].items()}
-        for s in self.shots:
-            self.assertIn(self.spec["style"], s.prompt)
-            if s.who in ("her", "him"):
-                self.assertIn(looks[s.who], s.prompt)  # the same words in every shot of a character
-            self.assertNotIn("{", s.prompt)
-        self.assertIn("child", self.spec["negative"])
-        self.assertTrue(all("late 20s" in look for look in looks.values()))
+    def test_style_d_figures_backgrounds_and_composites(self) -> None:
+        d = self.spec["styles"]["D"]
+        figures = [it for it in self.items if it.kind == "figure"]
+        self.assertEqual(len(figures), 2 * len(d["poses"]))
+        self.assertTrue({"portrait", "talk", "listen", "think", "point", "laugh", "nod"} <= set(d["poses"]))
+        seeds = self.spec.get("seeds", {})
+        for it in figures:
+            self.assertEqual(it.seed, seeds.get(it.id, {"her": 104, "him": 204}[it.who[0]]), it.id)
+        scenes = [it for it in self.items if it.kind == "scene"]
+        self.assertEqual(len(scenes), len(PLACES) * len(D_SHOTS))
+        for it in scenes:
+            self.assertEqual(it.deps[0], f"D-bg-{it.place}")
+            self.assertEqual([self.by_id[x].who[0] for x in it.deps[1:]], list(it.who))  # her left, him right
+            self.assertIn(it.talk, it.who)
+            self.assertEqual(it.focus, it.faces[it.talk])
+            if len(it.who) == 2:
+                self.assertLess(it.faces["her"][0], 0.5)
+                self.assertGreater(it.faces["him"][0], 0.5)
+            speaker_pose = next(x for x in it.deps[1:] if self.by_id[x].who[0] == it.talk).rsplit("-", 1)[1]
+            self.assertNotIn(speaker_pose, ("listen", "nod"), it.id)  # the speaker is never drawn listening
+        listener = self.by_id["D-cafe-both-her"].deps[2]
+        self.assertEqual(listener, "D-fig-him-listen")
 
-    def test_every_model_has_a_licence(self) -> None:
-        for name, model in self.spec["models"].items():
-            self.assertTrue(model.get("license"), name)
-            self.assertTrue(model.get("repo"), name)
+    def test_style_a_portraits_panels_and_split_two_shots(self) -> None:
+        a = [it for it in self.items if it.style == "A"]
+        self.assertEqual({it.id for it in a if "portrait" in it.id}, {"A-portrait-her", "A-portrait-him"})
+        shots = [it for it in a if it.is_shot]
+        self.assertEqual(len(shots), len(PLACES) * len(A_SHOTS))
+        for it in shots:
+            self.assertIn(it.talk, it.who)
+            if it.kind == "split":
+                left, right = (self.by_id[x] for x in it.deps)
+                self.assertEqual((left.who, right.who), (("her",), ("him",)))
+                self.assertTrue(it.deps[it.who.index(it.talk)].endswith("-talk"))
+                self.assertTrue(it.deps[1 - it.who.index(it.talk)].endswith("-listen"))
+        for it in a:
+            if it.who == ("her",) and it.kind == "draw":
+                self.assertRegex(it.prompt, r"\b(portrait|upper body)\b")  # framed head and shoulders, modest
+                self.assertIn("large breasts", it.negative)
 
-    def test_key_changes_with_prompt_or_seed(self) -> None:
-        a = self.shots[0]
-        b = I.Shot(**{**a.__dict__, "seed": a.seed + 1})
-        c = I.Shot(**{**a.__dict__, "prompt": a.prompt + ", rain"})
-        self.assertEqual(len({a.key(), b.key(), c.key()}), 3)
+    def test_prompts_describe_adults_and_avoid_text(self) -> None:
+        adult = [t.strip() for t in self.spec["adult_negative"].split(",")]
+        self.assertTrue({"child", "loli", "shota", "school uniform"} <= set(adult))
+        for it in self.items:
+            if it.kind == "split":
+                continue
+            for tag in adult:
+                self.assertIn(tag, it.negative, it.id)
+            self.assertNotIn("{", it.prompt)
+            self.assertNotIn("talking", it.prompt)  # it brings in lettering; the pose is described instead
+            if it.who and it.kind != "scene":
+                self.assertIn("adult " + ("woman" if it.who[0] == "her" else "man"), it.prompt)
+        bad = self.spec["adult_negative"].split(", ")[0]
+        spec = json.loads(json.dumps(self.spec))
+        spec["styles"]["D"]["negative"] = spec["styles"]["D"]["negative"].replace(bad + ", ", "")
+        spec["styles"]["D"]["characters"]["her"]["negative"] = "long hair"
+        with self.assertRaisesRegex(I.ImagesError, "adult-only"):
+            I.expand(spec)
+
+    def test_a_new_seed_reaches_the_shots_built_from_it(self) -> None:
+        spec = json.loads(json.dumps(self.spec))
+        spec["seeds"] = {"D-fig-her-talk": 1104}
+        after = {it.id: it for it in I.expand(spec)}
+        self.assertEqual(after["D-fig-her-talk"].seed, 1104)
+        self.assertNotEqual(after["D-cafe-both-her"].params_hash, self.by_id["D-cafe-both-her"].params_hash)
+        self.assertNotEqual(after["D-cafe-her-1"].params_hash, self.by_id["D-cafe-her-1"].params_hash)
+        self.assertEqual(after["D-cafe-him-1"].params_hash, self.by_id["D-cafe-him-1"].params_hash)
+        spec["seeds"] = {"A-panel-cafe-him-listen": 7}
+        after = {it.id: it for it in I.expand(spec)}
+        self.assertNotEqual(after["A-cafe-both-her"].params_hash, self.by_id["A-cafe-both-her"].params_hash)
+        self.assertEqual(after["A-cafe-both-him"].params_hash, self.by_id["A-cafe-both-him"].params_hash)
 
     def test_bad_spec_is_named(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "p.json"
-            path.write_text(json.dumps({"version": 1}), encoding="utf-8")
+            path.write_text(json.dumps({"version": 2}), encoding="utf-8")
             with self.assertRaisesRegex(I.ImagesError, "missing"):
                 I.load_spec(path)
 
@@ -114,66 +178,91 @@ class LibraryAndPickTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.tmp.cleanup()
 
-    def test_missing_library_says_how_to_build_it(self) -> None:
+    def test_missing_or_old_library_says_how_to_build_it(self) -> None:
         with self.assertRaisesRegex(I.ImagesError, "images-library"):
             I.load_library(Path(self.tmp.name) / "nothing")
+        old = Path(self.tmp.name) / "old"
+        old.mkdir()
+        (old / I.MANIFEST).write_text(json.dumps({"version": 1, "shots": []}), encoding="utf-8")
+        with self.assertRaisesRegex(I.ImagesError, "version 2"):
+            I.load_library(old)
 
     def test_a_missing_file_is_left_out(self) -> None:
-        (self.lib.folder / "cafe-him-1.jpg").unlink()
+        (self.lib.folder / "D-cafe-him-1.jpg").unlink()
         lib = I.load_library(self.lib.folder)
-        self.assertNotIn("cafe-him-1", lib.shots)
-        self.assertIn("cafe-him-2", lib.shots)
+        self.assertNotIn("D-cafe-him-1", lib.shots)
+        self.assertIn("D-cafe-him-2", lib.shots)
+
+    def test_styles_change_only_at_part_boundaries_near_the_share(self) -> None:
+        sizes = (6, 40, 20, 30, 20, 25, 4, 80, 30, 25)
+        lines = [(f"p{k}", PLACES[k % 5], "her" if j % 2 else "him") for k, n in enumerate(sizes) for j in range(n)]
+        styles = I.pick_styles(lines, self.lib)
+        self.assertEqual(self.lib.main_style(), "D")
+        self.assertEqual(styles[0], "D")  # the first part sets the main look
+        by_part = {}
+        for (part, _, _), style in zip(lines, styles):
+            by_part.setdefault(part, set()).add(style)
+        self.assertTrue(all(len(v) == 1 for v in by_part.values()))  # one style per part
+        order = [next(iter(by_part[f"p{k}"])) for k in range(len(sizes))]
+        self.assertIn("A", order)
+        self.assertFalse(any(a == b == "A" for a, b in zip(order, order[1:])))  # mixed in, never two parts in a row
+        self.assertAlmostEqual(styles.count("A") / len(styles), 0.25, delta=0.05)
+        self.assertEqual(styles, I.pick_styles(lines, self.lib))  # the same on every run
+
+    def test_a_style_is_used_only_where_it_has_stills(self) -> None:
+        lib = fake_library(Path(self.tmp.name) / "lib-a", a_places=("cafe",))
+        lines = [(f"p{k}", PLACES[k % 5], "her" if j % 3 else "him") for k in range(10) for j in range(10)]
+        for (_, place, _), style in zip(lines, I.pick_styles(lines, lib)):
+            if style == "A":
+                self.assertEqual(place, "cafe")
+        only_d = fake_library(Path(self.tmp.name) / "lib-d", a_places=())
+        self.assertEqual(set(I.pick_styles(lines, only_d)), {"D"})
+
+    def test_the_bubble_always_sits_on_a_still_of_its_speaker(self) -> None:
+        lines = [(f"p{k}", PLACES[k % 5], "her" if (j * 7 + k) % 3 else "him") for k in range(10) for j in range(30)]
+        for (_, place, talk), sid in zip(lines, I.pick_shots(lines, self.lib)):
+            entry = self.lib.shots[sid]
+            self.assertIn(talk, entry["who"], sid)  # never the other character's still
+            self.assertEqual(entry["place"], place)
+            x = I.focus_for(entry, talk)[0]
+            self.assertTrue(x < 0.5 if talk == "her" else x > 0.5, sid)  # the tail points at the speaker's side
+        with self.assertRaisesRegex(I.ImagesError, "does not show him"):
+            I.focus_for(self.lib.shots["D-cafe-her-1"], "him")
 
     def test_a_part_opens_on_the_two_shot_then_shots_take_turns(self) -> None:
+        lib = fake_library(Path(self.tmp.name) / "lib-only-d", a_places=())
         lines = [("p1", "cafe", "him")] * 6 + [("p2", "cafe", "her")] + [("p2", "cafe", "him")]
-        got = I.pick_shots(lines, self.lib)
-        self.assertEqual(got[:6], ["cafe-both-him", "cafe-him-1", "cafe-him-2", "cafe-both-him", "cafe-her-listen",
-                                   "cafe-him-1"])
-        self.assertEqual(got[6], "cafe-both-her")  # a new part opens on its two-shot
-        self.assertEqual(got[7], "cafe-him-1")
+        got = I.pick_shots(lines, lib)
+        self.assertEqual(got[:6], ["D-cafe-both-him", "D-cafe-him-1", "D-cafe-both-him", "D-cafe-him-2",
+                                   "D-cafe-both-him-2", "D-cafe-him-1"])
+        self.assertEqual(got[6], "D-cafe-both-her")  # a new part opens on its two-shot
+        self.assertEqual(got[7], "D-cafe-him-1")
 
     def test_never_the_same_still_twice_in_a_row(self) -> None:
         lines = [("p", "classroom", "her" if k % 3 else "him") for k in range(60)]
         got = I.pick_shots(lines, self.lib)
         self.assertTrue(all(a != b for a, b in zip(got, got[1:])))
-        for (_, place, talk), shot in zip(lines, got):
-            self.assertTrue(shot.startswith(place))
-            name = shot[len(place) + 1:]
-            self.assertIn(name, I.candidates(talk) + [I.opening(talk)])  # the speaker, or the listener reacting
-
-    def test_a_two_shot_serves_both_speakers(self) -> None:
-        lib = fake_library(Path(self.tmp.name) / "lib3", places=("desk",), skip=("desk-both-him",))
-        got = I.pick_shots([("p", "desk", "him"), ("p", "desk", "him"), ("p", "desk", "him"), ("p", "desk", "him")], lib)
-        self.assertEqual(got[0], "desk-both-her")  # the part still opens on a two-shot
-        self.assertIn("desk-both-her", got[1:])
-        entry = lib.shots["desk-both-her"]
-        self.assertEqual(I.focus_for(entry, "him"), list(I.TWO_SHOT_FOCUS["him"]))  # the camera goes to him
-        self.assertEqual(I.focus_for(entry, "her"), list(I.TWO_SHOT_FOCUS["her"]))
-        self.assertEqual(I.focus_for(lib.shots["desk-him-1"], "him"), lib.shots["desk-him-1"]["focus"])
-
-    def test_skipped_shots_are_not_drawn(self) -> None:
-        spec = I.load_spec(I.SPEC)
-        spec["skip"] = ["cafe-both-him"]
-        _, shots = I.expand(spec)
-        self.assertNotIn("cafe-both-him", {s.id for s in shots})
-        self.assertIn("cafe-both-her", {s.id for s in shots})
 
     def test_falls_back_when_a_shot_is_missing(self) -> None:
-        lib = fake_library(Path(self.tmp.name) / "lib2", places=("exam",),
-                           skip=("exam-both-her", "exam-her-1", "exam-her-2"))
+        lib = fake_library(Path(self.tmp.name) / "lib2", places=("exam",), a_places=(),
+                           skip=("D-exam-both-her", "D-exam-her-1", "D-exam-her-2", "D-exam-both-her-2"))
         got = I.pick_shots([("p", "exam", "her")] * 4, lib)
-        self.assertTrue(all(s in lib.shots for s in got))
+        self.assertTrue(all(lib.shots[s]["who"] == ["her", "him"] for s in got))  # only two-shots show her
         self.assertTrue(all(a != b for a, b in zip(got, got[1:])))
+        lib = fake_library(Path(self.tmp.name) / "lib3", places=("exam",), a_places=(),
+                           skip=tuple(f"D-exam-{n}" for n in D_SHOTS if "her" in n or n.startswith("both")))
+        with self.assertRaisesRegex(I.ImagesError, "no D still of her"):
+            I.pick_shots([("p", "exam", "her")], lib)
 
     def test_unknown_place_is_named(self) -> None:
         with self.assertRaisesRegex(I.ImagesError, "beach"):
             I.pick_shots([("p", "beach", "her")], self.lib)
 
     def test_worker_command(self) -> None:
-        cmd = I.worker_cmd(Path("/v/bin/python"), Path("p.json"), Path("/lib"), only=["cafe-him-1"], force=True)
+        cmd = I.worker_cmd(Path("/v/bin/python"), Path("p.json"), Path("/lib"), only=["D-cafe-him-1"], force=True)
         self.assertEqual(cmd[:3], ["/v/bin/python", "-m", "motion_studio.images_worker"])
         self.assertIn("--force", cmd)
-        self.assertEqual(cmd[cmd.index("--only") + 1], "cafe-him-1")
+        self.assertEqual(cmd[cmd.index("--only") + 1], "D-cafe-him-1")
 
 
 class LayoutTests(unittest.TestCase):
@@ -361,7 +450,19 @@ class LessonLookTests(unittest.TestCase):
             for s in (x for x in self.doc["scenes"] if x["id"].startswith(f"{key}-")):
                 if key == "listen" and s["id"].startswith("listen-again"):
                     continue
-                self.assertTrue(Path(s["visual"]["image"]).name.startswith(place + "-"), (key, s["id"]))
+                self.assertRegex(Path(s["visual"]["image"]).name, rf"^[AD]-{place}-", (key, s["id"]))
+
+    def test_each_still_shows_its_speaker_and_a_is_mixed_in(self) -> None:
+        styles = []
+        for s in self.doc["scenes"]:
+            v = s["visual"]
+            entry = self.lib.shots[Path(v["image"]).stem]
+            self.assertIn(v["talk"], entry["who"], s["id"])
+            self.assertEqual(v["focus"], I.focus_for(entry, v["talk"]))
+            styles.append(entry["style"])
+        self.assertEqual(styles[0], "D")
+        self.assertGreater(styles.count("A"), 0)
+        self.assertGreater(styles.count("D"), styles.count("A"))
 
     def test_write_source_copies_only_the_stills_used(self) -> None:
         folder = self.base / "lessons"
@@ -374,11 +475,11 @@ class LessonLookTests(unittest.TestCase):
         self.assertEqual(sorted(p.name for p in (src.folder / "library").iterdir()), sorted(Path(u).name for u in used))
         self.assertFalse((src.folder / "characters").exists())
         from_dict(doc, src.folder)  # schema + files
-        self.assertEqual(json.loads(src.topic.read_text(encoding="utf-8"))["job"], "en-2030-01-02-acme-3d")
+        self.assertEqual(json.loads(src.topic.read_text(encoding="utf-8"))["job"], "en-2030-01-02-acme-chibi")
 
     def test_look_names_and_description(self) -> None:
         self.assertEqual(L.job_name(Path("a.lesson.md"), self.lesson), "en-2030-01-02-a")
-        self.assertEqual(L.job_name(Path("a.lesson.md"), self.lesson, "illustrated"), "en-2030-01-02-a-3d")
+        self.assertEqual(L.job_name(Path("a.lesson.md"), self.lesson, "illustrated"), "en-2030-01-02-a-chibi")
         self.assertTrue(L.is_illustrated(self.doc))
         self.assertIn("made with AI", L.description_intro(self.lesson, True))
         self.assertIn("original drawings", L.description_intro(self.lesson, False))

@@ -1,36 +1,34 @@
 {
-  "version": 1,
+  "version": 2,
   "about": "Built by motion-studio images-library from samples/library/prompts.json. Images are original and made with AI on a local GPU; they stay out of git.",
   "models": {
-    "base": {
-      "repo": "stabilityai/stable-diffusion-xl-base-1.0",
-      "files": "fp16 variant",
+    "animagine-xl-3.1": {
+      "repo": "cagliostrolab/animagine-xl-3.1",
+      "revision": "483f0c322568ed13697ed01dd0be07204746d12b",
       "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
-      "url": "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0",
-      "revision": "462165984030d82259a11f4367a4eed129e94a7b"
+      "url": "https://huggingface.co/cagliostrolab/animagine-xl-3.1"
+    }
+  },
+  "styles": {
+    "D": {
+      "name": "chibi anime figure",
+      "share": 0.75,
+      "model": "animagine-xl-3.1"
     },
-    "ip_adapter": {
-      "repo": "h94/IP-Adapter",
-      "file": "sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors",
-      "license": "Apache-2.0",
-      "url": "https://huggingface.co/h94/IP-Adapter",
-      "revision": "018e402774aeeddd60609b4ecdb7e298259dc729"
-    },
-    "image_encoder": {
-      "repo": "h94/IP-Adapter",
-      "file": "models/image_encoder (OpenCLIP ViT-H/14, LAION-2B)",
-      "license": "Apache-2.0 (repo); the ViT-H/14 weights are MIT (LAION)",
-      "url": "https://huggingface.co/h94/IP-Adapter",
-      "revision": "018e402774aeeddd60609b4ecdb7e298259dc729"
+    "A": {
+      "name": "anime",
+      "share": 0.25,
+      "model": "animagine-xl-3.1"
     }
   },
   "generate": {
-    "width": 1344,
-    "height": 768,
     "steps": 28,
-    "guidance": 6.0,
-    "ip_scale": 0.5,
-    "ip_scale_both": 0.4
+    "guidance": 6.0
+  },
+  "blend": {
+    "strength": 0.3,
+    "steps": 30,
+    "guidance": 5.0
   },
   "output": {
     "width": 1920,
@@ -38,999 +36,3857 @@
     "format": "jpg",
     "quality": 92
   },
-  "characters": {
-    "her": {
-      "name": "Lan",
-      "file": "portrait-her.png",
-      "seed": 1101,
-      "prompt": "close-up portrait of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, stylized 3d cartoon character, big expressive eyes, friendly smile, facing the camera, plain warm grey background, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "params_hash": "f774bc04d25e2d84",
-      "sha256": "d69d19bac6ec3dfb1b22b879d3c892c0c8e1e1850a374ba2831a0bd7e269bd03",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0",
+  "sources": [
+    {
+      "id": "D-fig-her-portrait",
+      "kind": "figure",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, big head, full body, 1girl, solo, adult woman, black hair, bob cut, medium hair, mustard cardigan, dark yellow cardigan, open cardigan, white shirt, black pants, brown eyes, standing, smile, simple background, pastel background, light cream background, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, sound effects, watermark, logo, nsfw, lowres, worst quality, low quality, bad anatomy, bad hands, extra digits, fewer digits, realistic, long hair, ponytail, blonde hair, sweater, turtleneck, light yellow, pale yellow, bare legs, skirt, glasses",
+      "seed": 104,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "",
+      "shot": "",
+      "who": [
+        "her"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "ef7841879e6d585e",
+      "file": "D-fig-her-portrait.png",
+      "sha256": "408d0d774d198fad275edab61fe8775c76c3d412f0ce17bf1f98e378c5c091ff",
       "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
     },
-    "him": {
-      "name": "Minh",
-      "file": "portrait-him.png",
-      "seed": 2207,
-      "prompt": "close-up portrait of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, stylized 3d cartoon character, big expressive eyes, friendly smile, facing the camera, plain warm grey background, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "params_hash": "0cbe03721ad53fca",
-      "sha256": "dd86e0acc9ebf3861362e6faf1dcf16ae32663c50f5068e8c18da70d663ae11e",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0",
+    {
+      "id": "D-fig-her-talk",
+      "kind": "figure",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, big head, full body, 1girl, solo, adult woman, black hair, bob cut, medium hair, mustard cardigan, dark yellow cardigan, open cardigan, white shirt, black pants, brown eyes, open mouth, smile, hand up, open hand, simple background, pastel background, light cream background, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, sound effects, watermark, logo, nsfw, lowres, worst quality, low quality, bad anatomy, bad hands, extra digits, fewer digits, realistic, long hair, ponytail, blonde hair, sweater, turtleneck, light yellow, pale yellow, bare legs, skirt, glasses",
+      "seed": 104,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "",
+      "shot": "",
+      "who": [
+        "her"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "a11a1b901fb23c8d",
+      "file": "D-fig-her-talk.png",
+      "sha256": "4ec27a2dfb37d825a532663d01dbf29ad773e89d9e35f91fa893073cf1265917",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "D-fig-her-listen",
+      "kind": "figure",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, big head, full body, 1girl, solo, adult woman, black hair, bob cut, medium hair, mustard cardigan, dark yellow cardigan, open cardigan, white shirt, black pants, brown eyes, closed mouth, light smile, own hands together, standing, simple background, pastel background, light cream background, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, sound effects, watermark, logo, nsfw, lowres, worst quality, low quality, bad anatomy, bad hands, extra digits, fewer digits, realistic, long hair, ponytail, blonde hair, sweater, turtleneck, light yellow, pale yellow, bare legs, skirt, glasses",
+      "seed": 104,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "",
+      "shot": "",
+      "who": [
+        "her"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "bb68b3580a7e2e24",
+      "file": "D-fig-her-listen.png",
+      "sha256": "e65b6746ee8f115d78ce5715c1ae7523f9c6da359ea2b609637e10877223816b",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "D-fig-her-think",
+      "kind": "figure",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, big head, full body, 1girl, solo, adult woman, black hair, bob cut, medium hair, mustard cardigan, dark yellow cardigan, open cardigan, white shirt, black pants, brown eyes, closed mouth, hand on own chin, thinking, looking up, simple background, pastel background, light cream background, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, sound effects, watermark, logo, nsfw, lowres, worst quality, low quality, bad anatomy, bad hands, extra digits, fewer digits, realistic, long hair, ponytail, blonde hair, sweater, turtleneck, light yellow, pale yellow, bare legs, skirt, glasses",
+      "seed": 104,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "",
+      "shot": "",
+      "who": [
+        "her"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "e6df56cd765eaca5",
+      "file": "D-fig-her-think.png",
+      "sha256": "b669acdf1f5c0903341c1f7aa147185b0a434d24e4f13a92f5b34251f32dfc06",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "D-fig-her-point",
+      "kind": "figure",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, big head, full body, 1girl, solo, adult woman, black hair, bob cut, medium hair, mustard cardigan, dark yellow cardigan, open cardigan, white shirt, black pants, brown eyes, open mouth, smile, index finger raised, simple background, pastel background, light cream background, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, sound effects, watermark, logo, nsfw, lowres, worst quality, low quality, bad anatomy, bad hands, extra digits, fewer digits, realistic, long hair, ponytail, blonde hair, sweater, turtleneck, light yellow, pale yellow, bare legs, skirt, glasses",
+      "seed": 104,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "",
+      "shot": "",
+      "who": [
+        "her"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "578df5ceb9760a9e",
+      "file": "D-fig-her-point.png",
+      "sha256": "6b1d7c7ccfc77554344694f50a17d60edfe8df2e902f51fce257de942759bd1f",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "D-fig-her-laugh",
+      "kind": "figure",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, big head, full body, 1girl, solo, adult woman, black hair, bob cut, medium hair, mustard cardigan, dark yellow cardigan, open cardigan, white shirt, black pants, brown eyes, laughing, open mouth, closed eyes, happy, simple background, pastel background, light cream background, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, sound effects, watermark, logo, nsfw, lowres, worst quality, low quality, bad anatomy, bad hands, extra digits, fewer digits, realistic, long hair, ponytail, blonde hair, sweater, turtleneck, light yellow, pale yellow, bare legs, skirt, glasses",
+      "seed": 104,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "",
+      "shot": "",
+      "who": [
+        "her"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "42966ab7ea9bb608",
+      "file": "D-fig-her-laugh.png",
+      "sha256": "fb61e9e4e9d86fa7115757f41ae7cdef997860179ffdfcc3135315074714cc84",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "D-fig-her-nod",
+      "kind": "figure",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, big head, full body, 1girl, solo, adult woman, black hair, bob cut, medium hair, mustard cardigan, dark yellow cardigan, open cardigan, white shirt, black pants, brown eyes, smile, closed eyes, nodding, standing, simple background, pastel background, light cream background, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, sound effects, watermark, logo, nsfw, lowres, worst quality, low quality, bad anatomy, bad hands, extra digits, fewer digits, realistic, long hair, ponytail, blonde hair, sweater, turtleneck, light yellow, pale yellow, bare legs, skirt, glasses",
+      "seed": 104,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "",
+      "shot": "",
+      "who": [
+        "her"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "2ece47b99f286999",
+      "file": "D-fig-her-nod.png",
+      "sha256": "d596fc2255cbc2de69e1431e217915c36c488615078511a5f58251e5176002da",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "D-fig-him-portrait",
+      "kind": "figure",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, big head, full body, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, navy blue sweater, black pants, brown eyes, standing, smile, simple background, pastel background, light cream background, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, sound effects, watermark, logo, nsfw, lowres, worst quality, low quality, bad anatomy, bad hands, extra digits, fewer digits, realistic, facial hair, old man, sunglasses, tinted lenses, black sweater, light blue sweater, blue eyes, cardigan, jacket",
+      "seed": 204,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "",
+      "shot": "",
+      "who": [
+        "him"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "7b40cad194582852",
+      "file": "D-fig-him-portrait.png",
+      "sha256": "56051e935fc83f519e58ead4a9afd06cd00ec1af03a355cfdcc6b95bd9dd58e7",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "D-fig-him-talk",
+      "kind": "figure",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, big head, full body, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, navy blue sweater, black pants, brown eyes, open mouth, smile, hand up, open hand, simple background, pastel background, light cream background, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, sound effects, watermark, logo, nsfw, lowres, worst quality, low quality, bad anatomy, bad hands, extra digits, fewer digits, realistic, facial hair, old man, sunglasses, tinted lenses, black sweater, light blue sweater, blue eyes, cardigan, jacket",
+      "seed": 204,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "",
+      "shot": "",
+      "who": [
+        "him"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "fae78ff543b424ee",
+      "file": "D-fig-him-talk.png",
+      "sha256": "c13703239ff3971a6ffdd8df9aa1269389ad71fef6a9a8b5b53b136f0ad035ee",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "D-fig-him-listen",
+      "kind": "figure",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, big head, full body, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, navy blue sweater, black pants, brown eyes, closed mouth, light smile, own hands together, standing, simple background, pastel background, light cream background, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, sound effects, watermark, logo, nsfw, lowres, worst quality, low quality, bad anatomy, bad hands, extra digits, fewer digits, realistic, facial hair, old man, sunglasses, tinted lenses, black sweater, light blue sweater, blue eyes, cardigan, jacket",
+      "seed": 1204,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "",
+      "shot": "",
+      "who": [
+        "him"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "f530b86f973b3128",
+      "file": "D-fig-him-listen.png",
+      "sha256": "38ef0f03c232a2824043dd336d0779744de0f759e9a4ae832c3b94d274f0049b",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "D-fig-him-think",
+      "kind": "figure",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, big head, full body, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, navy blue sweater, black pants, brown eyes, closed mouth, hand on own chin, thinking, looking up, simple background, pastel background, light cream background, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, sound effects, watermark, logo, nsfw, lowres, worst quality, low quality, bad anatomy, bad hands, extra digits, fewer digits, realistic, facial hair, old man, sunglasses, tinted lenses, black sweater, light blue sweater, blue eyes, cardigan, jacket",
+      "seed": 204,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "",
+      "shot": "",
+      "who": [
+        "him"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "2212a2618d0c4853",
+      "file": "D-fig-him-think.png",
+      "sha256": "88c3664a611e7fc6d50b2c010523ed286913fb9a0724f45c356b5864fedcd51c",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "D-fig-him-point",
+      "kind": "figure",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, big head, full body, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, navy blue sweater, black pants, brown eyes, open mouth, smile, index finger raised, simple background, pastel background, light cream background, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, sound effects, watermark, logo, nsfw, lowres, worst quality, low quality, bad anatomy, bad hands, extra digits, fewer digits, realistic, facial hair, old man, sunglasses, tinted lenses, black sweater, light blue sweater, blue eyes, cardigan, jacket",
+      "seed": 204,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "",
+      "shot": "",
+      "who": [
+        "him"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "9898f21267ac06af",
+      "file": "D-fig-him-point.png",
+      "sha256": "3755a3a1ba3b37737b0629ee5f3993826d4a8385c09140793905e677c4ff8bf2",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "D-fig-him-laugh",
+      "kind": "figure",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, big head, full body, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, navy blue sweater, black pants, brown eyes, big smile, open mouth, happy, hand up, simple background, pastel background, light cream background, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, sound effects, watermark, logo, nsfw, lowres, worst quality, low quality, bad anatomy, bad hands, extra digits, fewer digits, realistic, facial hair, old man, sunglasses, tinted lenses, black sweater, light blue sweater, blue eyes, cardigan, jacket",
+      "seed": 204,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "",
+      "shot": "",
+      "who": [
+        "him"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "5365ccad01fbdedf",
+      "file": "D-fig-him-laugh.png",
+      "sha256": "a8d59b9e4cad12880df5dc49475f470e2502f9e66fc608fc23ae30571b7095ca",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "D-fig-him-nod",
+      "kind": "figure",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, big head, full body, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, navy blue sweater, black pants, brown eyes, smile, closed eyes, nodding, standing, simple background, pastel background, light cream background, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, sound effects, watermark, logo, nsfw, lowres, worst quality, low quality, bad anatomy, bad hands, extra digits, fewer digits, realistic, facial hair, old man, sunglasses, tinted lenses, black sweater, light blue sweater, blue eyes, cardigan, jacket",
+      "seed": 204,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "",
+      "shot": "",
+      "who": [
+        "him"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "c41826710a2374ff",
+      "file": "D-fig-him-nod.png",
+      "sha256": "93055e53cd9c0bc78f68e77c6c8c5fb278e832f56c5a3c0eb0699925ed6e064c",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "D-bg-classroom",
+      "kind": "background",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "no humans, indoors, classroom, large whiteboard, wooden floor, window, daylight, 3d, glossy, pastel colors, soft lighting, masterpiece, best quality",
+      "negative": "people, person, 1girl, 1boy, child, loli, shota, school uniform, kanji, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, realistic",
+      "seed": 3000,
+      "width": 1344,
+      "height": 768,
+      "deps": [],
+      "layout": [],
+      "place": "classroom",
+      "shot": "",
+      "who": [],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "f1bd269cae1b30d4",
+      "file": "D-bg-classroom.png",
+      "sha256": "e3d121f57724b21c389b36bd81e09ddaa0c5dbbf7717a525ca2360e3ae174d43",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "D-bg-cafe",
+      "kind": "background",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "no humans, indoors, cafe interior, small round table, two coffee cups on table, potted plant, warm light, 3d, glossy, pastel colors, soft lighting, masterpiece, best quality",
+      "negative": "people, person, 1girl, 1boy, child, loli, shota, school uniform, kanji, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, realistic",
+      "seed": 3100,
+      "width": 1344,
+      "height": 768,
+      "deps": [],
+      "layout": [],
+      "place": "cafe",
+      "shot": "",
+      "who": [],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "2f7779b0961a822d",
+      "file": "D-bg-cafe.png",
+      "sha256": "e0f23d0bffc49b5026bdc7c65b23df614ed1595e7f2c6318905a6e12caaf7392",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "D-bg-interview",
+      "kind": "background",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "no humans, indoors, office meeting room, glass wall, long table, potted plant, daylight, 3d, glossy, pastel colors, soft lighting, masterpiece, best quality",
+      "negative": "people, person, 1girl, 1boy, child, loli, shota, school uniform, kanji, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, realistic",
+      "seed": 4200,
+      "width": 1344,
+      "height": 768,
+      "deps": [],
+      "layout": [],
+      "place": "interview",
+      "shot": "",
+      "who": [],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "4d2a5df2566ebb60",
+      "file": "D-bg-interview.png",
+      "sha256": "a1f494992e2327c01e396ce18655f067bdeef17e0e5bc35eb467592dcead6503",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "D-bg-exam",
+      "kind": "background",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "no humans, indoors, quiet test room, small table, two chairs, wall clock, daylight, 3d, glossy, pastel colors, soft lighting, masterpiece, best quality",
+      "negative": "people, person, 1girl, 1boy, child, loli, shota, school uniform, kanji, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, realistic",
+      "seed": 5300,
+      "width": 1344,
+      "height": 768,
+      "deps": [],
+      "layout": [],
+      "place": "exam",
+      "shot": "",
+      "who": [],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "cd19d5c30642f25c",
+      "file": "D-bg-exam.png",
+      "sha256": "c78feb355f8b98bd8ca214fedb76a39fca519a7a8acd7c32b146f0aa787dc70e",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "D-bg-desk",
+      "kind": "background",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "no humans, indoors, study room, desk, laptop, cork board, bookshelf, warm light, 3d, glossy, pastel colors, soft lighting, masterpiece, best quality",
+      "negative": "people, person, 1girl, 1boy, child, loli, shota, school uniform, kanji, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, realistic",
+      "seed": 4400,
+      "width": 1344,
+      "height": 768,
+      "deps": [],
+      "layout": [],
+      "place": "desk",
+      "shot": "",
+      "who": [],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "aae3dc39bc52ba78",
+      "file": "D-bg-desk.png",
+      "sha256": "0b73fa98e8514f401395fbd8b9365aa7eab9963d9cc54a8e7067f267cee389a5",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-portrait-her",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1girl, solo, adult woman, black hair, bob cut, medium hair, oversized mustard cardigan, white shirt, brown eyes, portrait, smile, looking at viewer, simple background, light blue background, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, long hair, ponytail, blonde hair, sweater, turtleneck, pale yellow, glasses",
+      "seed": 1104,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "",
+      "shot": "",
+      "who": [
+        "her"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "614a4b893b5e7066",
+      "file": "A-portrait-her.png",
+      "sha256": "3737c8ced617412e964c40b0e0a8359ae12f9133509c2ab7be4e1a26f70c1299",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-portrait-him",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, visible eyes, navy blue sweater, dark blue sweater, white collared shirt, brown eyes, portrait, smile, looking at viewer, simple background, light blue background, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, green sweater, teal, cardigan, light blue sweater, facial hair, old man, sunglasses, tinted lenses, black sweater, jacket, purple eyes",
+      "seed": 2204,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "",
+      "shot": "",
+      "who": [
+        "him"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "2a116668fc94c06a",
+      "file": "A-portrait-him.png",
+      "sha256": "6200389e9ae9c61c9eeae9a704584733d730cc175e8428e27e0f5ba51dec86f1",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-classroom-her-talk",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1girl, solo, adult woman, black hair, bob cut, medium hair, oversized mustard cardigan, white shirt, brown eyes, portrait, open mouth, smile, hand up, classroom, large whiteboard, wooden floor, window, daylight, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, long hair, ponytail, blonde hair, sweater, turtleneck, pale yellow, glasses",
+      "seed": 1104,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "classroom",
+      "shot": "",
+      "who": [
+        "her"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "48c0a69e28c04679",
+      "file": "A-panel-classroom-her-talk.png",
+      "sha256": "e6b45c55c0665ec36a89f288c77d2a3f85daf3918de78b5ceab7da17a261c6bb",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-classroom-her-listen",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1girl, solo, adult woman, black hair, bob cut, medium hair, oversized mustard cardigan, white shirt, brown eyes, portrait, closed mouth, light smile, looking to the side, classroom, large whiteboard, wooden floor, window, daylight, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, long hair, ponytail, blonde hair, sweater, turtleneck, pale yellow, glasses",
+      "seed": 1104,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "classroom",
+      "shot": "",
+      "who": [
+        "her"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "ccdc467df29b3378",
+      "file": "A-panel-classroom-her-listen.png",
+      "sha256": "78188a97ebf94f37a80ad695a710274a29d8da5c15abfb8062911e7674f7b51b",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-classroom-him-talk",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, visible eyes, navy blue sweater, dark blue sweater, white collared shirt, brown eyes, portrait, open mouth, smile, hand up, classroom, large whiteboard, wooden floor, window, daylight, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, green sweater, teal, cardigan, light blue sweater, facial hair, old man, sunglasses, tinted lenses, black sweater, jacket, purple eyes",
+      "seed": 2204,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "classroom",
+      "shot": "",
+      "who": [
+        "him"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "d77f87c5a1ce3ec8",
+      "file": "A-panel-classroom-him-talk.png",
+      "sha256": "28dfd51b1a3681fc323706656d4e4fb49fc34bf7364daa175678c66c287ad638",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-classroom-him-listen",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, visible eyes, navy blue sweater, dark blue sweater, white collared shirt, brown eyes, portrait, closed mouth, light smile, looking to the side, classroom, large whiteboard, wooden floor, window, daylight, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, green sweater, teal, cardigan, light blue sweater, facial hair, old man, sunglasses, tinted lenses, black sweater, jacket, purple eyes",
+      "seed": 2204,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "classroom",
+      "shot": "",
+      "who": [
+        "him"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "d3ceef7d55ab1aa6",
+      "file": "A-panel-classroom-him-listen.png",
+      "sha256": "72937054952e53790cd11301f59aa41c354c95d33a968e3e3375cc7980f4b842",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-cafe-her-talk",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1girl, solo, adult woman, black hair, bob cut, medium hair, oversized mustard cardigan, white shirt, brown eyes, portrait, open mouth, smile, hand up, cafe interior, small round table, two coffee cups on table, potted plant, warm light, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, long hair, ponytail, blonde hair, sweater, turtleneck, pale yellow, glasses",
+      "seed": 1104,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "cafe",
+      "shot": "",
+      "who": [
+        "her"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "149630e5dde321b9",
+      "file": "A-panel-cafe-her-talk.png",
+      "sha256": "bca681da6f97798ae65cdb4f1b3fcea9f1350bb769d5600614de387aa5a9780b",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-cafe-her-listen",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1girl, solo, adult woman, black hair, bob cut, medium hair, oversized mustard cardigan, white shirt, brown eyes, portrait, closed mouth, light smile, looking to the side, cafe interior, small round table, two coffee cups on table, potted plant, warm light, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, long hair, ponytail, blonde hair, sweater, turtleneck, pale yellow, glasses",
+      "seed": 1104,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "cafe",
+      "shot": "",
+      "who": [
+        "her"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "cd989dc1f05ec8b5",
+      "file": "A-panel-cafe-her-listen.png",
+      "sha256": "ce635735f427c3875696d8196a96c85639d7dad1dd42014d484425a7878c1a1e",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-cafe-him-talk",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, visible eyes, navy blue sweater, dark blue sweater, white collared shirt, brown eyes, portrait, open mouth, smile, hand up, cafe interior, small round table, two coffee cups on table, potted plant, warm light, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, green sweater, teal, cardigan, light blue sweater, facial hair, old man, sunglasses, tinted lenses, black sweater, jacket, purple eyes",
+      "seed": 2204,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "cafe",
+      "shot": "",
+      "who": [
+        "him"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "f4c5443c55cceb18",
+      "file": "A-panel-cafe-him-talk.png",
+      "sha256": "7f7c0ef78e3bfd63c1daa9b50696a6a3a85b408a89dfe3d828e10c91e443c5b2",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-cafe-him-listen",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, visible eyes, navy blue sweater, dark blue sweater, white collared shirt, brown eyes, portrait, closed mouth, light smile, looking to the side, cafe interior, small round table, two coffee cups on table, potted plant, warm light, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, green sweater, teal, cardigan, light blue sweater, facial hair, old man, sunglasses, tinted lenses, black sweater, jacket, purple eyes",
+      "seed": 2204,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "cafe",
+      "shot": "",
+      "who": [
+        "him"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "576cf586926b9045",
+      "file": "A-panel-cafe-him-listen.png",
+      "sha256": "c7d54a8aaec26c8b492c0bf290b30346f6f3ecb2365131fdbbd8821793abb1b0",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-interview-her-talk",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1girl, solo, adult woman, black hair, bob cut, medium hair, oversized mustard cardigan, white shirt, brown eyes, portrait, open mouth, smile, hand up, office meeting room, glass wall, long table, potted plant, daylight, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, long hair, ponytail, blonde hair, sweater, turtleneck, pale yellow, glasses",
+      "seed": 1104,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "interview",
+      "shot": "",
+      "who": [
+        "her"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "5cedcfcf6a750f07",
+      "file": "A-panel-interview-her-talk.png",
+      "sha256": "a70a12e450510854f899242ef9b16f43aef473ce8a8bf9d5ff461aa870b8aecd",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-interview-her-listen",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1girl, solo, adult woman, black hair, bob cut, medium hair, oversized mustard cardigan, white shirt, brown eyes, portrait, closed mouth, light smile, looking to the side, office meeting room, glass wall, long table, potted plant, daylight, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, long hair, ponytail, blonde hair, sweater, turtleneck, pale yellow, glasses",
+      "seed": 1104,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "interview",
+      "shot": "",
+      "who": [
+        "her"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "2fd12dfb79eb6426",
+      "file": "A-panel-interview-her-listen.png",
+      "sha256": "45d736f6144d43aada45caaf4a8512e94b7d3e09454f9b030a60436bfd174f5f",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-interview-him-talk",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, visible eyes, navy blue sweater, dark blue sweater, white collared shirt, brown eyes, portrait, open mouth, smile, hand up, office meeting room, glass wall, long table, potted plant, daylight, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, green sweater, teal, cardigan, light blue sweater, facial hair, old man, sunglasses, tinted lenses, black sweater, jacket, purple eyes",
+      "seed": 2204,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "interview",
+      "shot": "",
+      "who": [
+        "him"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "fb4e53e96e82184a",
+      "file": "A-panel-interview-him-talk.png",
+      "sha256": "185182f8808ffee3d9de634b1dfba4331cb1b8449fe619a918c15012d4660164",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-interview-him-listen",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, visible eyes, navy blue sweater, dark blue sweater, white collared shirt, brown eyes, portrait, closed mouth, light smile, looking to the side, office meeting room, glass wall, long table, potted plant, daylight, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, green sweater, teal, cardigan, light blue sweater, facial hair, old man, sunglasses, tinted lenses, black sweater, jacket, purple eyes",
+      "seed": 2204,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "interview",
+      "shot": "",
+      "who": [
+        "him"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "75c0a381b71df9be",
+      "file": "A-panel-interview-him-listen.png",
+      "sha256": "7a9a365bf6fe7c9c22dc7282200bfa7a27fe16b2fc7c0b0e60e54368689aa22b",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-exam-her-talk",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1girl, solo, adult woman, black hair, bob cut, medium hair, oversized mustard cardigan, white shirt, brown eyes, portrait, open mouth, smile, hand up, quiet test room, small table, two chairs, wall clock, daylight, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, long hair, ponytail, blonde hair, sweater, turtleneck, pale yellow, glasses",
+      "seed": 1104,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "exam",
+      "shot": "",
+      "who": [
+        "her"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "e8a435e7e82bc745",
+      "file": "A-panel-exam-her-talk.png",
+      "sha256": "5ab8cb622de507db053789129173f4874134824feb8c608fff0e77c19fe2d126",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-exam-her-listen",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1girl, solo, adult woman, black hair, bob cut, medium hair, oversized mustard cardigan, white shirt, brown eyes, portrait, closed mouth, light smile, looking to the side, quiet test room, small table, two chairs, wall clock, daylight, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, long hair, ponytail, blonde hair, sweater, turtleneck, pale yellow, glasses",
+      "seed": 1104,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "exam",
+      "shot": "",
+      "who": [
+        "her"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "2f7dbe25aa2abe93",
+      "file": "A-panel-exam-her-listen.png",
+      "sha256": "f23486b0691b703297e8774b53f8d5a5af0de9ebef0c7575c083f9fcc1505b79",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-exam-him-talk",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, visible eyes, navy blue sweater, dark blue sweater, white collared shirt, brown eyes, portrait, open mouth, smile, hand up, quiet test room, small table, two chairs, wall clock, daylight, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, green sweater, teal, cardigan, light blue sweater, facial hair, old man, sunglasses, tinted lenses, black sweater, jacket, purple eyes",
+      "seed": 2204,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "exam",
+      "shot": "",
+      "who": [
+        "him"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "53fcac9191ab0605",
+      "file": "A-panel-exam-him-talk.png",
+      "sha256": "a0015ad6aa913177e68ad5c14372ab52de13da977638b70a2fb512e498cfa73a",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-exam-him-listen",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, visible eyes, navy blue sweater, dark blue sweater, white collared shirt, brown eyes, portrait, closed mouth, light smile, looking to the side, quiet test room, small table, two chairs, wall clock, daylight, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, green sweater, teal, cardigan, light blue sweater, facial hair, old man, sunglasses, tinted lenses, black sweater, jacket, purple eyes",
+      "seed": 2204,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "exam",
+      "shot": "",
+      "who": [
+        "him"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "5ef2f52054feb7e4",
+      "file": "A-panel-exam-him-listen.png",
+      "sha256": "cb5a83c50c51b517d2bb8db07e56252d6d74ed77d92b1cda88c1654ed1e9cc0c",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-desk-her-talk",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1girl, solo, adult woman, black hair, bob cut, medium hair, oversized mustard cardigan, white shirt, brown eyes, portrait, open mouth, smile, hand up, study room, desk, laptop, cork board, bookshelf, warm light, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, long hair, ponytail, blonde hair, sweater, turtleneck, pale yellow, glasses",
+      "seed": 1104,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "desk",
+      "shot": "",
+      "who": [
+        "her"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "b5d23a64fb359a5d",
+      "file": "A-panel-desk-her-talk.png",
+      "sha256": "6a783140375ffe4a27384a55eabf1c3a9c5b23e62992cbf85d3ff9e3773e945d",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-desk-her-listen",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1girl, solo, adult woman, black hair, bob cut, medium hair, oversized mustard cardigan, white shirt, brown eyes, portrait, closed mouth, light smile, looking to the side, study room, desk, laptop, cork board, bookshelf, warm light, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, long hair, ponytail, blonde hair, sweater, turtleneck, pale yellow, glasses",
+      "seed": 1104,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "desk",
+      "shot": "",
+      "who": [
+        "her"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "1db8098b4ef37feb",
+      "file": "A-panel-desk-her-listen.png",
+      "sha256": "07e560588253adcb7ac80dbfb4e7ab6bf0569b50eee1ad08d43064a06dec4fb3",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-desk-him-talk",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, visible eyes, navy blue sweater, dark blue sweater, white collared shirt, brown eyes, portrait, open mouth, smile, hand up, study room, desk, laptop, cork board, bookshelf, warm light, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, green sweater, teal, cardigan, light blue sweater, facial hair, old man, sunglasses, tinted lenses, black sweater, jacket, purple eyes",
+      "seed": 2204,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "desk",
+      "shot": "",
+      "who": [
+        "him"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "4eeb2e5ad8b0078d",
+      "file": "A-panel-desk-him-talk.png",
+      "sha256": "5ea82f1f21aaea5a60313ee8da058c2e468bf8f74f9bfaeeff2f413429a0d7a1",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-panel-desk-him-listen",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, visible eyes, navy blue sweater, dark blue sweater, white collared shirt, brown eyes, portrait, closed mouth, light smile, looking to the side, study room, desk, laptop, cork board, bookshelf, warm light, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, green sweater, teal, cardigan, light blue sweater, facial hair, old man, sunglasses, tinted lenses, black sweater, jacket, purple eyes",
+      "seed": 2204,
+      "width": 1024,
+      "height": 1024,
+      "deps": [],
+      "layout": [],
+      "place": "desk",
+      "shot": "",
+      "who": [
+        "him"
+      ],
+      "talk": "",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "63a5bfe6b047344a",
+      "file": "A-panel-desk-him-listen.png",
+      "sha256": "b179313773229dafc1594ec3cebe4bac57fbf8994490dd2da84497f4b4d1f478",
       "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
     }
-  },
+  ],
   "shots": [
     {
-      "id": "classroom-both-her",
-      "place": "classroom",
-      "shot": "both-her",
-      "who": "both",
-      "talk": "her",
-      "focus": [
-        0.34,
-        0.42
-      ],
-      "prompt": "two people talking, a young woman in a yellow cardigan on the left standing by the whiteboard, speaking, a young man with glasses in a dark blue sweater on the right sitting at a desk with a notebook, listening, medium wide shot, a bright classroom with a clean whiteboard, wooden desks and big windows, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3400,
-      "ip": [
-        "her",
-        "him"
-      ],
-      "ip_scale": 0.4,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64], [0.577, 0.38, 0.72]]",
+      "id": "A-classroom-her-1",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1girl, solo, adult woman, black hair, bob cut, medium hair, oversized mustard cardigan, white shirt, brown eyes, upper body, open mouth, smile, hand up, classroom, large whiteboard, wooden floor, window, daylight, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, long hair, ponytail, blonde hair, sweater, turtleneck, pale yellow, glasses",
+      "seed": 1104,
       "width": 1344,
       "height": 768,
-      "file": "classroom-both-her.jpg",
-      "params_hash": "ffc42e9e47f11cbc",
-      "sha256": "1d48a16d8945f14342b3dacfcef29d292743777492f5df53c8fc62b4aa294e9e",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "classroom-her-1",
+      "deps": [],
+      "layout": [],
       "place": "classroom",
       "shot": "her-1",
-      "who": "her",
+      "who": [
+        "her"
+      ],
       "talk": "her",
       "focus": [
         0.5,
         0.36
       ],
-      "prompt": "medium close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, standing by the whiteboard, talking, warm smile, on the left of the frame, a bright classroom with a clean whiteboard, wooden desks and big windows, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "faces": {},
+      "mirror": false,
+      "params_hash": "92dc70dc42bd39bd",
+      "file": "A-classroom-her-1.jpg",
+      "sha256": "e6561087efdd68135bb89adb49fbbab7df825158bb96ab9f536e12afa43c259a",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-classroom-him-1",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, visible eyes, navy blue sweater, dark blue sweater, white collared shirt, brown eyes, upper body, open mouth, smile, hand up, classroom, large whiteboard, wooden floor, window, daylight, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, green sweater, teal, cardigan, light blue sweater, facial hair, old man, sunglasses, tinted lenses, black sweater, jacket, purple eyes",
+      "seed": 5204,
+      "width": 1344,
+      "height": 768,
+      "deps": [],
+      "layout": [],
+      "place": "classroom",
+      "shot": "him-1",
+      "who": [
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.65,
+        0.42
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "8af171388ae00831",
+      "file": "A-classroom-him-1.jpg",
+      "sha256": "c8c71200f60f5c31038619db3d46789811d1092aed2a5fbe25ea7f741ffa8524",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-cafe-her-1",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1girl, solo, adult woman, black hair, bob cut, medium hair, oversized mustard cardigan, white shirt, brown eyes, upper body, open mouth, smile, hand up, cafe interior, small round table, two coffee cups on table, potted plant, warm light, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, long hair, ponytail, blonde hair, sweater, turtleneck, pale yellow, glasses",
+      "seed": 1104,
+      "width": 1344,
+      "height": 768,
+      "deps": [],
+      "layout": [],
+      "place": "cafe",
+      "shot": "her-1",
+      "who": [
+        "her"
+      ],
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "31f5152433481b62",
+      "file": "A-cafe-her-1.jpg",
+      "sha256": "f2a0722dd7087a20c42f0d6e09c7a1b19aa0bc115b3df33a97c66fbb03fd8e06",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-cafe-him-1",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, visible eyes, navy blue sweater, dark blue sweater, white collared shirt, brown eyes, upper body, open mouth, smile, hand up, cafe interior, small round table, two coffee cups on table, potted plant, warm light, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, green sweater, teal, cardigan, light blue sweater, facial hair, old man, sunglasses, tinted lenses, black sweater, jacket, purple eyes",
+      "seed": 2204,
+      "width": 1344,
+      "height": 768,
+      "deps": [],
+      "layout": [],
+      "place": "cafe",
+      "shot": "him-1",
+      "who": [
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.78,
+        0.3
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "f6932072fc28c84b",
+      "file": "A-cafe-him-1.jpg",
+      "sha256": "7ab411e19d3dc6da541e3f303e2d69723599c50263f571b2843ffabd529d8303",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-interview-her-1",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1girl, solo, adult woman, black hair, bob cut, medium hair, oversized mustard cardigan, white shirt, brown eyes, upper body, open mouth, smile, hand up, office meeting room, glass wall, long table, potted plant, daylight, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, long hair, ponytail, blonde hair, sweater, turtleneck, pale yellow, glasses",
+      "seed": 1104,
+      "width": 1344,
+      "height": 768,
+      "deps": [],
+      "layout": [],
+      "place": "interview",
+      "shot": "her-1",
+      "who": [
+        "her"
+      ],
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "792be0816ab2c13d",
+      "file": "A-interview-her-1.jpg",
+      "sha256": "2cbbc27e2e32f2e3eba6ceb857b393ba83b52a0a6e3d4ffdf50c264d85b36912",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-interview-him-1",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, visible eyes, navy blue sweater, dark blue sweater, white collared shirt, brown eyes, upper body, open mouth, smile, hand up, office meeting room, glass wall, long table, potted plant, daylight, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, green sweater, teal, cardigan, light blue sweater, facial hair, old man, sunglasses, tinted lenses, black sweater, jacket, purple eyes",
+      "seed": 2204,
+      "width": 1344,
+      "height": 768,
+      "deps": [],
+      "layout": [],
+      "place": "interview",
+      "shot": "him-1",
+      "who": [
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.78,
+        0.28
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "8d5d0f6abf5eda4b",
+      "file": "A-interview-him-1.jpg",
+      "sha256": "9b0342e96b8e4666c71be66e959a182647fe25d0adb094ff4e8a5952e8899123",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-exam-her-1",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1girl, solo, adult woman, black hair, bob cut, medium hair, oversized mustard cardigan, white shirt, brown eyes, upper body, open mouth, smile, hand up, quiet test room, small table, two chairs, wall clock, daylight, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, long hair, ponytail, blonde hair, sweater, turtleneck, pale yellow, glasses",
+      "seed": 1104,
+      "width": 1344,
+      "height": 768,
+      "deps": [],
+      "layout": [],
+      "place": "exam",
+      "shot": "her-1",
+      "who": [
+        "her"
+      ],
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "0e1696d1745990f4",
+      "file": "A-exam-her-1.jpg",
+      "sha256": "d96fc2376b9d098eca3d6160d0ad32e81712641ec2f5e37f8019b334bf9fd14c",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-exam-him-1",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, visible eyes, navy blue sweater, dark blue sweater, white collared shirt, brown eyes, upper body, open mouth, smile, hand up, quiet test room, small table, two chairs, wall clock, daylight, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, green sweater, teal, cardigan, light blue sweater, facial hair, old man, sunglasses, tinted lenses, black sweater, jacket, purple eyes",
+      "seed": 2204,
+      "width": 1344,
+      "height": 768,
+      "deps": [],
+      "layout": [],
+      "place": "exam",
+      "shot": "him-1",
+      "who": [
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.75,
+        0.28
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "bd20a2aab3478800",
+      "file": "A-exam-him-1.jpg",
+      "sha256": "f3f2ea66ba1fdcaaae7640d40492426156055e30e7a9f4d25dcc023973eb860e",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-desk-her-1",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1girl, solo, adult woman, black hair, bob cut, medium hair, oversized mustard cardigan, white shirt, brown eyes, upper body, open mouth, smile, hand up, study room, desk, laptop, cork board, bookshelf, warm light, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, long hair, ponytail, blonde hair, sweater, turtleneck, pale yellow, glasses",
+      "seed": 1104,
+      "width": 1344,
+      "height": 768,
+      "deps": [],
+      "layout": [],
+      "place": "desk",
+      "shot": "her-1",
+      "who": [
+        "her"
+      ],
+      "talk": "her",
+      "focus": [
+        0.5,
+        0.36
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "a11c9012e118b11b",
+      "file": "A-desk-her-1.jpg",
+      "sha256": "2367ee75c9bc3e6883fa1ce8ac721c45c6c7932589a24c440feb41ebf4d631ed",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "A-desk-him-1",
+      "kind": "draw",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "anime screencap, anime coloring, clean lineart, 1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, visible eyes, navy blue sweater, dark blue sweater, white collared shirt, brown eyes, upper body, open mouth, smile, hand up, study room, desk, laptop, cork board, bookshelf, warm light, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi, green sweater, teal, cardigan, light blue sweater, facial hair, old man, sunglasses, tinted lenses, black sweater, jacket, purple eyes",
+      "seed": 2204,
+      "width": 1344,
+      "height": 768,
+      "deps": [],
+      "layout": [],
+      "place": "desk",
+      "shot": "him-1",
+      "who": [
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.75,
+        0.3
+      ],
+      "faces": {},
+      "mirror": false,
+      "params_hash": "9df338afff02fb2d",
+      "file": "A-desk-him-1.jpg",
+      "sha256": "04711249328f2531143c58aef1bbdf5a3ab77bb6a35805541746e7ed94f47e4f",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)"
+    },
+    {
+      "id": "D-classroom-both-her",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, classroom, large whiteboard, wooden floor, window, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3001,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-classroom",
+        "D-fig-her-talk",
+        "D-fig-him-listen"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "classroom",
+      "shot": "both-her",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "her",
+      "focus": [
+        0.2984,
+        0.5128
+      ],
+      "faces": {
+        "her": [
+          0.2984,
+          0.5128
+        ],
+        "him": [
+          0.702,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "09c42046a20f98a8",
+      "file": "D-classroom-both-her.jpg",
+      "sha256": "57cce24ecbce0b14de592e553e13ea439cf519e1e5854b89cddf04e5d0b98ac9",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-classroom, D-fig-her-talk, D-fig-him-listen; img2img strength 0.3"
+    },
+    {
+      "id": "D-classroom-both-him",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, classroom, large whiteboard, wooden floor, window, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3002,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-classroom",
+        "D-fig-her-listen",
+        "D-fig-him-talk"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "classroom",
+      "shot": "both-him",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.7225,
+        0.4757
+      ],
+      "faces": {
+        "her": [
+          0.2999,
+          0.5128
+        ],
+        "him": [
+          0.7225,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "34da320ef11d2351",
+      "file": "D-classroom-both-him.jpg",
+      "sha256": "72a9ac09fc87cd4d55a756802160d4f4c1dc0d9f5ff59582238a88c5b6562840",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-classroom, D-fig-her-listen, D-fig-him-talk; img2img strength 0.3"
+    },
+    {
+      "id": "D-classroom-both-her-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, classroom, large whiteboard, wooden floor, window, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3003,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-classroom",
+        "D-fig-her-point",
+        "D-fig-him-nod"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "classroom",
+      "shot": "both-her-2",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "her",
+      "focus": [
+        0.301,
+        0.5128
+      ],
+      "faces": {
+        "her": [
+          0.301,
+          0.5128
+        ],
+        "him": [
+          0.6957,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "06d92f8c58f476a9",
+      "file": "D-classroom-both-her-2.jpg",
+      "sha256": "b988275ec4645a9ede5b7c6acc02d58ded64caa6be76056dc0e9a828a1c2b779",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-classroom, D-fig-her-point, D-fig-him-nod; img2img strength 0.3"
+    },
+    {
+      "id": "D-classroom-both-him-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, classroom, large whiteboard, wooden floor, window, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3004,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-classroom",
+        "D-fig-her-nod",
+        "D-fig-him-point"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "classroom",
+      "shot": "both-him-2",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.7098,
+        0.4757
+      ],
+      "faces": {
+        "her": [
+          0.2991,
+          0.5128
+        ],
+        "him": [
+          0.7098,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "dd28ba2333c52228",
+      "file": "D-classroom-both-him-2.jpg",
+      "sha256": "ce43b909072965fdbdcc7ebfcd163fbd53fc3d0035da577ff1783b48400a74df",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-classroom, D-fig-her-nod, D-fig-him-point; img2img strength 0.3"
+    },
+    {
+      "id": "D-classroom-her-1",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, solo, adult woman, standing, classroom, large whiteboard, wooden floor, window, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3005,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-classroom",
+        "D-fig-her-talk"
+      ],
+      "layout": [
+        [
+          0.32,
+          0.86
+        ]
+      ],
+      "place": "classroom",
+      "shot": "her-1",
+      "who": [
+        "her"
+      ],
+      "talk": "her",
+      "focus": [
+        0.3188,
+        0.4385
+      ],
+      "faces": {
+        "her": [
+          0.3188,
+          0.4385
+        ]
+      },
+      "mirror": false,
+      "params_hash": "3a2b53644354dd5b",
+      "file": "D-classroom-her-1.jpg",
+      "sha256": "8447739fc2d5df7af0dd15079293c562a11314a293b79aea3f2e67896890b433",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-classroom, D-fig-her-talk; img2img strength 0.3"
+    },
+    {
+      "id": "D-classroom-her-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, solo, adult woman, standing, classroom, large whiteboard, wooden floor, window, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3006,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-classroom",
+        "D-fig-her-think"
+      ],
+      "layout": [
+        [
+          0.32,
+          0.86
+        ]
+      ],
+      "place": "classroom",
+      "shot": "her-2",
+      "who": [
+        "her"
+      ],
+      "talk": "her",
+      "focus": [
+        0.3192,
+        0.4385
+      ],
+      "faces": {
+        "her": [
+          0.3192,
+          0.4385
+        ]
+      },
+      "mirror": false,
+      "params_hash": "11529807b56d0d39",
+      "file": "D-classroom-her-2.jpg",
+      "sha256": "c6eb92277d3485e49827230c483517624823ea9add365f41ed397e164e9fa682",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-classroom, D-fig-her-think; img2img strength 0.3"
+    },
+    {
+      "id": "D-classroom-him-1",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1boy, solo, adult man, standing, classroom, large whiteboard, wooden floor, window, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3007,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-classroom",
+        "D-fig-him-talk"
+      ],
+      "layout": [
+        [
+          0.68,
+          0.92
+        ]
+      ],
+      "place": "classroom",
+      "shot": "him-1",
+      "who": [
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.7057,
+        0.4014
+      ],
+      "faces": {
+        "him": [
+          0.7057,
+          0.4014
+        ]
+      },
+      "mirror": false,
+      "params_hash": "cca4032c40344962",
+      "file": "D-classroom-him-1.jpg",
+      "sha256": "89f212c911f44760c64393430e41bc1099bdbba23219c31e6323e9c9a4336409",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-classroom, D-fig-him-talk; img2img strength 0.3"
+    },
+    {
+      "id": "D-classroom-him-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1boy, solo, adult man, standing, classroom, large whiteboard, wooden floor, window, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3008,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-classroom",
+        "D-fig-him-laugh"
+      ],
+      "layout": [
+        [
+          0.68,
+          0.92
+        ]
+      ],
+      "place": "classroom",
+      "shot": "him-2",
+      "who": [
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.6819,
+        0.4014
+      ],
+      "faces": {
+        "him": [
+          0.6819,
+          0.4014
+        ]
+      },
+      "mirror": false,
+      "params_hash": "f3f6a46bf0212a70",
+      "file": "D-classroom-him-2.jpg",
+      "sha256": "5357dda9d92d0c5d0e5d3186b8111569d5427fe36b95aa31495007cb1c12dea2",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-classroom, D-fig-him-laugh; img2img strength 0.3"
+    },
+    {
+      "id": "D-cafe-both-her",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, cafe interior, small round table, two coffee cups on table, potted plant, warm light, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3101,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-cafe",
+        "D-fig-her-talk",
+        "D-fig-him-listen"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "cafe",
+      "shot": "both-her",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "her",
+      "focus": [
+        0.2984,
+        0.5128
+      ],
+      "faces": {
+        "her": [
+          0.2984,
+          0.5128
+        ],
+        "him": [
+          0.702,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "5bf7c6d09b224691",
+      "file": "D-cafe-both-her.jpg",
+      "sha256": "e318f861da843837f7e694cefee3e1cced2b437b2f72819999bab49af173ceaf",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-cafe, D-fig-her-talk, D-fig-him-listen; img2img strength 0.3"
+    },
+    {
+      "id": "D-cafe-both-him",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, cafe interior, small round table, two coffee cups on table, potted plant, warm light, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3102,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-cafe",
+        "D-fig-her-listen",
+        "D-fig-him-talk"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "cafe",
+      "shot": "both-him",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.7225,
+        0.4757
+      ],
+      "faces": {
+        "her": [
+          0.2999,
+          0.5128
+        ],
+        "him": [
+          0.7225,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "89c41cbb9833703a",
+      "file": "D-cafe-both-him.jpg",
+      "sha256": "0dcd559fd34e3758924fd0a3d0568b0f1400b69304392ab52b257d237db536a9",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-cafe, D-fig-her-listen, D-fig-him-talk; img2img strength 0.3"
+    },
+    {
+      "id": "D-cafe-both-her-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, cafe interior, small round table, two coffee cups on table, potted plant, warm light, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3103,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-cafe",
+        "D-fig-her-point",
+        "D-fig-him-nod"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "cafe",
+      "shot": "both-her-2",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "her",
+      "focus": [
+        0.301,
+        0.5128
+      ],
+      "faces": {
+        "her": [
+          0.301,
+          0.5128
+        ],
+        "him": [
+          0.6957,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "f3105255ae4160a9",
+      "file": "D-cafe-both-her-2.jpg",
+      "sha256": "17171ea06e89fe68fdd3f7d97a5ea048349afdeeabcbe471988c6a7ba5944fd8",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-cafe, D-fig-her-point, D-fig-him-nod; img2img strength 0.3"
+    },
+    {
+      "id": "D-cafe-both-him-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, cafe interior, small round table, two coffee cups on table, potted plant, warm light, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3104,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-cafe",
+        "D-fig-her-nod",
+        "D-fig-him-point"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "cafe",
+      "shot": "both-him-2",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.7098,
+        0.4757
+      ],
+      "faces": {
+        "her": [
+          0.2991,
+          0.5128
+        ],
+        "him": [
+          0.7098,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "e393b50c83f812e1",
+      "file": "D-cafe-both-him-2.jpg",
+      "sha256": "a4327cc5f77524a7277ed153d44070be4c7d6402ef1f99c09f85449f62f5b070",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-cafe, D-fig-her-nod, D-fig-him-point; img2img strength 0.3"
+    },
+    {
+      "id": "D-cafe-her-1",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, solo, adult woman, standing, cafe interior, small round table, two coffee cups on table, potted plant, warm light, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3105,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-cafe",
+        "D-fig-her-talk"
+      ],
+      "layout": [
+        [
+          0.32,
+          0.86
+        ]
+      ],
+      "place": "cafe",
+      "shot": "her-1",
+      "who": [
+        "her"
+      ],
+      "talk": "her",
+      "focus": [
+        0.3188,
+        0.4385
+      ],
+      "faces": {
+        "her": [
+          0.3188,
+          0.4385
+        ]
+      },
+      "mirror": false,
+      "params_hash": "d0eb5f6371b13dfe",
+      "file": "D-cafe-her-1.jpg",
+      "sha256": "ff421c1be779a6d43727254a088e5993fdd32e80eb464790c399940801d60ab0",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-cafe, D-fig-her-talk; img2img strength 0.3"
+    },
+    {
+      "id": "D-cafe-her-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, solo, adult woman, standing, cafe interior, small round table, two coffee cups on table, potted plant, warm light, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3106,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-cafe",
+        "D-fig-her-laugh"
+      ],
+      "layout": [
+        [
+          0.32,
+          0.86
+        ]
+      ],
+      "place": "cafe",
+      "shot": "her-2",
+      "who": [
+        "her"
+      ],
+      "talk": "her",
+      "focus": [
+        0.3199,
+        0.4385
+      ],
+      "faces": {
+        "her": [
+          0.3199,
+          0.4385
+        ]
+      },
+      "mirror": false,
+      "params_hash": "c071e302c6b948d4",
+      "file": "D-cafe-her-2.jpg",
+      "sha256": "67443b40af61306fe43604b740fe745baf895aa1751bf3db2d81152d6d4435c2",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-cafe, D-fig-her-laugh; img2img strength 0.3"
+    },
+    {
+      "id": "D-cafe-him-1",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1boy, solo, adult man, standing, cafe interior, small round table, two coffee cups on table, potted plant, warm light, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3107,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-cafe",
+        "D-fig-him-talk"
+      ],
+      "layout": [
+        [
+          0.68,
+          0.92
+        ]
+      ],
+      "place": "cafe",
+      "shot": "him-1",
+      "who": [
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.7057,
+        0.4014
+      ],
+      "faces": {
+        "him": [
+          0.7057,
+          0.4014
+        ]
+      },
+      "mirror": false,
+      "params_hash": "425518853ff4a40d",
+      "file": "D-cafe-him-1.jpg",
+      "sha256": "b8ccacca241369ca8200d22816bccdb4da376d28ef120e4d5230d4a5ee30183b",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-cafe, D-fig-him-talk; img2img strength 0.3"
+    },
+    {
+      "id": "D-cafe-him-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1boy, solo, adult man, standing, cafe interior, small round table, two coffee cups on table, potted plant, warm light, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3108,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-cafe",
+        "D-fig-him-think"
+      ],
+      "layout": [
+        [
+          0.68,
+          0.92
+        ]
+      ],
+      "place": "cafe",
+      "shot": "him-2",
+      "who": [
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.6834,
+        0.4014
+      ],
+      "faces": {
+        "him": [
+          0.6834,
+          0.4014
+        ]
+      },
+      "mirror": false,
+      "params_hash": "99b6374f6a512c7f",
+      "file": "D-cafe-him-2.jpg",
+      "sha256": "118b9b149b79f22248122d458f4b7ad8a0de3d669fa60dd839e1b784340624e5",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-cafe, D-fig-him-think; img2img strength 0.3"
+    },
+    {
+      "id": "D-interview-both-her",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, office meeting room, glass wall, long table, potted plant, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3201,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-interview",
+        "D-fig-her-talk",
+        "D-fig-him-listen"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "interview",
+      "shot": "both-her",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "her",
+      "focus": [
+        0.2984,
+        0.5128
+      ],
+      "faces": {
+        "her": [
+          0.2984,
+          0.5128
+        ],
+        "him": [
+          0.702,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "59e68b7d524e72c0",
+      "file": "D-interview-both-her.jpg",
+      "sha256": "b198b845b09f352372a82c999cb831719ccdf3fca65f07b6ada425cb1ffe63ab",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-interview, D-fig-her-talk, D-fig-him-listen; img2img strength 0.3"
+    },
+    {
+      "id": "D-interview-both-him",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, office meeting room, glass wall, long table, potted plant, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3202,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-interview",
+        "D-fig-her-listen",
+        "D-fig-him-talk"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "interview",
+      "shot": "both-him",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.7225,
+        0.4757
+      ],
+      "faces": {
+        "her": [
+          0.2999,
+          0.5128
+        ],
+        "him": [
+          0.7225,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "2d1642dd62b08c5e",
+      "file": "D-interview-both-him.jpg",
+      "sha256": "1dac691d6877c4ed6547ac94d12707862fd6b4ec8428f7da28a524982e13fffc",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-interview, D-fig-her-listen, D-fig-him-talk; img2img strength 0.3"
+    },
+    {
+      "id": "D-interview-both-her-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, office meeting room, glass wall, long table, potted plant, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3203,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-interview",
+        "D-fig-her-point",
+        "D-fig-him-nod"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "interview",
+      "shot": "both-her-2",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "her",
+      "focus": [
+        0.301,
+        0.5128
+      ],
+      "faces": {
+        "her": [
+          0.301,
+          0.5128
+        ],
+        "him": [
+          0.6957,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "7351ea3b089eaf1c",
+      "file": "D-interview-both-her-2.jpg",
+      "sha256": "34b8acceb1d7457bde49846d64cd9acc2f40ac0a6d091832a8863b258800187b",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-interview, D-fig-her-point, D-fig-him-nod; img2img strength 0.3"
+    },
+    {
+      "id": "D-interview-both-him-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, office meeting room, glass wall, long table, potted plant, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3204,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-interview",
+        "D-fig-her-nod",
+        "D-fig-him-point"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "interview",
+      "shot": "both-him-2",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.7098,
+        0.4757
+      ],
+      "faces": {
+        "her": [
+          0.2991,
+          0.5128
+        ],
+        "him": [
+          0.7098,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "9c3c1a152acb82a1",
+      "file": "D-interview-both-him-2.jpg",
+      "sha256": "4693fa4d7e558e892997ec594e4cc41659331878ee349f7a04451c4c2475b28a",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-interview, D-fig-her-nod, D-fig-him-point; img2img strength 0.3"
+    },
+    {
+      "id": "D-interview-her-1",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, solo, adult woman, standing, office meeting room, glass wall, long table, potted plant, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3205,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-interview",
+        "D-fig-her-talk"
+      ],
+      "layout": [
+        [
+          0.32,
+          0.86
+        ]
+      ],
+      "place": "interview",
+      "shot": "her-1",
+      "who": [
+        "her"
+      ],
+      "talk": "her",
+      "focus": [
+        0.3188,
+        0.4385
+      ],
+      "faces": {
+        "her": [
+          0.3188,
+          0.4385
+        ]
+      },
+      "mirror": false,
+      "params_hash": "a9659e7ee522ef57",
+      "file": "D-interview-her-1.jpg",
+      "sha256": "5d11844afb593ee3ff752373dce26b7413bd80b464383e9c6a1f3e1709c554a6",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-interview, D-fig-her-talk; img2img strength 0.3"
+    },
+    {
+      "id": "D-interview-her-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, solo, adult woman, standing, office meeting room, glass wall, long table, potted plant, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3206,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-interview",
+        "D-fig-her-laugh"
+      ],
+      "layout": [
+        [
+          0.32,
+          0.86
+        ]
+      ],
+      "place": "interview",
+      "shot": "her-2",
+      "who": [
+        "her"
+      ],
+      "talk": "her",
+      "focus": [
+        0.3199,
+        0.4385
+      ],
+      "faces": {
+        "her": [
+          0.3199,
+          0.4385
+        ]
+      },
+      "mirror": false,
+      "params_hash": "78f2a706ca3bf4c9",
+      "file": "D-interview-her-2.jpg",
+      "sha256": "6d4bdbff5e89d6cfc8f05d392ef0981733886cd7eeb24922b8a319084d2d4258",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-interview, D-fig-her-laugh; img2img strength 0.3"
+    },
+    {
+      "id": "D-interview-him-1",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1boy, solo, adult man, standing, office meeting room, glass wall, long table, potted plant, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3207,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-interview",
+        "D-fig-him-talk"
+      ],
+      "layout": [
+        [
+          0.68,
+          0.92
+        ]
+      ],
+      "place": "interview",
+      "shot": "him-1",
+      "who": [
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.7057,
+        0.4014
+      ],
+      "faces": {
+        "him": [
+          0.7057,
+          0.4014
+        ]
+      },
+      "mirror": false,
+      "params_hash": "f30d50f9425c2945",
+      "file": "D-interview-him-1.jpg",
+      "sha256": "4af2f782afd2afeaece78d13aa123860b80d55788371d2936868e50e16ad76c7",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-interview, D-fig-him-talk; img2img strength 0.3"
+    },
+    {
+      "id": "D-interview-him-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1boy, solo, adult man, standing, office meeting room, glass wall, long table, potted plant, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3208,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-interview",
+        "D-fig-him-think"
+      ],
+      "layout": [
+        [
+          0.68,
+          0.92
+        ]
+      ],
+      "place": "interview",
+      "shot": "him-2",
+      "who": [
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.6834,
+        0.4014
+      ],
+      "faces": {
+        "him": [
+          0.6834,
+          0.4014
+        ]
+      },
+      "mirror": false,
+      "params_hash": "d729b5097ec4848d",
+      "file": "D-interview-him-2.jpg",
+      "sha256": "c40ef4d868d8645d6b18cc7b2701b81d1b3ead4011c453a66a096fbddb7bd8b1",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-interview, D-fig-him-think; img2img strength 0.3"
+    },
+    {
+      "id": "D-exam-both-her",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, quiet test room, small table, two chairs, wall clock, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3301,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-exam",
+        "D-fig-her-talk",
+        "D-fig-him-listen"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "exam",
+      "shot": "both-her",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "her",
+      "focus": [
+        0.2984,
+        0.5128
+      ],
+      "faces": {
+        "her": [
+          0.2984,
+          0.5128
+        ],
+        "him": [
+          0.702,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "5e1f92f7455f05ef",
+      "file": "D-exam-both-her.jpg",
+      "sha256": "062ed0cc523ebf1db96c3319caaca73b5a2b931110690359040668f163f633cd",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-exam, D-fig-her-talk, D-fig-him-listen; img2img strength 0.3"
+    },
+    {
+      "id": "D-exam-both-him",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, quiet test room, small table, two chairs, wall clock, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3302,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-exam",
+        "D-fig-her-listen",
+        "D-fig-him-talk"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "exam",
+      "shot": "both-him",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.7225,
+        0.4757
+      ],
+      "faces": {
+        "her": [
+          0.2999,
+          0.5128
+        ],
+        "him": [
+          0.7225,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "ee28f6ac58ea524d",
+      "file": "D-exam-both-him.jpg",
+      "sha256": "ef325ba5a90770d9d11ce1a9b76002d7ab29d3824188877c2d1e926322cc2af8",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-exam, D-fig-her-listen, D-fig-him-talk; img2img strength 0.3"
+    },
+    {
+      "id": "D-exam-both-her-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, quiet test room, small table, two chairs, wall clock, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3303,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-exam",
+        "D-fig-her-point",
+        "D-fig-him-nod"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "exam",
+      "shot": "both-her-2",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "her",
+      "focus": [
+        0.301,
+        0.5128
+      ],
+      "faces": {
+        "her": [
+          0.301,
+          0.5128
+        ],
+        "him": [
+          0.6957,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "df791d3e8575dc4e",
+      "file": "D-exam-both-her-2.jpg",
+      "sha256": "786364e75cc843312193e3656ffff77a3a3c2239d3705e923850d4fb77e2efac",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-exam, D-fig-her-point, D-fig-him-nod; img2img strength 0.3"
+    },
+    {
+      "id": "D-exam-both-him-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, quiet test room, small table, two chairs, wall clock, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3304,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-exam",
+        "D-fig-her-nod",
+        "D-fig-him-point"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "exam",
+      "shot": "both-him-2",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.7098,
+        0.4757
+      ],
+      "faces": {
+        "her": [
+          0.2991,
+          0.5128
+        ],
+        "him": [
+          0.7098,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "7b52b291e01e7392",
+      "file": "D-exam-both-him-2.jpg",
+      "sha256": "76248e026f747c6e895ab025f519c1064a85e9ea6d124baf5e5c1c5c512443c3",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-exam, D-fig-her-nod, D-fig-him-point; img2img strength 0.3"
+    },
+    {
+      "id": "D-exam-her-1",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, solo, adult woman, standing, quiet test room, small table, two chairs, wall clock, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3305,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-exam",
+        "D-fig-her-talk"
+      ],
+      "layout": [
+        [
+          0.32,
+          0.86
+        ]
+      ],
+      "place": "exam",
+      "shot": "her-1",
+      "who": [
+        "her"
+      ],
+      "talk": "her",
+      "focus": [
+        0.3188,
+        0.4385
+      ],
+      "faces": {
+        "her": [
+          0.3188,
+          0.4385
+        ]
+      },
+      "mirror": false,
+      "params_hash": "2d5620f4409fec65",
+      "file": "D-exam-her-1.jpg",
+      "sha256": "44bf321874c55d6092d4c06b2bebd622d2b406c72b46b0d0d4bea03b7639c4ff",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-exam, D-fig-her-talk; img2img strength 0.3"
+    },
+    {
+      "id": "D-exam-her-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, solo, adult woman, standing, quiet test room, small table, two chairs, wall clock, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3306,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-exam",
+        "D-fig-her-think"
+      ],
+      "layout": [
+        [
+          0.32,
+          0.86
+        ]
+      ],
+      "place": "exam",
+      "shot": "her-2",
+      "who": [
+        "her"
+      ],
+      "talk": "her",
+      "focus": [
+        0.3192,
+        0.4385
+      ],
+      "faces": {
+        "her": [
+          0.3192,
+          0.4385
+        ]
+      },
+      "mirror": false,
+      "params_hash": "77e68ce73048b2e5",
+      "file": "D-exam-her-2.jpg",
+      "sha256": "578eb36c1c2476be5e68d4a2857656d3b6a3efca5ba647451914e0ff9c8595f4",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-exam, D-fig-her-think; img2img strength 0.3"
+    },
+    {
+      "id": "D-exam-him-1",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1boy, solo, adult man, standing, quiet test room, small table, two chairs, wall clock, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3307,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-exam",
+        "D-fig-him-talk"
+      ],
+      "layout": [
+        [
+          0.68,
+          0.92
+        ]
+      ],
+      "place": "exam",
+      "shot": "him-1",
+      "who": [
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.7057,
+        0.4014
+      ],
+      "faces": {
+        "him": [
+          0.7057,
+          0.4014
+        ]
+      },
+      "mirror": false,
+      "params_hash": "bff66b07273bcc9b",
+      "file": "D-exam-him-1.jpg",
+      "sha256": "fcebf4e7dcd32971ffe3564e02353af505cf91e9b06afaba0bb8a06ef533b61a",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-exam, D-fig-him-talk; img2img strength 0.3"
+    },
+    {
+      "id": "D-exam-him-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1boy, solo, adult man, standing, quiet test room, small table, two chairs, wall clock, daylight, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3308,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-exam",
+        "D-fig-him-laugh"
+      ],
+      "layout": [
+        [
+          0.68,
+          0.92
+        ]
+      ],
+      "place": "exam",
+      "shot": "him-2",
+      "who": [
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.6819,
+        0.4014
+      ],
+      "faces": {
+        "him": [
+          0.6819,
+          0.4014
+        ]
+      },
+      "mirror": false,
+      "params_hash": "ed0806bb1d92c58c",
+      "file": "D-exam-him-2.jpg",
+      "sha256": "5ba62dc4a4bde0d2fb3c5e3ca98c23581487ecb308e72ce83836e818e7ced815",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-exam, D-fig-him-laugh; img2img strength 0.3"
+    },
+    {
+      "id": "D-desk-both-her",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, study room, desk, laptop, cork board, bookshelf, warm light, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3401,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-desk",
+        "D-fig-her-talk",
+        "D-fig-him-listen"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "desk",
+      "shot": "both-her",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "her",
+      "focus": [
+        0.2984,
+        0.5128
+      ],
+      "faces": {
+        "her": [
+          0.2984,
+          0.5128
+        ],
+        "him": [
+          0.702,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "6847862485fa89ec",
+      "file": "D-desk-both-her.jpg",
+      "sha256": "db211571606567ee96e097dfd0473b681327a278f76e608b32553f1bbc2dead5",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-desk, D-fig-her-talk, D-fig-him-listen; img2img strength 0.3"
+    },
+    {
+      "id": "D-desk-both-him",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, study room, desk, laptop, cork board, bookshelf, warm light, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
       "seed": 3402,
-      "ip": [
-        "her"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
       "width": 1344,
       "height": 768,
-      "file": "classroom-her-1.jpg",
-      "params_hash": "960dec126ed70066",
-      "sha256": "3318c090bc72d2cc1894f750580c87cfa22ff5b85a5d861414dd7da6cff9363e",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+      "deps": [
+        "D-bg-desk",
+        "D-fig-her-listen",
+        "D-fig-him-talk"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "desk",
+      "shot": "both-him",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.7225,
+        0.4757
+      ],
+      "faces": {
+        "her": [
+          0.2999,
+          0.5128
+        ],
+        "him": [
+          0.7225,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "85c4a730790b2afa",
+      "file": "D-desk-both-him.jpg",
+      "sha256": "2625ab1451f35648d729f8ad778dae3269c243a36ef64d746a4230d9f5b5bd2f",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-desk, D-fig-her-listen, D-fig-him-talk; img2img strength 0.3"
     },
     {
-      "id": "classroom-her-2",
-      "place": "classroom",
-      "shot": "her-2",
-      "who": "her",
+      "id": "D-desk-both-her-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, study room, desk, laptop, cork board, bookshelf, warm light, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3403,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-desk",
+        "D-fig-her-point",
+        "D-fig-him-nod"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "desk",
+      "shot": "both-her-2",
+      "who": [
+        "her",
+        "him"
+      ],
       "talk": "her",
       "focus": [
-        0.5,
-        0.36
+        0.301,
+        0.5128
       ],
-      "prompt": "medium shot of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, standing by the whiteboard, explaining with an open hand, three-quarter view, a bright classroom with a clean whiteboard, wooden desks and big windows, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 5403,
-      "ip": [
-        "her"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
-      "width": 1344,
-      "height": 768,
-      "file": "classroom-her-2.jpg",
-      "params_hash": "48ceea5a1e459f04",
-      "sha256": "3b68490528eaefbceb97f94037069be0cccda0ae6d0db0bc44c5c235f3202c82",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+      "faces": {
+        "her": [
+          0.301,
+          0.5128
+        ],
+        "him": [
+          0.6957,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "2b07a6501278ed71",
+      "file": "D-desk-both-her-2.jpg",
+      "sha256": "b000354bbfcb1d5ac4d8564814120b7bd4785f847b950797589b461fcb95790b",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-desk, D-fig-her-point, D-fig-him-nod; img2img strength 0.3"
     },
     {
-      "id": "classroom-her-listen",
-      "place": "classroom",
-      "shot": "her-listen",
-      "who": "her",
-      "talk": "him",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, standing by the whiteboard, listening, gentle smile, on the left of the frame, a bright classroom with a clean whiteboard, wooden desks and big windows, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 4404,
-      "ip": [
-        "her"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
+      "id": "D-desk-both-him-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, 1boy, adult woman, adult man, standing, study room, desk, laptop, cork board, bookshelf, warm light, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3404,
       "width": 1344,
       "height": 768,
-      "file": "classroom-her-listen.jpg",
-      "params_hash": "4297224506af17f9",
-      "sha256": "587874a2bdb1ff1ac7e6dde5214da0c11bbb0872bff2c0f33400d02bb2eb945f",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "classroom-him-1",
-      "place": "classroom",
-      "shot": "him-1",
-      "who": "him",
+      "deps": [
+        "D-bg-desk",
+        "D-fig-her-nod",
+        "D-fig-him-point"
+      ],
+      "layout": [
+        [
+          0.3,
+          0.74
+        ],
+        [
+          0.7,
+          0.8
+        ]
+      ],
+      "place": "desk",
+      "shot": "both-him-2",
+      "who": [
+        "her",
+        "him"
+      ],
       "talk": "him",
       "focus": [
-        0.5,
-        0.36
+        0.7098,
+        0.4757
       ],
-      "prompt": "medium close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, sitting at a desk with a notebook, talking, friendly smile, on the right of the frame, a bright classroom with a clean whiteboard, wooden desks and big windows, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "faces": {
+        "her": [
+          0.2991,
+          0.5128
+        ],
+        "him": [
+          0.7098,
+          0.4757
+        ]
+      },
+      "mirror": false,
+      "params_hash": "e9b847b1105ca1b3",
+      "file": "D-desk-both-him-2.jpg",
+      "sha256": "6a9e2470541d78a24c9eca1edf8905839402983ad331fbbfce7b82cdd39c6627",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-desk, D-fig-her-nod, D-fig-him-point; img2img strength 0.3"
+    },
+    {
+      "id": "D-desk-her-1",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, solo, adult woman, standing, study room, desk, laptop, cork board, bookshelf, warm light, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
       "seed": 3405,
-      "ip": [
-        "him"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
       "width": 1344,
       "height": 768,
-      "file": "classroom-him-1.jpg",
-      "params_hash": "cbb8deee8cec7eae",
-      "sha256": "8ea76a2f689819a7da203aee37d0546f69102146e06014eeb7de7a052f201efb",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+      "deps": [
+        "D-bg-desk",
+        "D-fig-her-talk"
+      ],
+      "layout": [
+        [
+          0.32,
+          0.86
+        ]
+      ],
+      "place": "desk",
+      "shot": "her-1",
+      "who": [
+        "her"
+      ],
+      "talk": "her",
+      "focus": [
+        0.3188,
+        0.4385
+      ],
+      "faces": {
+        "her": [
+          0.3188,
+          0.4385
+        ]
+      },
+      "mirror": false,
+      "params_hash": "38739ee3c801df6c",
+      "file": "D-desk-her-1.jpg",
+      "sha256": "5c67693f8dec93d05c05ce78c11b4d35fc1ab055db9de1f0f6b754af4979f118",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-desk, D-fig-her-talk; img2img strength 0.3"
     },
     {
-      "id": "classroom-him-2",
-      "place": "classroom",
-      "shot": "him-2",
-      "who": "him",
-      "talk": "him",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "medium shot of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, sitting at a desk with a notebook, explaining with one hand raised, three-quarter view, a bright classroom with a clean whiteboard, wooden desks and big windows, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "id": "D-desk-her-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1girl, solo, adult woman, standing, study room, desk, laptop, cork board, bookshelf, warm light, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
       "seed": 3406,
-      "ip": [
-        "him"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
       "width": 1344,
       "height": 768,
-      "file": "classroom-him-2.jpg",
-      "params_hash": "d4f8fcf3f87dd4f8",
-      "sha256": "10ae5275714b3dc48cbd335691dc02169c0d3a2955908245e47a83fb8f3c5252",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "classroom-him-listen",
-      "place": "classroom",
-      "shot": "him-listen",
-      "who": "him",
+      "deps": [
+        "D-bg-desk",
+        "D-fig-her-laugh"
+      ],
+      "layout": [
+        [
+          0.32,
+          0.86
+        ]
+      ],
+      "place": "desk",
+      "shot": "her-2",
+      "who": [
+        "her"
+      ],
       "talk": "her",
       "focus": [
-        0.5,
-        0.36
+        0.3199,
+        0.4385
       ],
-      "prompt": "close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, sitting at a desk with a notebook, listening, nodding, on the right of the frame, a bright classroom with a clean whiteboard, wooden desks and big windows, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+      "faces": {
+        "her": [
+          0.3199,
+          0.4385
+        ]
+      },
+      "mirror": false,
+      "params_hash": "458e1c4ee85cc24d",
+      "file": "D-desk-her-2.jpg",
+      "sha256": "61069c99352ec5e1cc189cc81897e59a7b71fae791b3282c0bd18845042d9799",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-desk, D-fig-her-laugh; img2img strength 0.3"
+    },
+    {
+      "id": "D-desk-him-1",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1boy, solo, adult man, standing, study room, desk, laptop, cork board, bookshelf, warm light, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
       "seed": 3407,
-      "ip": [
-        "him"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
       "width": 1344,
       "height": 768,
-      "file": "classroom-him-listen.jpg",
-      "params_hash": "c00fc63d24e09121",
-      "sha256": "9666318a4feddde4c97b7e9799b20d82ae22525a97ce89c4dd020365e85e5642",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+      "deps": [
+        "D-bg-desk",
+        "D-fig-him-talk"
+      ],
+      "layout": [
+        [
+          0.68,
+          0.92
+        ]
+      ],
+      "place": "desk",
+      "shot": "him-1",
+      "who": [
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.7057,
+        0.4014
+      ],
+      "faces": {
+        "him": [
+          0.7057,
+          0.4014
+        ]
+      },
+      "mirror": false,
+      "params_hash": "079db3169c35385a",
+      "file": "D-desk-him-1.jpg",
+      "sha256": "23f92dcb9e9fae721a7c22ccfc26a45d598afbdba0dc691fb461441333a3d38d",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-desk, D-fig-him-talk; img2img strength 0.3"
     },
     {
-      "id": "interview-both-her",
-      "place": "interview",
-      "shot": "both-her",
-      "who": "both",
-      "talk": "her",
-      "focus": [
-        0.34,
-        0.42
+      "id": "D-desk-him-2",
+      "kind": "scene",
+      "style": "D",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "chibi, super deformed, figure, glossy, 3d, 1boy, solo, adult man, standing, study room, desk, laptop, cork board, bookshelf, warm light, soft lighting, masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "seed": 3408,
+      "width": 1344,
+      "height": 768,
+      "deps": [
+        "D-bg-desk",
+        "D-fig-him-think"
       ],
-      "prompt": "two people talking, a young woman in a yellow cardigan on the left sitting at the table with a folder, speaking, a young man with glasses in a dark blue sweater on the right sitting across the table, listening, medium wide shot, a modern office meeting room with a glass wall and a plant, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 8500,
-      "ip": [
+      "layout": [
+        [
+          0.68,
+          0.92
+        ]
+      ],
+      "place": "desk",
+      "shot": "him-2",
+      "who": [
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.6834,
+        0.4014
+      ],
+      "faces": {
+        "him": [
+          0.6834,
+          0.4014
+        ]
+      },
+      "mirror": false,
+      "params_hash": "dcb94cded4873654",
+      "file": "D-desk-him-2.jpg",
+      "sha256": "f3ba675b627fdcf0fed1259ca58c89aca8b405a3a12faa5c850a24acd3db62fc",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "composite of D-bg-desk, D-fig-him-think; img2img strength 0.3"
+    },
+    {
+      "id": "A-classroom-both-her",
+      "kind": "split",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "",
+      "negative": "",
+      "seed": [
+        1104,
+        2204
+      ],
+      "width": 1920,
+      "height": 1080,
+      "deps": [
+        "A-panel-classroom-her-talk",
+        "A-panel-classroom-him-listen"
+      ],
+      "layout": [],
+      "place": "classroom",
+      "shot": "both-her",
+      "who": [
         "her",
         "him"
       ],
-      "ip_scale": 0.4,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64], [0.577, 0.38, 0.72]]",
-      "width": 1344,
-      "height": 768,
-      "file": "interview-both-her.jpg",
-      "params_hash": "d7a9c0955373cead",
-      "sha256": "3fffd155067c5b44efb1fecb91f440e7ea28cab19de62d32fee66bc7b1b4d6d9",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+      "talk": "her",
+      "focus": [
+        0.25,
+        0.36
+      ],
+      "faces": {
+        "her": [
+          0.25,
+          0.36
+        ],
+        "him": [
+          0.75,
+          0.36
+        ]
+      },
+      "mirror": false,
+      "params_hash": "a6f02e30e5aee9cc",
+      "file": "A-classroom-both-her.jpg",
+      "sha256": "ba5ef1112f117fe9840e353903c831f199d43bd7b2f304d862500e3f33edd269",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "split screen of A-panel-classroom-her-talk | A-panel-classroom-him-listen"
     },
     {
-      "id": "interview-both-him",
+      "id": "A-classroom-both-him",
+      "kind": "split",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "",
+      "negative": "",
+      "seed": [
+        1104,
+        2204
+      ],
+      "width": 1920,
+      "height": 1080,
+      "deps": [
+        "A-panel-classroom-her-listen",
+        "A-panel-classroom-him-talk"
+      ],
+      "layout": [],
+      "place": "classroom",
+      "shot": "both-him",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.75,
+        0.36
+      ],
+      "faces": {
+        "her": [
+          0.25,
+          0.36
+        ],
+        "him": [
+          0.75,
+          0.36
+        ]
+      },
+      "mirror": false,
+      "params_hash": "2cd75617bd92f39a",
+      "file": "A-classroom-both-him.jpg",
+      "sha256": "06aed535ce09396d7e2d895be1b1528b15fc643d75b976faca094307e1f19aea",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "split screen of A-panel-classroom-her-listen | A-panel-classroom-him-talk"
+    },
+    {
+      "id": "A-cafe-both-her",
+      "kind": "split",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "",
+      "negative": "",
+      "seed": [
+        1104,
+        2204
+      ],
+      "width": 1920,
+      "height": 1080,
+      "deps": [
+        "A-panel-cafe-her-talk",
+        "A-panel-cafe-him-listen"
+      ],
+      "layout": [],
+      "place": "cafe",
+      "shot": "both-her",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "her",
+      "focus": [
+        0.25,
+        0.36
+      ],
+      "faces": {
+        "her": [
+          0.25,
+          0.36
+        ],
+        "him": [
+          0.75,
+          0.36
+        ]
+      },
+      "mirror": false,
+      "params_hash": "e28869a645358a4e",
+      "file": "A-cafe-both-her.jpg",
+      "sha256": "0f81b5555806e12614540906ba02a93a22adcc54f3bc07c06c5a057b7f58f3ff",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "split screen of A-panel-cafe-her-talk | A-panel-cafe-him-listen"
+    },
+    {
+      "id": "A-cafe-both-him",
+      "kind": "split",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "",
+      "negative": "",
+      "seed": [
+        1104,
+        2204
+      ],
+      "width": 1920,
+      "height": 1080,
+      "deps": [
+        "A-panel-cafe-her-listen",
+        "A-panel-cafe-him-talk"
+      ],
+      "layout": [],
+      "place": "cafe",
+      "shot": "both-him",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "him",
+      "focus": [
+        0.75,
+        0.36
+      ],
+      "faces": {
+        "her": [
+          0.25,
+          0.36
+        ],
+        "him": [
+          0.75,
+          0.36
+        ]
+      },
+      "mirror": false,
+      "params_hash": "819eae9ccadcd0f2",
+      "file": "A-cafe-both-him.jpg",
+      "sha256": "0b759609fe8be1f999619f33bc661dda6075255be39cc5dd7eb01b971ae74335",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "split screen of A-panel-cafe-her-listen | A-panel-cafe-him-talk"
+    },
+    {
+      "id": "A-interview-both-her",
+      "kind": "split",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "",
+      "negative": "",
+      "seed": [
+        1104,
+        2204
+      ],
+      "width": 1920,
+      "height": 1080,
+      "deps": [
+        "A-panel-interview-her-talk",
+        "A-panel-interview-him-listen"
+      ],
+      "layout": [],
+      "place": "interview",
+      "shot": "both-her",
+      "who": [
+        "her",
+        "him"
+      ],
+      "talk": "her",
+      "focus": [
+        0.25,
+        0.36
+      ],
+      "faces": {
+        "her": [
+          0.25,
+          0.36
+        ],
+        "him": [
+          0.75,
+          0.36
+        ]
+      },
+      "mirror": false,
+      "params_hash": "5e5b45c2b2107a1b",
+      "file": "A-interview-both-her.jpg",
+      "sha256": "88352157f052099e779d8b4558ef9e1abab5ecbb72759443e9a5e557f1a54ed1",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "split screen of A-panel-interview-her-talk | A-panel-interview-him-listen"
+    },
+    {
+      "id": "A-interview-both-him",
+      "kind": "split",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "",
+      "negative": "",
+      "seed": [
+        1104,
+        2204
+      ],
+      "width": 1920,
+      "height": 1080,
+      "deps": [
+        "A-panel-interview-her-listen",
+        "A-panel-interview-him-talk"
+      ],
+      "layout": [],
       "place": "interview",
       "shot": "both-him",
-      "who": "both",
-      "talk": "him",
-      "focus": [
-        0.66,
-        0.42
-      ],
-      "prompt": "two people talking, a young woman in a yellow cardigan on the left sitting at the table with a folder, listening, a young man with glasses in a dark blue sweater on the right sitting across the table, speaking, medium wide shot, a modern office meeting room with a glass wall and a plant, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 14501,
-      "ip": [
+      "who": [
         "her",
         "him"
       ],
-      "ip_scale": 0.4,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64], [0.577, 0.38, 0.72]]",
-      "width": 1344,
-      "height": 768,
-      "file": "interview-both-him.jpg",
-      "params_hash": "ef44bd408bf3a875",
-      "sha256": "a70024aa9d00deaffd358f963b6c0eed67a55678b59ebcd2db2544a03bbfbb89",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "interview-her-1",
-      "place": "interview",
-      "shot": "her-1",
-      "who": "her",
-      "talk": "her",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "medium close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, sitting at the table with a folder, talking, warm smile, on the left of the frame, a modern office meeting room with a glass wall and a plant, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 4502,
-      "ip": [
-        "her"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
-      "width": 1344,
-      "height": 768,
-      "file": "interview-her-1.jpg",
-      "params_hash": "4be90970be01eb76",
-      "sha256": "f70f6674374cd6060c9f5993473bf993ecc2463f6c0243d1c00927b972800d83",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "interview-her-2",
-      "place": "interview",
-      "shot": "her-2",
-      "who": "her",
-      "talk": "her",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "medium shot of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, sitting at the table with a folder, explaining with an open hand, three-quarter view, a modern office meeting room with a glass wall and a plant, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3503,
-      "ip": [
-        "her"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
-      "width": 1344,
-      "height": 768,
-      "file": "interview-her-2.jpg",
-      "params_hash": "6525eaf694f4b60a",
-      "sha256": "f0d8bf7eb82c9d0ad964c60dcecb044b2c99a4b0dd563e90a484fd83f50ceb00",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "interview-her-listen",
-      "place": "interview",
-      "shot": "her-listen",
-      "who": "her",
       "talk": "him",
       "focus": [
-        0.36,
-        0.4
-      ],
-      "prompt": "close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, sitting at the table with a folder, listening, gentle smile, on the left of the frame, a modern office meeting room with a glass wall and a plant, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3504,
-      "ip": [
-        "her"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
-      "width": 1344,
-      "height": 768,
-      "file": "interview-her-listen.jpg",
-      "params_hash": "216b65900fed21a7",
-      "sha256": "a56380c39cc7b5711651826b20930aa3e4aeac998992bf538ee5e4595fc34833",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "interview-him-1",
-      "place": "interview",
-      "shot": "him-1",
-      "who": "him",
-      "talk": "him",
-      "focus": [
-        0.5,
+        0.75,
         0.36
       ],
-      "prompt": "medium close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, sitting across the table, talking, friendly smile, on the right of the frame, a modern office meeting room with a glass wall and a plant, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3505,
-      "ip": [
-        "him"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
-      "width": 1344,
-      "height": 768,
-      "file": "interview-him-1.jpg",
-      "params_hash": "4f9b8272073ec5d1",
-      "sha256": "b8f9a0f0a321687841c17c80814c6c6a728a5367cd515b4f200a2122548c8cc6",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+      "faces": {
+        "her": [
+          0.25,
+          0.36
+        ],
+        "him": [
+          0.75,
+          0.36
+        ]
+      },
+      "mirror": false,
+      "params_hash": "6b9818b3db8b52f4",
+      "file": "A-interview-both-him.jpg",
+      "sha256": "d41bd7bc147d0eceb7c890f2d75af75d0050f479f9ed119d540915dcd5cf0579",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "split screen of A-panel-interview-her-listen | A-panel-interview-him-talk"
     },
     {
-      "id": "interview-him-2",
-      "place": "interview",
-      "shot": "him-2",
-      "who": "him",
-      "talk": "him",
-      "focus": [
-        0.5,
-        0.36
+      "id": "A-exam-both-her",
+      "kind": "split",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "",
+      "negative": "",
+      "seed": [
+        1104,
+        2204
       ],
-      "prompt": "medium shot of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, sitting across the table, explaining with one hand raised, three-quarter view, a modern office meeting room with a glass wall and a plant, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3506,
-      "ip": [
-        "him"
+      "width": 1920,
+      "height": 1080,
+      "deps": [
+        "A-panel-exam-her-talk",
+        "A-panel-exam-him-listen"
       ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
-      "width": 1344,
-      "height": 768,
-      "file": "interview-him-2.jpg",
-      "params_hash": "72c6376f2c941cff",
-      "sha256": "d66757a6b8d0996c9bd421b88d7f50798493a69ee3c314768c6ef60b2fae1756",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "interview-him-listen",
-      "place": "interview",
-      "shot": "him-listen",
-      "who": "him",
-      "talk": "her",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, sitting across the table, listening, nodding, on the right of the frame, a modern office meeting room with a glass wall and a plant, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3507,
-      "ip": [
-        "him"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
-      "width": 1344,
-      "height": 768,
-      "file": "interview-him-listen.jpg",
-      "params_hash": "14da2b50f494683a",
-      "sha256": "08f7f291a5306577246e1eded168ea2b28d13ec0eb1d2c0fc3e10e3f30fcd493",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "exam-both-her",
+      "layout": [],
       "place": "exam",
       "shot": "both-her",
-      "who": "both",
-      "talk": "her",
-      "focus": [
-        0.34,
-        0.42
-      ],
-      "prompt": "two people talking, a young woman in a yellow cardigan on the left sitting at the table holding papers, speaking, a young man with glasses in a dark blue sweater on the right sitting upright across the table, listening, medium wide shot, a quiet test room with a small table, two chairs and a wall clock, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 5600,
-      "ip": [
+      "who": [
         "her",
         "him"
       ],
-      "ip_scale": 0.4,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64], [0.577, 0.38, 0.72]]",
-      "width": 1344,
-      "height": 768,
-      "file": "exam-both-her.jpg",
-      "params_hash": "b81ae22752a0058f",
-      "sha256": "ae429dbbeadc345027ee4d7f26ec57be84893515fd4b5d804ead8ae9369a1e99",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+      "talk": "her",
+      "focus": [
+        0.25,
+        0.36
+      ],
+      "faces": {
+        "her": [
+          0.25,
+          0.36
+        ],
+        "him": [
+          0.75,
+          0.36
+        ]
+      },
+      "mirror": false,
+      "params_hash": "a7cdb872571593d2",
+      "file": "A-exam-both-her.jpg",
+      "sha256": "debcfc2e12dabc63e16c110040f46ef776a8e25dbcb6937c30539da32b108bbe",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "split screen of A-panel-exam-her-talk | A-panel-exam-him-listen"
     },
     {
-      "id": "exam-both-him",
+      "id": "A-exam-both-him",
+      "kind": "split",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "",
+      "negative": "",
+      "seed": [
+        1104,
+        2204
+      ],
+      "width": 1920,
+      "height": 1080,
+      "deps": [
+        "A-panel-exam-her-listen",
+        "A-panel-exam-him-talk"
+      ],
+      "layout": [],
       "place": "exam",
       "shot": "both-him",
-      "who": "both",
-      "talk": "him",
-      "focus": [
-        0.66,
-        0.42
-      ],
-      "prompt": "two people talking, a young woman in a yellow cardigan on the left sitting at the table holding papers, listening, a young man with glasses in a dark blue sweater on the right sitting upright across the table, speaking, medium wide shot, a quiet test room with a small table, two chairs and a wall clock, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3601,
-      "ip": [
+      "who": [
         "her",
         "him"
       ],
-      "ip_scale": 0.4,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64], [0.577, 0.38, 0.72]]",
-      "width": 1344,
-      "height": 768,
-      "file": "exam-both-him.jpg",
-      "params_hash": "b6f7c9ba7fa726b6",
-      "sha256": "5a0a216a4b0671bbf7c07b369bcc8d3f24f00dfe8e7e41cb7290d61388d09427",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "exam-her-1",
-      "place": "exam",
-      "shot": "her-1",
-      "who": "her",
-      "talk": "her",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "medium close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, sitting at the table holding papers, talking, warm smile, on the left of the frame, a quiet test room with a small table, two chairs and a wall clock, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 6602,
-      "ip": [
-        "her"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
-      "width": 1344,
-      "height": 768,
-      "file": "exam-her-1.jpg",
-      "params_hash": "c9c5315d252954a5",
-      "sha256": "e1a57b89c0e56272bd1b4bf0de95b47622882be80ba6531eb897f4263b782f81",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "exam-her-2",
-      "place": "exam",
-      "shot": "her-2",
-      "who": "her",
-      "talk": "her",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "medium shot of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, sitting at the table holding papers, explaining with an open hand, three-quarter view, a quiet test room with a small table, two chairs and a wall clock, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3603,
-      "ip": [
-        "her"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
-      "width": 1344,
-      "height": 768,
-      "file": "exam-her-2.jpg",
-      "params_hash": "fbf69268796be1ca",
-      "sha256": "3edaee5dfcdd43f0febba7c07c37f0c5d427e7cfb302c31fb155cdbd17888d50",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "exam-her-listen",
-      "place": "exam",
-      "shot": "her-listen",
-      "who": "her",
       "talk": "him",
       "focus": [
-        0.5,
+        0.75,
         0.36
       ],
-      "prompt": "close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, sitting at the table holding papers, listening, gentle smile, on the left of the frame, a quiet test room with a small table, two chairs and a wall clock, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3604,
-      "ip": [
-        "her"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
-      "width": 1344,
-      "height": 768,
-      "file": "exam-her-listen.jpg",
-      "params_hash": "909d06ab51184027",
-      "sha256": "14a43d941a424ef6da88bd171cb03ba96b2dde9f830840a60fba850e9f8ee81d",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+      "faces": {
+        "her": [
+          0.25,
+          0.36
+        ],
+        "him": [
+          0.75,
+          0.36
+        ]
+      },
+      "mirror": false,
+      "params_hash": "492b01cb3be678c1",
+      "file": "A-exam-both-him.jpg",
+      "sha256": "a031917fb4dcf969aab56927b2e8a9bb5c25263c73c24aa448a4d9b815cde826",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "split screen of A-panel-exam-her-listen | A-panel-exam-him-talk"
     },
     {
-      "id": "exam-him-1",
-      "place": "exam",
-      "shot": "him-1",
-      "who": "him",
-      "talk": "him",
-      "focus": [
-        0.5,
-        0.36
+      "id": "A-desk-both-her",
+      "kind": "split",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "",
+      "negative": "",
+      "seed": [
+        1104,
+        2204
       ],
-      "prompt": "medium close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, sitting upright across the table, talking, friendly smile, on the right of the frame, a quiet test room with a small table, two chairs and a wall clock, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3605,
-      "ip": [
-        "him"
+      "width": 1920,
+      "height": 1080,
+      "deps": [
+        "A-panel-desk-her-talk",
+        "A-panel-desk-him-listen"
       ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
-      "width": 1344,
-      "height": 768,
-      "file": "exam-him-1.jpg",
-      "params_hash": "aa1a18271c82834b",
-      "sha256": "cc69dbaaca7cc28c61c0749e0ba8028ba4d7214946b054e9bf2bb7997f0e2ced",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "exam-him-2",
-      "place": "exam",
-      "shot": "him-2",
-      "who": "him",
-      "talk": "him",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "medium shot of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, sitting upright across the table, explaining with one hand raised, three-quarter view, a quiet test room with a small table, two chairs and a wall clock, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3606,
-      "ip": [
-        "him"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
-      "width": 1344,
-      "height": 768,
-      "file": "exam-him-2.jpg",
-      "params_hash": "fbb78d48e312ff65",
-      "sha256": "3d4c79e1cab5f2d2eead8b42de6f5cf29f7904122e0d156e001577d45689a162",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "exam-him-listen",
-      "place": "exam",
-      "shot": "him-listen",
-      "who": "him",
-      "talk": "her",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, sitting upright across the table, listening, nodding, on the right of the frame, a quiet test room with a small table, two chairs and a wall clock, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3607,
-      "ip": [
-        "him"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
-      "width": 1344,
-      "height": 768,
-      "file": "exam-him-listen.jpg",
-      "params_hash": "043ef657b1bc12f3",
-      "sha256": "719dda611b22f2b12fafa1664566e31084dfadda73642913d1977b9260c46482",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "desk-both-her",
+      "layout": [],
       "place": "desk",
       "shot": "both-her",
-      "who": "both",
-      "talk": "her",
-      "focus": [
-        0.34,
-        0.42
-      ],
-      "prompt": "two people talking, a young woman in a yellow cardigan on the left standing by the desk, speaking, a young man with glasses in a dark blue sweater on the right at the desk with a laptop, listening, medium wide shot, a cozy study corner with a desk, a laptop and a cork board, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 5700,
-      "ip": [
+      "who": [
         "her",
         "him"
       ],
-      "ip_scale": 0.4,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64], [0.577, 0.38, 0.72]]",
-      "width": 1344,
-      "height": 768,
-      "file": "desk-both-her.jpg",
-      "params_hash": "00358ae8bdc853f8",
-      "sha256": "49290eace05a327cde0e72151b21425b82355faac06dee8a79137376d077e8e8",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "desk-her-1",
-      "place": "desk",
-      "shot": "her-1",
-      "who": "her",
       "talk": "her",
       "focus": [
-        0.5,
+        0.25,
         0.36
       ],
-      "prompt": "medium close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, standing by the desk, talking, warm smile, on the left of the frame, a cozy study corner with a desk, a laptop and a cork board, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3702,
-      "ip": [
-        "her"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
-      "width": 1344,
-      "height": 768,
-      "file": "desk-her-1.jpg",
-      "params_hash": "ab6a2526ddc7f051",
-      "sha256": "ce2aa9d639fbd30c409498567c3fd439a98d3c1f7e6a4ae866b31290a49c71f7",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+      "faces": {
+        "her": [
+          0.25,
+          0.36
+        ],
+        "him": [
+          0.75,
+          0.36
+        ]
+      },
+      "mirror": false,
+      "params_hash": "48c1bd0df3e9be3a",
+      "file": "A-desk-both-her.jpg",
+      "sha256": "911fc766ad65688d5d9953fafbdac1e558bd1fd37eed143f5048eaaa05261099",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "split screen of A-panel-desk-her-talk | A-panel-desk-him-listen"
     },
     {
-      "id": "desk-her-2",
+      "id": "A-desk-both-him",
+      "kind": "split",
+      "style": "A",
+      "model": "cagliostrolab/animagine-xl-3.1@483f0c322568",
+      "prompt": "",
+      "negative": "",
+      "seed": [
+        1104,
+        2204
+      ],
+      "width": 1920,
+      "height": 1080,
+      "deps": [
+        "A-panel-desk-her-listen",
+        "A-panel-desk-him-talk"
+      ],
+      "layout": [],
       "place": "desk",
-      "shot": "her-2",
-      "who": "her",
-      "talk": "her",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "medium shot of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, standing by the desk, explaining with an open hand, three-quarter view, a cozy study corner with a desk, a laptop and a cork board, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3703,
-      "ip": [
-        "her"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
-      "width": 1344,
-      "height": 768,
-      "file": "desk-her-2.jpg",
-      "params_hash": "3c0c9a6ebb6ced52",
-      "sha256": "f5dbac337e79dec48aa2a59c43c8968963aea176ada4835abb5f7715f03fa44c",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "desk-her-listen",
-      "place": "desk",
-      "shot": "her-listen",
-      "who": "her",
-      "talk": "him",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, standing by the desk, listening, gentle smile, on the left of the frame, a cozy study corner with a desk, a laptop and a cork board, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 4704,
-      "ip": [
-        "her"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
-      "width": 1344,
-      "height": 768,
-      "file": "desk-her-listen.jpg",
-      "params_hash": "225baf34f00e8d47",
-      "sha256": "e2300f5c60266ce543b37e8b1f28211a341c5653450117600f62c6f2ec34bf58",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "desk-him-1",
-      "place": "desk",
-      "shot": "him-1",
-      "who": "him",
-      "talk": "him",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "medium close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, at the desk with a laptop, talking, friendly smile, on the right of the frame, a cozy study corner with a desk, a laptop and a cork board, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3705,
-      "ip": [
-        "him"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
-      "width": 1344,
-      "height": 768,
-      "file": "desk-him-1.jpg",
-      "params_hash": "62d13b8cb5acb128",
-      "sha256": "7ec1eb12e54194dd63e6ad16b8523b00983ed99ec06b52449d6b349ee47859b1",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "desk-him-2",
-      "place": "desk",
-      "shot": "him-2",
-      "who": "him",
-      "talk": "him",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "medium shot of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, at the desk with a laptop, explaining with one hand raised, three-quarter view, a cozy study corner with a desk, a laptop and a cork board, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3706,
-      "ip": [
-        "him"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
-      "width": 1344,
-      "height": 768,
-      "file": "desk-him-2.jpg",
-      "params_hash": "c52216378be60860",
-      "sha256": "39eb042af3bd1641144bc726bed2a9050addfafa70e106a69f69bdd7e5b9bebc",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "desk-him-listen",
-      "place": "desk",
-      "shot": "him-listen",
-      "who": "him",
-      "talk": "her",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, at the desk with a laptop, listening, nodding, on the right of the frame, a cozy study corner with a desk, a laptop and a cork board, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3707,
-      "ip": [
-        "him"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
-      "width": 1344,
-      "height": 768,
-      "file": "desk-him-listen.jpg",
-      "params_hash": "ea4f3ecaae5898bd",
-      "sha256": "4d244204b0f1435b6dc88117de70a5531a981e4dc4ed8e97df23bc7869a65003",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "cafe-both-her",
-      "place": "cafe",
-      "shot": "both-her",
-      "who": "both",
-      "talk": "her",
-      "focus": [
-        0.34,
-        0.42
-      ],
-      "prompt": "two people talking, a young woman in a yellow cardigan on the left at a cafe table with a coffee, speaking, a young man with glasses in a dark blue sweater on the right at a cafe table with a tea, listening, medium wide shot, a warm cafe with wooden tables and plants, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 7800,
-      "ip": [
+      "shot": "both-him",
+      "who": [
         "her",
         "him"
       ],
-      "ip_scale": 0.4,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64], [0.577, 0.38, 0.72]]",
-      "width": 1344,
-      "height": 768,
-      "file": "cafe-both-her.jpg",
-      "params_hash": "a0e3613ea53d016b",
-      "sha256": "43d60f2f7717c0be0dbf81229efe5f05d8fbbc8a49d194d9c790a519e702005d",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "cafe-her-1",
-      "place": "cafe",
-      "shot": "her-1",
-      "who": "her",
-      "talk": "her",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "medium close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, at a cafe table with a coffee, talking, warm smile, on the left of the frame, a warm cafe with wooden tables and plants, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3802,
-      "ip": [
-        "her"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
-      "width": 1344,
-      "height": 768,
-      "file": "cafe-her-1.jpg",
-      "params_hash": "a261cafbd198a070",
-      "sha256": "b44dabfd14472e63b48bbf4026701b809b263e7036a0a938f43bc9fd3d85ff57",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "cafe-her-2",
-      "place": "cafe",
-      "shot": "her-2",
-      "who": "her",
-      "talk": "her",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "medium shot of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, at a cafe table with a coffee, explaining with an open hand, three-quarter view, a warm cafe with wooden tables and plants, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 4803,
-      "ip": [
-        "her"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
-      "width": 1344,
-      "height": 768,
-      "file": "cafe-her-2.jpg",
-      "params_hash": "80cc8c628c52be1e",
-      "sha256": "b095eb774485ee110c8701d88d75fbbc352cbfd67196f50dec4ffbba1bf64f21",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "cafe-her-listen",
-      "place": "cafe",
-      "shot": "her-listen",
-      "who": "her",
       "talk": "him",
       "focus": [
-        0.5,
+        0.75,
         0.36
       ],
-      "prompt": "close-up of a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse, at a cafe table with a coffee, listening, gentle smile, on the left of the frame, a warm cafe with wooden tables and plants, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3804,
-      "ip": [
-        "her"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.547, 0.3, 0.64]]",
-      "width": 1344,
-      "height": 768,
-      "file": "cafe-her-listen.jpg",
-      "params_hash": "4ea7e0b2ec3f0e03",
-      "sha256": "08c98dccfd3a371e61ea3d0df25c058c2d670ebb999bfceb3d7fbd404e02f8b1",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "cafe-him-1",
-      "place": "cafe",
-      "shot": "him-1",
-      "who": "him",
-      "talk": "him",
-      "focus": [
-        0.64,
-        0.4
-      ],
-      "prompt": "medium close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, at a cafe table with a tea, talking, friendly smile, on the right of the frame, a warm cafe with wooden tables and plants, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3805,
-      "ip": [
-        "him"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
-      "width": 1344,
-      "height": 768,
-      "file": "cafe-him-1.jpg",
-      "params_hash": "66b00e382fd59343",
-      "sha256": "5c3e83310ad441abc3f6dc0633a2497cc46143d8b60282442e19e8c633bf1194",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "cafe-him-2",
-      "place": "cafe",
-      "shot": "him-2",
-      "who": "him",
-      "talk": "him",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "medium shot of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, at a cafe table with a tea, explaining with one hand raised, three-quarter view, a warm cafe with wooden tables and plants, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3806,
-      "ip": [
-        "him"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
-      "width": 1344,
-      "height": 768,
-      "file": "cafe-him-2.jpg",
-      "params_hash": "29aefe46e409a7c3",
-      "sha256": "c70da3e97695868085db84f3dbf8d88c0d091ded830f6f674f2a3d8f7dc77f8a",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
-    },
-    {
-      "id": "cafe-him-listen",
-      "place": "cafe",
-      "shot": "him-listen",
-      "who": "him",
-      "talk": "her",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "close-up of a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt, at a cafe table with a tea, listening, nodding, on the right of the frame, a warm cafe with wooden tables and plants, 3d animated movie still, cartoon style, warm cinematic light",
-      "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
-      "seed": 3807,
-      "ip": [
-        "him"
-      ],
-      "ip_scale": 0.5,
-      "ip_ref": "[\"sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors\", [0.577, 0.38, 0.72]]",
-      "width": 1344,
-      "height": 768,
-      "file": "cafe-him-listen.jpg",
-      "params_hash": "1c4a6484a4e518a6",
-      "sha256": "917500ea4af2989d6a8ce294cae6ba378a93f780bfb808e54faed1fdac1d5331",
-      "model": "stabilityai/stable-diffusion-xl-base-1.0 + h94/IP-Adapter (ip-adapter-plus-face_sdxl_vit-h.safetensors)",
-      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence); IP-Adapter Apache-2.0"
+      "faces": {
+        "her": [
+          0.25,
+          0.36
+        ],
+        "him": [
+          0.75,
+          0.36
+        ]
+      },
+      "mirror": false,
+      "params_hash": "e74fa601102e581e",
+      "file": "A-desk-both-him.jpg",
+      "sha256": "e186e470f1569e20fc3a5381b0ea6aa918e7709a6ec4cf711d66f616e1d13028",
+      "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
+      "method": "split screen of A-panel-desk-her-listen | A-panel-desk-him-talk"
     }
   ]
 }
