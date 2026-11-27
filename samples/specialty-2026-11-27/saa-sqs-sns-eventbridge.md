@@ -27,8 +27,8 @@ many subscribers. EventBridge **routes** events by their content.
   at later, so it does not block the queue.
 - **Long polling** (`WaitTimeSeconds` up to 20 s): fewer empty receives, lower cost.
 - **Delay queue / message timer:** holds a message back for up to 15 minutes.
-- **Message size:** the exam says at most 256 KB (AWS raised the limit to 1 MiB in 2025; *verify* before using it
-  outside the exam). Bigger payloads go to S3 and the message carries a pointer (the Extended Client Library).
+- **Message size:** the exam says at most 256 KB (AWS raised the limit to 1 MiB in 2025, announced 4 August 2025:
+  https://aws.amazon.com/about-aws/whats-new/2025/08/amazon-sqs-max-payload-size-1mib). Bigger payloads go to S3 and the message carries a pointer (the Extended Client Library).
 - **Auto Scaling on queue length:** the metric `ApproximateNumberOfMessagesVisible`, or better a backlog per instance.
 
 ## Worked example

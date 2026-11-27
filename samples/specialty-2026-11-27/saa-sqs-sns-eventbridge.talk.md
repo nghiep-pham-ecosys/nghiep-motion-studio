@@ -101,7 +101,7 @@ Minh: And long polling?
 Lan: A worker can wait up to 20 seconds for a message.
 Lan: It does not have to ask again and again.
 Lan: Fewer empty receives, and a lower bill.
-[points Delays, size and scaling | Delay queue or message timer: up to 15 minutes | Message size: 256 KB in the exam | AWS raised it to 1 MiB in 2025 (verify) | Bigger payloads: S3, plus a pointer in the message | Scale workers on the backlog per instance]
+[points Delays, size and scaling | Delay queue or message timer: up to 15 minutes | Message size: 256 KB in the exam | AWS raised it to 1 MiB in 2025 | Bigger payloads: S3, plus a pointer in the message | Scale workers on the backlog per instance]
 Minh: Can a message wait before it is delivered?
 Lan: Yes. A delay queue or a message timer holds it for up to 15 minutes.
 Minh: And how big can a message be?
