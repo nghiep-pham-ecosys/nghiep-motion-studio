@@ -61,8 +61,8 @@ MAX_PLAYLIST_TITLE = 150  # characters (lab-to-prod checks the same limits)
 MAX_PLAYLIST_DESCRIPTION = 5000  # bytes
 PLAYLIST_PRIVACY = ("public", "unlisted", "private")
 REPO_VOICES = Path(__file__).resolve().parents[2] / "voices.json"  # the checkout's voices.json, when there is one
-AI_NOTE = ("Made with AI: the narration is a synthetic (text-to-speech) voice and the visuals are generated from "
-           "code; the script was drafted with AI assistance and fact-checked by me.")
+AI_NOTE = ("Made with AI: the narration is a synthetic (text-to-speech) voice, the visuals are drawn by code or by "
+           "an AI image model, and the script was drafted with AI assistance and fact-checked by me.")
 
 
 class PublishError(RuntimeError):
