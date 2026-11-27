@@ -113,8 +113,24 @@ def parse_time(text: str, what: str = "publish time") -> _dt.datetime:
     return when
 
 
-def check_gate(video: Path, allow_limits: bool = False) -> dict[str, Any]:
-    """The video's ``.gate.json`` must exist, be newer than the video, name it, and pass every check (fail closed)."""
+def topic_window(topic: Path | None) -> tuple[float, float] | None:
+    """The duration window of a topic file's ``gate`` block (a lesson: 1200-1800 s), or None."""
+    if topic is None:
+        return None
+    try:
+        gate = json.loads(Path(topic).read_text(encoding="utf-8")).get("gate") or {}
+    except (OSError, ValueError, AttributeError) as exc:
+        raise PublishError(f"cannot read the topic file {topic}: {exc}") from exc
+    if "min_s" not in gate and "max_s" not in gate:
+        return None
+    base = Limits()
+    return float(gate.get("min_s", base.min_duration_s)), float(gate.get("max_s", base.max_duration_s))
+
+
+def check_gate(video: Path, allow_limits: bool = False,
+               window: tuple[float, float] | None = None) -> dict[str, Any]:
+    """The video's ``.gate.json`` must exist, be newer than the video, name it, and pass every check (fail closed).
+    ``window`` is the duration window of the video's topic file: only those two limits may differ from the defaults."""
     report = sidecar(video, ".gate.json")
     try:
         data = json.loads(report.read_text(encoding="utf-8"))
@@ -135,7 +151,8 @@ def check_gate(video: Path, allow_limits: bool = False) -> dict[str, Any]:
     missing = [name for name in GATE_CHECKS if name not in passed]
     if missing:
         problems.append(f"checks missing from the report: {', '.join(missing)}")
-    if not allow_limits and data.get("limits") != asdict(Limits()):
+    expected = Limits() if window is None else Limits(min_duration_s=window[0], max_duration_s=window[1])
+    if not allow_limits and data.get("limits") != asdict(expected):
         problems.append("the gate ran with changed limits; run it with the defaults "
                         "(--allow-gate-limits is for a test upload only)")
     if problems:
@@ -346,7 +363,7 @@ def build(video: Path, scenes_file: Path, publish_at: str, text: str | None = No
     now = now or _dt.datetime.now(_dt.timezone.utc)
     if when <= now:
         raise PublishError(f"publish time {publish_at} is in the past")
-    check_gate(video, allow_gate_limits)
+    check_gate(video, allow_gate_limits, topic_window(topic))
     scenes = load(scenes_file)
     if lang not in scenes.languages:
         raise PublishError(f"{scenes_file} has no {lang} narration")

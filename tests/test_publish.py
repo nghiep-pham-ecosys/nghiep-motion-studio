@@ -178,6 +178,22 @@ class PublishTest(unittest.TestCase):
         staged, _ = self.stage(allow_gate_limits=True)
         self.assertEqual(staged.tag, "yt-demo-en")
 
+    def test_gate_accepts_the_topic_files_duration_window_only(self):
+        lesson = {**asdict(Limits()), "min_duration_s": 1200.0, "max_duration_s": 1800.0}
+        self.write_gate(gate_doc(self.video, limits=lesson))
+        with self.assertRaisesRegex(PublishError, "changed limits"):
+            publish.check_gate(self.video)
+        topic = self.job / "topic.json"
+        topic.write_text(json.dumps({"gate": {"min_s": 1200, "max_s": 1800}}), encoding="utf-8")
+        self.assertEqual(publish.topic_window(topic), (1200.0, 1800.0))
+        publish.check_gate(self.video, window=publish.topic_window(topic))
+        self.write_gate(gate_doc(self.video, limits={**lesson, "target_lufs": -10.0}))
+        with self.assertRaisesRegex(PublishError, "changed limits"):
+            publish.check_gate(self.video, window=(1200.0, 1800.0))
+        topic.write_text(json.dumps({"job": "x"}), encoding="utf-8")
+        self.assertIsNone(publish.topic_window(topic))
+        self.assertIsNone(publish.topic_window(None))
+
     def test_stage_refuses_a_past_time_a_published_release_and_a_started_upload(self):
         with self.assertRaisesRegex(PublishError, "in the past"):
             self.stage(publish_at="2026-11-25T19:00:00+07:00")
