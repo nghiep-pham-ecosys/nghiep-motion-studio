@@ -626,18 +626,19 @@ def _cmd_images_library(args: argparse.Namespace) -> int:
     spec = Path(args.spec) if args.spec else SPEC
     out = Path(args.out).expanduser() if args.out else default_library()
     try:
-        portraits, shots = expand(load_spec(spec))
+        items = expand(load_spec(spec))
     except ImagesError as exc:
         print(f"FAIL {exc}", file=sys.stderr)
         return 1
-    unknown = [s for s in args.only if s not in {x.id for x in portraits + shots}]
+    unknown = [s for s in args.only if s not in {x.id for x in items}]
     if unknown:
-        print(f"FAIL unknown shot id(s): {', '.join(unknown)}", file=sys.stderr)
+        print(f"FAIL unknown image id(s): {', '.join(unknown)}", file=sys.stderr)
         return 1
     if args.dry_run:
-        for shot in portraits + shots:
-            print(f"{shot.id:24} seed {shot.seed:5}  {shot.prompt}")
-        print(f"OK   {len(portraits)} portraits and {len(shots)} shots into {out}")
+        for it in items:
+            built = f"from {' + '.join(it.deps)}" if it.deps else it.prompt
+            print(f"{it.id:34} {it.kind:10} seed {it.seed:5}  {built}")
+        print(f"OK   {len(items)} images ({sum(1 for x in items if x.is_shot)} shots) into {out}")
         return 0
     python = Path(args.python).expanduser() if args.python else images_python()
     return run_worker(worker_cmd(python, spec, out, only=args.only, force=args.force, sheet_only=args.sheet_only,
@@ -699,9 +700,9 @@ def build_parser() -> argparse.ArgumentParser:
     ls.add_argument("--characters", help="folder with the character and background SVGs (default: the nearest "
                     "characters/ folder at or above the lesson file)")
     ls.add_argument("--look", choices=("flat", "illustrated"), default="flat",
-                    help="flat: the SVG characters (default); illustrated: 3D-cartoon stills of the image library "
+                    help="flat: the SVG characters (default); illustrated: anime stills of the image library "
                          "(build it first with images-library), a slow move on the speaker and a speech bubble; "
-                         "its job name ends in -3d")
+                         "its job name ends in -chibi")
     ls.add_argument("--library", help="the image library folder (default: $MOTION_STUDIO_LIBRARY, else "
                     "~/.cache/nghiep-motion-studio/library)")
     ls.add_argument("--shorts", type=int, default=3, help="how many Shorts (default: 3)")
@@ -713,19 +714,20 @@ def build_parser() -> argparse.ArgumentParser:
     ls.add_argument("--dry-run", action="store_true", help="write the source, print the steps; run nothing")
     ls.set_defaults(func=_cmd_lesson)
 
-    il = sub.add_parser("images-library", help="draw the illustrated lesson library (2 portraits, 5 places x 8 shots) "
-                        "on the local GPU with SDXL base 1.0 and the IP-Adapter, plus library.json and a contact sheet")
+    il = sub.add_parser("images-library", help="draw the illustrated lesson library (style D chibi anime figures and "
+                        "style A anime, 5 places) on the local GPU with Animagine XL 3.1, plus library.json and a "
+                        "contact sheet")
     il.add_argument("--spec", help="the prompts file (default: samples/library/prompts.json)")
     il.add_argument("--out", help="the library folder (default: $MOTION_STUDIO_LIBRARY, else "
                     "~/.cache/nghiep-motion-studio/library)")
-    il.add_argument("--only", action="append", default=[], help="draw only this shot id (repeatable)")
+    il.add_argument("--only", action="append", default=[], help="draw only this image id (repeatable; --dry-run lists them)")
     il.add_argument("--force", action="store_true", help="redraw images that already exist")
     il.add_argument("--sheet-only", action="store_true", help="only rewrite the contact sheet")
     il.add_argument("--candidates", type=int, default=0, help="draw N seeds of each --only shot into "
                     "<library>/candidates/ to pick one for the seeds of the prompts file (the library is left alone)")
     il.add_argument("--python", help="python of the images venv (default: $MOTION_STUDIO_IMAGES_VENV/bin/python, "
                     "else ~/.cache/nghiep-motion-studio/images-venv; `just images-setup` makes it)")
-    il.add_argument("--dry-run", action="store_true", help="list every shot with its seed and prompt; draw nothing")
+    il.add_argument("--dry-run", action="store_true", help="list every image with its seed and prompt; draw nothing")
     il.set_defaults(func=_cmd_images_library)
 
     v = sub.add_parser("validate", help="check scenes.json files against the schema")

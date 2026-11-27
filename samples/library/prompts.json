@@ -1,33 +1,33 @@
 {
-  "version": 1,
-  "about": "Prompts of the illustrated lesson library: two original characters (Lan and Minh) in five places, 8 shots per place, generated once on a local GPU (motion-studio images-library) and reused by every lesson. No studio, film, channel or real person is named; both characters are adults in ordinary clothes.",
+  "version": 2,
+  "about": "Prompts of the illustrated lesson library: two original characters (Lan and Minh), drawn once on a local GPU (motion-studio images-library) and reused by every lesson. Style D (chibi anime figures) is the main look; style A (clean anime) is mixed in, about 1 shot in 4. No studio, film, game, brand, channel or real person is named; both characters are adults in ordinary clothes.",
   "models": {
-    "base": {
-      "repo": "stabilityai/stable-diffusion-xl-base-1.0",
-      "files": "fp16 variant",
+    "animagine-xl-3.1": {
+      "repo": "cagliostrolab/animagine-xl-3.1",
+      "revision": "483f0c322568ed13697ed01dd0be07204746d12b",
+      "files": [
+        "model_index.json",
+        "scheduler/*",
+        "tokenizer/*",
+        "tokenizer_2/*",
+        "text_encoder/*",
+        "text_encoder_2/*",
+        "unet/*",
+        "vae/*"
+      ],
+      "local": "models/animagine-xl-3.1-diffusers",
       "license": "CreativeML Open RAIL++-M (commercial use allowed, with the use restrictions of the licence)",
-      "url": "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0"
-    },
-    "ip_adapter": {
-      "repo": "h94/IP-Adapter",
-      "file": "sdxl_models/ip-adapter-plus-face_sdxl_vit-h.safetensors",
-      "license": "Apache-2.0",
-      "url": "https://huggingface.co/h94/IP-Adapter"
-    },
-    "image_encoder": {
-      "repo": "h94/IP-Adapter",
-      "file": "models/image_encoder (OpenCLIP ViT-H/14, LAION-2B)",
-      "license": "Apache-2.0 (repo); the ViT-H/14 weights are MIT (LAION)",
-      "url": "https://huggingface.co/h94/IP-Adapter"
+      "url": "https://huggingface.co/cagliostrolab/animagine-xl-3.1"
     }
   },
   "generate": {
-    "width": 1344,
-    "height": 768,
     "steps": 28,
-    "guidance": 6.0,
-    "ip_scale": 0.5,
-    "ip_scale_both": 0.4
+    "guidance": 6.0
+  },
+  "blend": {
+    "strength": 0.3,
+    "steps": 30,
+    "guidance": 5.0
   },
   "output": {
     "width": 1920,
@@ -35,152 +35,238 @@
     "format": "jpg",
     "quality": 92
   },
-  "style": "3d animated movie still, cartoon style, warm cinematic light",
-  "negative": "photo, photorealistic, 2d, flat illustration, anime, sketch, text, letters, watermark, logo, blurry, lowres, deformed, bad hands, extra fingers, cross-eyed, duplicate person, crowd, third person, child, teenager",
+  "adult_negative": "child, loli, shota, school uniform",
   "characters": {
     "her": {
-      "name": "Lan",
-      "look": "a Vietnamese woman in her late 20s, shoulder-length black hair, mustard cardigan, white blouse",
-      "short": "a young woman in a yellow cardigan",
-      "portrait_seed": 1101,
-      "face": [
-        0.547,
-        0.3,
-        0.64
-      ]
+      "name": "Lan"
     },
     "him": {
-      "name": "Minh",
-      "look": "a Vietnamese man in his late 20s, short black hair, black glasses, navy sweater, blue shirt",
-      "short": "a young man with glasses in a dark blue sweater",
-      "portrait_seed": 2207,
-      "face": [
-        0.577,
-        0.38,
-        0.72
-      ]
+      "name": "Minh"
     }
   },
-  "portrait": "close-up portrait of {look}, stylized 3d cartoon character, big expressive eyes, friendly smile, facing the camera, plain warm grey background",
   "places": {
-    "classroom": {
-      "setting": "a bright classroom with a clean whiteboard, wooden desks and big windows",
-      "her": "standing by the whiteboard",
-      "him": "sitting at a desk with a notebook"
+    "classroom": "classroom, large whiteboard, wooden floor, window, daylight",
+    "cafe": "cafe interior, small round table, two coffee cups on table, potted plant, warm light",
+    "interview": "office meeting room, glass wall, long table, potted plant, daylight",
+    "exam": "quiet test room, small table, two chairs, wall clock, daylight",
+    "desk": "study room, desk, laptop, cork board, bookshelf, warm light"
+  },
+  "styles": {
+    "D": {
+      "name": "chibi anime figure",
+      "model": "animagine-xl-3.1",
+      "share": 0.75,
+      "style": "chibi, super deformed, figure, glossy, big head, full body",
+      "quality": "masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, sound effects, watermark, logo, nsfw, lowres, worst quality, low quality, bad anatomy, bad hands, extra digits, fewer digits, realistic",
+      "characters": {
+        "her": {
+          "tags": "1girl, solo, adult woman, black hair, bob cut, medium hair, mustard cardigan, dark yellow cardigan, open cardigan, white shirt, black pants, brown eyes",
+          "negative": "long hair, ponytail, blonde hair, sweater, turtleneck, light yellow, pale yellow, bare legs, skirt, glasses",
+          "seed": 104
+        },
+        "him": {
+          "tags": "1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, navy blue sweater, black pants, brown eyes",
+          "negative": "facial hair, old man, sunglasses, tinted lenses, black sweater, light blue sweater, blue eyes, cardigan, jacket",
+          "seed": 204,
+          "poses": {
+            "laugh": "big smile, open mouth, happy, hand up"
+          }
+        }
+      },
+      "figure": "{style}, {tags}, {pose}, simple background, pastel background, light cream background, {quality}",
+      "poses": {
+        "portrait": "standing, smile",
+        "talk": "open mouth, smile, hand up, open hand",
+        "listen": "closed mouth, light smile, own hands together, standing",
+        "think": "closed mouth, hand on own chin, thinking, looking up",
+        "point": "open mouth, smile, index finger raised",
+        "laugh": "laughing, open mouth, closed eyes, happy",
+        "nod": "smile, closed eyes, nodding, standing"
+      },
+      "background": "no humans, indoors, {setting}, 3d, glossy, pastel colors, soft lighting, {quality}",
+      "background_negative": "people, person, 1girl, 1boy, child, loli, shota, school uniform, kanji, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, realistic",
+      "blend": "chibi, super deformed, figure, glossy, 3d, {people}, standing, {setting}, soft lighting, {quality}",
+      "blend_negative": "kanji, child, loli, shota, school uniform, text, watermark, logo, speech bubble, nsfw, lowres, worst quality, low quality, bad anatomy, extra digits, realistic, multiple girls, multiple boys, crowd, sunglasses",
+      "layout": {
+        "two": {
+          "her": [
+            0.3,
+            0.74
+          ],
+          "him": [
+            0.7,
+            0.8
+          ]
+        },
+        "solo": {
+          "her": [
+            0.32,
+            0.86
+          ],
+          "him": [
+            0.68,
+            0.92
+          ]
+        },
+        "floor": 22,
+        "face": 0.38
+      },
+      "shots": {
+        "both-her": {
+          "talk": "her",
+          "figures": {
+            "her": "talk",
+            "him": "listen"
+          }
+        },
+        "both-him": {
+          "talk": "him",
+          "figures": {
+            "her": "listen",
+            "him": "talk"
+          }
+        },
+        "both-her-2": {
+          "talk": "her",
+          "figures": {
+            "her": "point",
+            "him": "nod"
+          }
+        },
+        "both-him-2": {
+          "talk": "him",
+          "figures": {
+            "her": "nod",
+            "him": "point"
+          }
+        },
+        "her-1": {
+          "talk": "her",
+          "figures": {
+            "her": "talk"
+          }
+        },
+        "her-2": {
+          "talk": "her",
+          "figures": {
+            "her": "think"
+          },
+          "alt": {
+            "cafe": "laugh",
+            "interview": "laugh",
+            "desk": "laugh"
+          }
+        },
+        "him-1": {
+          "talk": "him",
+          "figures": {
+            "him": "talk"
+          }
+        },
+        "him-2": {
+          "talk": "him",
+          "figures": {
+            "him": "laugh"
+          },
+          "alt": {
+            "cafe": "think",
+            "interview": "think",
+            "desk": "think"
+          }
+        }
+      }
     },
-    "interview": {
-      "setting": "a modern office meeting room with a glass wall and a plant",
-      "her": "sitting at the table with a folder",
-      "him": "sitting across the table"
-    },
-    "exam": {
-      "setting": "a quiet test room with a small table, two chairs and a wall clock",
-      "her": "sitting at the table holding papers",
-      "him": "sitting upright across the table"
-    },
-    "desk": {
-      "setting": "a cozy study corner with a desk, a laptop and a cork board",
-      "her": "standing by the desk",
-      "him": "at the desk with a laptop"
-    },
-    "cafe": {
-      "setting": "a warm cafe with wooden tables and plants",
-      "her": "at a cafe table with a coffee",
-      "him": "at a cafe table with a tea"
+    "A": {
+      "name": "anime",
+      "model": "animagine-xl-3.1",
+      "share": 0.25,
+      "style": "anime screencap, anime coloring, clean lineart",
+      "quality": "masterpiece, best quality",
+      "negative": "kanji, child, loli, shota, school uniform, text, speech bubble, watermark, nsfw, large breasts, cleavage, lowres, worst quality, bad anatomy, bad hands, extra digits, chibi",
+      "characters": {
+        "her": {
+          "tags": "1girl, solo, adult woman, black hair, bob cut, medium hair, oversized mustard cardigan, white shirt, brown eyes",
+          "negative": "long hair, ponytail, blonde hair, sweater, turtleneck, pale yellow, glasses",
+          "seed": 1104
+        },
+        "him": {
+          "tags": "1boy, solo, adult man, clean-shaven, short hair, black hair, round eyewear, clear glasses, visible eyes, navy blue sweater, dark blue sweater, white collared shirt, brown eyes",
+          "negative": "green sweater, teal, cardigan, light blue sweater, facial hair, old man, sunglasses, tinted lenses, black sweater, jacket, purple eyes",
+          "seed": 2204
+        }
+      },
+      "portrait": "{style}, {tags}, portrait, smile, looking at viewer, simple background, light blue background, {quality}",
+      "panel": "{style}, {tags}, portrait, {pose}, {setting}, {quality}",
+      "solo": "{style}, {tags}, upper body, {pose}, {setting}, {quality}",
+      "poses": {
+        "talk": "open mouth, smile, hand up",
+        "listen": "closed mouth, light smile, looking to the side"
+      },
+      "panel_size": [
+        1024,
+        1024
+      ],
+      "solo_size": [
+        1344,
+        768
+      ],
+      "shots": {
+        "both-her": {
+          "talk": "her",
+          "split": {
+            "her": "talk",
+            "him": "listen"
+          }
+        },
+        "both-him": {
+          "talk": "him",
+          "split": {
+            "her": "listen",
+            "him": "talk"
+          }
+        },
+        "her-1": {
+          "talk": "her",
+          "solo": "talk"
+        },
+        "him-1": {
+          "talk": "him",
+          "solo": "talk"
+        }
+      }
     }
   },
-  "shots": {
-    "both-her": {
-      "who": "both",
-      "talk": "her",
-      "focus": [
-        0.34,
-        0.42
-      ],
-      "prompt": "two people talking, {her_short} on the left {her_pose}, speaking, {him_short} on the right {him_pose}, listening, medium wide shot, {setting}"
-    },
-    "both-him": {
-      "who": "both",
-      "talk": "him",
-      "focus": [
-        0.66,
-        0.42
-      ],
-      "prompt": "two people talking, {her_short} on the left {her_pose}, listening, {him_short} on the right {him_pose}, speaking, medium wide shot, {setting}"
-    },
-    "her-1": {
-      "who": "her",
-      "talk": "her",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "medium close-up of {her_look}, {her_pose}, talking, warm smile, on the left of the frame, {setting}"
-    },
-    "her-2": {
-      "who": "her",
-      "talk": "her",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "medium shot of {her_look}, {her_pose}, explaining with an open hand, three-quarter view, {setting}"
-    },
-    "her-listen": {
-      "who": "her",
-      "talk": "him",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "close-up of {her_look}, {her_pose}, listening, gentle smile, on the left of the frame, {setting}"
-    },
-    "him-1": {
-      "who": "him",
-      "talk": "him",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "medium close-up of {him_look}, {him_pose}, talking, friendly smile, on the right of the frame, {setting}"
-    },
-    "him-2": {
-      "who": "him",
-      "talk": "him",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "medium shot of {him_look}, {him_pose}, explaining with one hand raised, three-quarter view, {setting}"
-    },
-    "him-listen": {
-      "who": "him",
-      "talk": "her",
-      "focus": [
-        0.5,
-        0.36
-      ],
-      "prompt": "close-up of {him_look}, {him_pose}, listening, nodding, on the right of the frame, {setting}"
-    }
-  },
-  "seed_base": 3400,
+  "seed_base": 3000,
   "seeds": {
-    "classroom-her-2": 5403,
-    "classroom-her-listen": 4404,
-    "interview-both-her": 8500,
-    "interview-both-him": 14501,
-    "interview-her-1": 4502,
-    "exam-both-her": 5600,
-    "exam-her-1": 6602,
-    "desk-both-her": 5700,
-    "desk-her-listen": 4704,
-    "cafe-both-her": 7800,
-    "cafe-her-2": 4803
+    "D-fig-him-listen": 1204,
+    "D-bg-interview": 4200,
+    "D-bg-exam": 5300,
+    "D-bg-desk": 4400,
+    "A-classroom-him-1": 5204
   },
-  "skip": [
-    "classroom-both-him",
-    "desk-both-him",
-    "cafe-both-him"
-  ],
-  "review": "Two-shots were drawn with --candidates 3 and checked by eye (2026-11-26): seeds lists the ones chosen; skip lists two-shots with no clean seed (clothes swapped or a third person), whose place uses its other two-shot for both speakers. Hair pass (2026-11-26, issue 37): nine stills where Lan's hair ran past her shoulders were drawn again with --candidates (4 to 10 seeds each) and the seed whose hair matches the portrait (shoulder-length, curled under) was kept; the other stills and both portraits are unchanged."
+  "mirror": [],
+  "focus": {
+    "A-classroom-him-1": [
+      0.65,
+      0.42
+    ],
+    "A-cafe-him-1": [
+      0.78,
+      0.3
+    ],
+    "A-desk-him-1": [
+      0.75,
+      0.3
+    ],
+    "A-exam-him-1": [
+      0.75,
+      0.28
+    ],
+    "A-interview-him-1": [
+      0.78,
+      0.28
+    ]
+  },
+  "review": ""
 }

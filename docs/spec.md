@@ -426,72 +426,81 @@ visuals 486 s, render 508 s, drift 51 s; duration, loudness (-14.3 LUFS, true
 peak -1.6 dBTP), black frames and drift (median 20 ms, p90 260 ms, 309 of 354
 cues) pass; fact-check waits for Nghiep; 3 Shorts (59.9, 58.5, 59.3 s).
 
-## Illustrated look (issue 34)
+## Illustrated look (issues 34, 40)
 
 `motion-studio lesson <file> --look illustrated` plays the same lesson (same
-lines, voices, pauses and chapters) over warm 3D-cartoon stills of the two
-characters instead of the flat SVGs; `--look flat` (the default until
-Nghiep approves the characters on the contact sheet) keeps the old look. The
-illustrated job is named `<job>-3d`, so both renders can sit side by side.
+lines, voices, pauses and chapters) over anime stills of the two characters
+instead of the flat SVGs; `--look flat` stays the default until Nghiep
+approves the characters on the contact sheet. The illustrated job is named
+`<job>-chibi`, so the renders can sit side by side (the 3D-cartoon render of
+issue 34 kept its `-3d` job).
+
+Two styles (issue 40, chosen from the style probe of issue 39): **D, chibi
+anime figures**, is the main look; **A, clean anime**, is mixed in for whole
+parts, about 1 line in 4.
 
 **The library** is drawn once on the local GPU (RTX 4070, 8 GB) and reused by
 every lesson: `just images-setup` (a venv with CUDA torch 2.11 and diffusers
 0.39 in `~/.cache/nghiep-motion-studio/images-venv`), then
-`just images-library`. Prompts, seeds and models are in
+`just images-library`. Prompts, seeds and the model of each style are in
 `samples/library/prompts.json`; images go to
-`~/.cache/nghiep-motion-studio/library` (never git) with `library.json` (model,
-revision, licence, seed, prompt, file and sha256 per shot) and
-`contact-sheet.jpg`. A copy of both lives in `samples/library/` (the sheet is
-a small preview under 2 MB). Contents: a reference portrait per character,
-then 5 places (classroom, cafe, interview room, test room, study desk) x up
-to 8 shots (two-shot with her speaking, two-shot with him speaking, two
-angles of each speaker, each one listening) at 1920 x 1080.
+`~/.cache/nghiep-motion-studio/library` (never git) with `library.json`
+(model and revision, licence, seed, prompt, method, file and sha256 of every
+image) and `contact-sheet.jpg`. A copy of both lives in `samples/library/`
+(the sheet is a small preview under 2 MB).
 
 | Model | Use | Licence |
 |---|---|---|
-| [SDXL base 1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0) (fp16 files) | every image | CreativeML Open RAIL++-M: commercial use allowed, with its use restrictions |
-| [IP-Adapter plus-face SDXL ViT-H](https://huggingface.co/h94/IP-Adapter) | the same face in every shot | Apache-2.0 |
-| OpenCLIP ViT-H/14 image encoder (in the same repo) | encodes the portraits for the IP-Adapter | Apache-2.0 repo; MIT weights (LAION) |
+| [Animagine XL 3.1](https://huggingface.co/cagliostrolab/animagine-xl-3.1), pinned revision `483f0c32`, fp16 diffusers files | every image of both styles | CreativeML Open RAIL++-M: commercial use allowed, with its use restrictions |
 
-No other checkpoint, LoRA or VAE is used, no paid API and no web service.
-Prompts never name a studio, film, channel or person; both characters are
-adults in ordinary clothes (Lan: mustard cardigan; Minh: glasses, navy
-sweater). Consistency comes from three things: the same look words in every
-prompt (clothes included), one seed family (`seed_base` + 100 x place +
-shot) and the face IP-Adapter on a square crop of the character's face in
-the portrait (`face` in the prompts file; scale 0.5, in a two-shot both
-faces at 0.4 with a left and a right mask). The plus adapter on the whole
-portrait was tried first: it copied the portrait's grey backdrop and pose
-into every shot. SDXL still swaps clothes between the two people of a
-two-shot now and then, so `--candidates 3 --only <id>` draws three seeds of a
-shot into `<library>/candidates/` and the one chosen goes under `seeds` in the
-prompts file (seed + 1000 x k). A two-shot with no clean seed goes under
-`skip`: either two-shot of a place serves both speakers (the camera moves to
-the one who talks), so the place uses its other two-shot. Review of
-2026-11-26: 30 candidates, 4 seeds chosen, 3 two-shots skipped (classroom,
-desk and cafe with him speaking), so the library has 37 stills. Hair pass
-(issue 37): the face adapter keeps the face but not always the hair, and in
-nine stills Lan's hair ran past her shoulders. Each was drawn again with 4
-to 10 candidate seeds and the one whose hair matches the portrait
-(shoulder-length, curled under) went under `seeds`; the other stills and both
-portraits stayed as they were. Two of the chosen two-shots still show a
-little colour bleed in the shirt under the cardigan or sweater.
+No other checkpoint, LoRA, adapter or VAE is used, no paid API and no web
+service. The worker uses the local copy in `~/.cache/nghiep-motion-studio/models/`
+when it is there (its weight files are byte-identical to the pinned
+revision), else downloads that revision. Prompts are Animagine tags and never
+name a studio, film, game, brand, channel or person; both characters are
+adults in ordinary clothes (Lan: black bob, mustard cardigan; Minh: round
+clear glasses, navy sweater), and every negative prompt keeps the adult-only
+tags (`adult_negative`: child, loli, shota, school uniform; a test checks
+each image). "talking" pulls in lettering, so poses are described instead
+(open mouth, hand up) and "kanji" leads the negative. CLIP reads 77 tokens:
+style and look come first, quality tags last.
+
+**Style D** (composites). Each character is drawn once per pose (portrait,
+talk, listen, think, point, laugh, nod) on a plain background at one pinned
+seed (Lan 104, Minh 204; a pose whose hair or clothes drift gets another
+seed under `seeds`). Each place gets an empty background ("no humans").
+A shot is the background, the cut-out figures (the backdrop flood-filled
+from the border, the floor under the feet dropped) with a soft shadow, Lan
+on the left and Minh on the right, then one img2img pass at strength 0.30
+that blends them in (above 0.4 the clothes colours drift). A two-person
+prompt cannot bind clothes and hair to one person; a composite of our own
+figures can. Per place: four two-shots (speaker talking or pointing, the
+other listening or nodding) and two solo shots per character (talk, and
+think or laugh). The worker records where each face landed, and the camera
+and the bubble's tail go there.
+
+**Style A** (drawn). Framed head and shoulders (`portrait`; the first probe
+was too tight on the chest), a loose cardigan, `large breasts, cleavage` in
+the negative. Per place: a talk and a listen panel per character
+(1024 x 1024) and a wider talk shot (1344 x 768). A two-shot is a split
+screen: her panel on the left, his on the right, the speaker talking and the
+other listening.
 
 **One model on the GPU at a time** (`images_worker.py`, run in the images
-venv): the text encoders encode every prompt and leave; SDXL draws the two
-portraits; the IP-Adapter image encoder encodes them and leaves; SDXL with the
-IP-Adapter draws the shots. SDXL draws at 1344 x 768 (an SDXL size) in 28
-DPM++ 2M Karras steps, guidance 6; the VAE decodes in bf16 in 512 px tiles
-(the default fp32 upcast failed on this GPU under WSL, and fp16 overflows);
-Pillow scales to 1920 x 1080 (JPEG, quality 92). About 20 s per still. An
-image whose prompt, seed and size did not change is kept; `--only <id>
---force` redraws one.
+venv, about 10 GB RAM): the two text encoders encode every prompt and leave;
+then the UNet and the VAE draw (28 Euler a steps, guidance 6, 1024 x 1024 or
+1344 x 768) the figures, backgrounds and drawn shots, then blend the
+composites (30 steps x 0.30); the VAE decodes in bf16 in 512 px tiles (fp16
+overflows; the fp32 upcast failed on this GPU under WSL); Pillow scales the
+shots to 1920 x 1080 (JPEG, quality 92). About 15 s a drawing, 8 s a blend.
+An image whose parameters did not change is kept; a new seed of a figure
+re-blends the shots built from it. `--only <id> --candidates 3` draws three
+seeds (seed + 1000 x k) into `<library>/candidates/` to choose one by eye.
 
 **The `illustrated` visual** (`visuals/illustrated.py`, ffmpeg only): the
 still at 2x the output size and `zoompan` pushing in slowly (ease-out, 3 % +
 1.2 % per second of the clip, at most 12 %) towards `focus` (the speaker's
-side in a two-shot, the upper centre in a single shot, since SDXL does not
-reliably place one person left or right), kept inside the picture; one transparent SVG per scene on top: the
+face), kept inside the picture; one transparent SVG per scene on top: the
 part label, small faint "AI voice" and "Made with AI" chips (20 px, 55 % opacity,
 top right; the AI disclosure is never left out), a large speech bubble at the
 bottom on the speaker's side (52 px sentence, 38 px Vietnamese line, shrinks
@@ -504,17 +513,36 @@ cards, questions, lists and notes stay. The pause cue sits on the bubble's
 edge and the countdown bar fills inside it. Clip length and pauses are the
 same as the `dialogue` kind.
 
-**Which still** (`images.pick_shots`): each part has a place (intro, words,
-recap: classroom; listen, shadowing, listen again: cafe; model answer and
-follow-up: interview room; IELTS Speaking: test room; IELTS Writing: desk).
-The first line of a part opens on a two-shot (its speaker's, else the
-other one); then the
-speaker's close-up, a second angle, the two-shot and the listener's reaction
-take turns, and a still never follows itself. A missing still falls back to
-another shot of the same place. Only the stills a lesson uses are copied into
-its job (`lesson/library/`). Lip-sync is out of scope.
+**Which style, which still** (`images.pick_styles`, `images.pick_shots`):
+each part has a place (intro, words, recap: classroom; listen, shadowing,
+listen again: cafe; model answer and follow-up: interview room; IELTS
+Speaking: test room; IELTS Writing: desk). The first part sets the main
+style; A takes whole parts, never two in a row, and the set of parts whose
+share of lines is closest to A's share (25 %) wins, so a style changes only at a
+part boundary and the choice is the same on every run. Within a part the
+first line opens on the speaker's two-shot; then the speaker's shots take
+turns (solo, two-shot, second solo, second two-shot) and a still never
+follows itself. **Every still shows the speaker**: the 3D library let a
+listener's reaction shot carry the speaker's line, so at about 300 s of the
+first pilot Minh's bubble sat on a still of Lan (issue 40). `focus_for`
+refuses such a still. Only the stills a lesson uses are copied into its job
+(`lesson/library/`). Lip-sync is out of scope.
 
-**Pilot (2026-11-26, illustrated).** `ai-eng-p3 --look illustrated`: 276
+**Pilot (2026-11-27, chibi library, issue 40).** Library: 101 images (14
+figures, 5 backgrounds, 40 composites, 2 A portraits, 20 A panels, 10 A
+shots, 10 split two-shots; 60 shots) in about 30 min of GPU time, after 46
+candidate drawings to pick seeds (Minh's listen pose, three backgrounds, one
+A shot with a stray hand) and two prompt passes (no "diorama" in the
+backgrounds; Minh's A sweater pinned to navy). `ai-eng-p3 --look
+illustrated` (job `en-2026-11-26-ai-eng-p3-chibi`, narration carried over
+from the `-3d` job): 276 scenes on 44 of the 60 shots; style A on shadowing
+and recap, 69 of 276 lines (25 %); every still shows its speaker. Pipeline:
+visuals 951 s, render 697 s, subtitles 59 s. Gate (`--min-s 1200 --max-s
+1800`): duration 1754.5 s, loudness (-14.3 LUFS, true peak -1.7 dBTP), black
+frames and drift (median 20 ms, p90 210 ms, 315 of 354 cues) pass;
+fact-check waits for Nghiep. 3 Shorts (59.8, 58.5, 59.4 s).
+
+**Pilot (2026-11-26, 3D-cartoon library, issue 34).** `ai-eng-p3 --look illustrated`: 276
 scenes on 35 of the 37 stills, 1754.5 s. Library: 2 portraits and 37 stills
 in 748 s (about 16 s a still, 5.7 GiB on the GPU), after 30 two-shot
 candidates. Pipeline: visuals 979 s (twice the flat look: the 2x zoom per

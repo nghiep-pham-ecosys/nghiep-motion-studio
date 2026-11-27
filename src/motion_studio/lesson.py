@@ -24,11 +24,12 @@ the ``pause`` of each dialogue visual: ``scale`` x the line's length +
 ``add_s``.
 
 Two looks: ``flat`` (the SVG characters and rooms of ``samples/characters``,
-the ``dialogue`` visual) and ``illustrated`` (3D-cartoon stills of the same
-two characters from the library that ``motion-studio images-library`` draws
-on the local GPU, the ``illustrated`` visual: a slow push-in on the speaker
-and a big speech bubble). ``illustrate`` picks a still per line
-(``images.pick_shots``) in the place of the part (``PLACES``).
+the ``dialogue`` visual) and ``illustrated`` (anime stills of the same two
+characters from the library that ``motion-studio images-library`` draws on
+the local GPU: chibi figures, with clean anime mixed in for whole parts; the
+``illustrated`` visual: a slow push-in on the speaker and a big speech
+bubble). ``illustrate`` picks a still per line (``images.pick_shots``) in the
+place of the part (``PLACES``); every still shows the one who speaks.
 
 ``write_source`` writes the scenes, a topic file, a voices config, the fact
 check and the character files (or the stills used) into a folder; ``run`` hands that topic to the
@@ -650,7 +651,8 @@ def build_scenes(lesson: Lesson, characters: str = "characters", look: str = "fl
 
 def illustrate(scenes: list[dict[str, Any]], parts: list[str], library: Library, stills: str = "library") -> None:
     """Turn each flat ``dialogue`` visual into an ``illustrated`` one (in place): the library still of the line's place
-    and speaker, the camera's focus, the speaker's name and the "Made with AI" badge; text and pause stay."""
+    and speaker, the camera's focus on the speaker's face, the speaker's name and the "Made with AI" badge; text and
+    pause stay. ``focus_for`` refuses a still that does not show the speaker."""
     lines = [(part, PLACES[part], scene["visual"]["talk"]) for scene, part in zip(scenes, parts)]
     for scene, shot_id in zip(scenes, pick_shots(lines, library)):
         flat = scene["visual"]
@@ -677,10 +679,10 @@ def video_title(lesson: Lesson) -> str:
 
 
 def job_name(path: Path, lesson: Lesson, look: str = "flat") -> str:
-    """The job of a lesson; the illustrated look gets its own job (``-3d``), so both renders can sit side by side."""
+    """The job of a lesson; the illustrated look gets its own job (``-chibi``), so the renders can sit side by side."""
     stem = path.name.replace(".lesson.md", "").replace(".md", "")
     slug = re.sub(r"[^a-z0-9-]+", "-", stem.lower()).strip("-") or "lesson"
-    suffix = "-3d" if look == "illustrated" else ""
+    suffix = "-chibi" if look == "illustrated" else ""
     return f"en-{lesson.date}-{slug}"[:64 - len(suffix)].rstrip("-") + suffix
 
 
@@ -795,8 +797,8 @@ def description_intro(lesson: Lesson, illustrated: bool = False) -> str:
     ]
     if lesson.source:
         lines.append(f"Material: the post \"{lesson.source}\".")
-    art = ("the characters and places are original 3D-cartoon stills made with AI (Stable Diffusion XL with an "
-           "IP-Adapter, on a local GPU)" if illustrated else "the characters are original drawings")
+    art = ("the characters and places are original anime stills made with AI (Animagine XL 3.1, a Stable Diffusion "
+           "XL model, on a local GPU)" if illustrated else "the characters are original drawings")
     lines.append(f"{AI_LABEL}: both voices are synthetic (Kokoro {VOICES[HER]} and {VOICES[HIM]}); {art}. "
                  "An audio-only version of this lesson is made for listening without a screen.")
     return "\n\n".join(lines)
