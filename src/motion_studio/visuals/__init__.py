@@ -1,4 +1,4 @@
-"""Generated visuals: build Manim, diagram, code, terminal, dialogue and illustrated clips, then hand them to the renderer.
+"""Generated visuals: build Manim, diagram, code, terminal, dialogue, illustrated and card clips, then hand them to the renderer.
 
 A scene whose visual kind is one of ``GENERATED_KINDS`` is built into an mp4
 clip (cached by content) and replaced, in a copy of the scenes, by a plain
@@ -24,12 +24,13 @@ from ..schema import Scenes
 from ..theme import LIGHT, Theme
 from .base import Adapter, BuildRequest, VisualError
 from .dialogue import DialogueAdapter
+from .card import CardAdapter
 from .illustrated import IllustratedAdapter
 from .manim_ce import CodeAdapter, DiagramAdapter, ManimAdapter
 from .vhs import TerminalAdapter
 
 ADAPTERS: dict[str, Adapter] = {a.kind: a for a in (ManimAdapter(), DiagramAdapter(), CodeAdapter(), TerminalAdapter(), DialogueAdapter(),
-                                     IllustratedAdapter())}
+                                     IllustratedAdapter(), CardAdapter())}
 GENERATED_KINDS = frozenset(ADAPTERS)
 
 __all__ = [

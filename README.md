@@ -10,7 +10,8 @@ scene or speaker with a `voice_mix` policy; see [docs/voices.md](docs/voices.md)
 generated visuals (Manim diagrams and scenes, animated code, VHS terminal
 recordings), subtitles, loudness normalisation, a quality gate for rendered videos, Shorts cut from
 each video, a work dir with a size cap that is cleaned after upload, the hand-off to YouTube as
-private, scheduled drafts, and one command that runs every step from a topic file.
+private, scheduled drafts, one command that runs every step from a topic file, the English lesson as a dialogue,
+and the daily explainer of a lab-to-prod post (or a study lesson) with code, output and chart cards.
 
 ## One command
 
@@ -40,6 +41,37 @@ just lesson samples/lesson-2026-11-26/ai-eng-p3.lesson.md --look illustrated
 
 The illustrated look shows those stills ([contact sheet](samples/library/contact-sheet.jpg)) with a slow camera move on
 the speaker and a large speech bubble. Details: "Illustrated look" in the spec.
+
+### Explainer: one post (or study lesson) and its merged work
+
+```sh
+# a first talk file from the post (TODO lines to write; the build refuses them)
+just explainer ../lab-to-prod/content/2026-W48/2026-11-27-ai-eng-p4 --draft-talk my.talk.md
+# the pilot: post folder + talk file -> an 8-15 min explainer and 2 Shorts (job en-2026-11-27-ai-eng-p4-explainer)
+just explainer samples/explainer-2026-11-27/2026-11-27-ai-eng-p4 --talk samples/explainer-2026-11-27/ai-eng-p4.talk.md
+# the second source type: a study lesson (Concept, Worked example, Edge cases, Quiz)
+just explainer samples/specialty-2026-11-27/saa-sqs-sns-eventbridge.md --talk samples/specialty-2026-11-27/saa-sqs-sns-eventbridge.talk.md
+```
+
+`motion-studio explainer SOURCE --talk TALK` reads a lab-to-prod post folder (`post.md` with its `## linkedin` blog
+note, `image.png`, the scripts next to it and their `.expected` output, and the entries its `work:` names in the
+nearest `work.yaml`) or one lesson file, plus a talk file written for the day. Lan and Minh (the lesson characters,
+preset Kokoro voices) explain the problem, the method, the code that runs, the measured number and its limit.
+
+- The talk file: `## Section {place}` starts a chapter (places: classroom, cafe, desk, interview, exam); `Lan:` and
+  `Minh:` lines are split into sentences, one scene each, and each sentence must fit one subtitle cue.
+- A `[...]` line sets what the next lines show: `[code FILE A-B hl C-D | title]` and `[output FILE A-B]` (lines of a
+  file next to the source, at most 16), `[image FILE]`, `[chart TITLE | max N | label = value (text) | note ...]`,
+  `[points TITLE | item | ...]` and `[flow TITLE | a -> b, c -> d]` become full-frame cards (the `card` visual: the
+  panel, the speaker's still as an inset, the caption, the AI chips); `[card TITLE | line ...]` and `[still]` keep the
+  illustrated look. `Lan: question? [pause 8]` adds an answer pause with a cue.
+- Every number in the voice or on a card must occur in the source (the post, its scripts and `.expected` files, its
+  work entries, or the lesson file); the build stops on one that does not. Code and output cards are copied from
+  the files. The draft `factcheck.md` lists each number with the file and line it came from, unchecked, so the gate
+  fails until a person checks it (save the reviewed one as `<talk>.factcheck.md` next to the talk file).
+- The job is `en-<post folder>-explainer` (or `Job:` in the talk file), the gate window 8-15 min, 2 Shorts, and the
+  playlist "Lab to Prod — AI engineering in practice" (study lessons: "Study notes explained"). After the render it
+  writes `<job>.en.description.txt` with the chapters, the post link and the work link.
 
 ## Quick start
 

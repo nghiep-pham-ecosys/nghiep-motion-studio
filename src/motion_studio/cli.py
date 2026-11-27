@@ -1,4 +1,4 @@
-"""Command line: ``motion-studio video|lesson|images-library|validate|render|narrate|subtitles|gate|shorts|stage-upload|...``."""
+"""Command line: ``motion-studio video|lesson|explainer|images-library|validate|render|narrate|subtitles|gate|shorts|stage-upload|...``."""
 
 from __future__ import annotations
 
@@ -620,6 +620,50 @@ def _cmd_lesson(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_explainer(args: argparse.Namespace) -> int:
+    from .explainer import ExplainerError, draft_talk, job_name, load_source, load_talk, write_description, write_source
+    from .images import ImagesError
+    from .pipeline import STEPS, Pipeline, PipelineError, load_topic
+
+    try:
+        source = load_source(args.source)
+        if args.draft_talk:
+            out = Path(args.draft_talk)
+            if out.exists():
+                raise ExplainerError(f"{out} exists; the draft never overwrites a talk file")
+            out.write_text(draft_talk(source), encoding="utf-8")
+            print(f"OK   draft talk: {out} (write every TODO line, then build with --talk {out})")
+            return 0
+        if not args.talk:
+            raise ExplainerError("give the talk file with --talk (or write a first draft with --draft-talk FILE)")
+        job = job_name(source, load_talk(args.talk))
+        out = Path(args.out) if args.out else workdir.job_dir(job, workdir.work_dir()) / "explainer"
+        src = write_source(args.source, args.talk, out, library=Path(args.library).expanduser() if args.library else None,
+                           shorts=args.shorts)
+        print(f"OK   {src.topic}: {src.count} scene(s) for the job {job}; every number has a source")
+        if not src.factcheck_ready:
+            talk = Path(args.talk)
+            print(f"WARN no reviewed fact check next to {talk.name}: wrote a draft with unchecked claims to "
+                  f"{src.folder / 'factcheck.md'}; check them, set Reviewed-by and Narration: {src.narration}, and "
+                  f"save it as {talk.name.replace('.talk.md', '')}.factcheck.md", file=sys.stderr)
+        if args.build_only:
+            return 0
+        pipe = Pipeline(load_topic(src.topic), tts_python=Path(args.tts_python).expanduser() if args.tts_python else None,
+                        jobs=args.jobs, from_step=args.from_step or STEPS[0], until_step=args.until or STEPS[-1])
+        report = pipe.run(dry_run=args.dry_run)
+        if args.dry_run or not report.ok:
+            return 0 if report.ok else 1
+        if STEPS.index(args.until or STEPS[-1]) < STEPS.index("render"):
+            return 0
+        intro, desc = write_description(source, Path(report.job_dir), job)
+    except (ExplainerError, ImagesError, PipelineError, WorkDirError, OSError, ValueError, KeyError) as exc:
+        print(f"FAIL {exc}", file=sys.stderr)
+        return 1
+    print(f"OK   description (chapters, AI voice label): {desc}")
+    print(f"     top text for stage-upload --description-file: {intro}")
+    return 0
+
+
 def _cmd_images_library(args: argparse.Namespace) -> int:
     from .images import SPEC, ImagesError, default_library, expand, images_python, load_spec, run_worker, worker_cmd
 
@@ -713,6 +757,25 @@ def build_parser() -> argparse.ArgumentParser:
     ls.add_argument("--tts-python", help="python of the TTS venv (default: as for video)")
     ls.add_argument("--dry-run", action="store_true", help="write the source, print the steps; run nothing")
     ls.set_defaults(func=_cmd_lesson)
+
+    ex = sub.add_parser("explainer", help="one lab-to-prod post folder (or one study lesson .md) and a talk file -> "
+                        "one 8-15 min explainer played by Lan and Minh with code, output and chart cards, and 2 Shorts "
+                        "(runs the video steps; the job name ends in -explainer)")
+    ex.add_argument("source", help="a lab-to-prod post folder (post.md, scripts, .expected, image.png; work.yaml at or "
+                    "above it) or a lesson file (# Lesson YYYY-MM-DD: ..., Concept, Worked example, Edge cases, Quiz)")
+    ex.add_argument("--talk", help="the talk file: '## section {place}', 'Lan:' and 'Minh:' lines and [directives]")
+    ex.add_argument("--draft-talk", metavar="FILE", help="write a first talk from the source (TODO lines to fill) and stop")
+    ex.add_argument("--out", help="folder for the generated topic, scenes and fact check (default: <work dir>/<job>/explainer)")
+    ex.add_argument("--library", help="the image library folder (default: $MOTION_STUDIO_LIBRARY, else "
+                    "~/.cache/nghiep-motion-studio/library)")
+    ex.add_argument("--shorts", type=int, default=2, help="how many Shorts (default: 2)")
+    ex.add_argument("--build-only", action="store_true", help="write the topic, scenes and fact check; run nothing")
+    ex.add_argument("--from", dest="from_step", choices=STEPS, help="as for video: skip the steps before this one")
+    ex.add_argument("--until", choices=STEPS, help="as for video: stop after this step")
+    ex.add_argument("--jobs", type=int, default=1, help="parallel scene encodes in the render step (default: 1)")
+    ex.add_argument("--tts-python", help="python of the TTS venv (default: as for video)")
+    ex.add_argument("--dry-run", action="store_true", help="write the source, print the steps; run nothing")
+    ex.set_defaults(func=_cmd_explainer)
 
     il = sub.add_parser("images-library", help="draw the illustrated lesson library (style D chibi anime figures and "
                         "style A anime, 5 places) on the local GPU with Animagine XL 3.1, plus library.json and a "

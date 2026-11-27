@@ -1,0 +1,11 @@
+# A copy of the one lab-to-prod work ledger entry (content/work.yaml) that the pilot post names, so the
+# pilot builds without the lab-to-prod checkout. The ledger in lab-to-prod stays the source of truth. The post
+# folder next to this file is a copy of lab-to-prod content/2026-W48/2026-11-27-ai-eng-p4 at commit 82e70c0 (x.md left out).
+entries:
+  - id: cfe-rag-bm25
+    repo: claude-for-everyone-vi
+    ref: https://github.com/nghiep-pham-ecosys/claude-for-everyone-vi/commit/07d728363db3e3022d97e7d4264f7416af4e6a00
+    merged: 2026-11-16
+    what: >-
+      A course module on retrieval-augmented generation: BM25 retrieval that runs locally, chunking
+      and result-fusion exercises, search results passed to the model with citations, and a quiz.

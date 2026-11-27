@@ -558,6 +558,44 @@ peak -1.7 dBTP), black frames and drift (median 20 ms, p90 200 ms, 300 of 354
 cues) pass, fact-check waits; no card title touches its card; 3 Shorts (59.8,
 58.5, 59.4 s).
 
+## Explainer from a post and its merged work (issue 44)
+
+Nghiep (2026-11-27): every working day one English lesson video and one project video, each with 2 Shorts; then a
+third, a specialty explainer from a study lesson. `motion-studio explainer SOURCE --talk TALK` makes the project
+and specialty videos; `src/motion_studio/explainer.py`.
+
+- **Source.** A lab-to-prod post folder (`post.md`: front matter and channel sections, the `## linkedin` section is
+  the blog note; `image.png`; scripts and their `.expected` output; the entries named by `work:` in the nearest
+  `work.yaml`), or one study lesson file (`# Lesson YYYY-MM-DD: title`, `## Concept`, `## Worked example`,
+  `## Edge cases`, `## Quiz` with numbered questions and `Answer:` lines). A post without merged work has no
+  explainer (the ledger rule of lab-to-prod). A lesson uses only concepts with self-written examples, never graded
+  course code.
+- **Talk file.** The dialogue is written for the day (no LLM is called, P5): sections become chapters, each
+  sentence one scene, and each sentence must fit one subtitle cue (a split cue lands late and fails the drift
+  check). `--draft-talk FILE` writes a first talk from the source with `TODO` lines, which the build refuses.
+- **Look.** The illustrated look of the lessons (Lan and Minh, the chibi D and anime A library) for plain lines; a
+  new `card` visual for code, program output, a bar chart, points, a flow of boxes or the post's image: the panel
+  fills the left of the frame, the speaker's still is a square inset cropped at the face, the source of the panel
+  (file and lines) sits under the speaker's name, the caption runs along the bottom, and the "AI voice" and "Made
+  with AI" chips stay at the top right. Code is coloured by a small highlighter on the theme's code colours (no
+  Manim run per card); long lines wrap at a space; the font shrinks from 30 to 22 px before a line wraps.
+- **Numbers.** Every number in the voice or on a card must occur in the source; the build stops on one that does
+  not (names such as `bm25`, `k1`, `EC2` are not numbers; dates count whole). The draft fact check lists each
+  sentence with its numbers and the file and line each was found in (the source line that shares most words with
+  the sentence), plus one claim per code and output card and one per work entry, all unchecked: the gate's
+  fact-check fails until Nghiep reviews it. A reviewed `<talk>.factcheck.md` next to the talk file replaces the
+  draft.
+- **Job.** `en-<post folder>-explainer` (a lesson: `en-<date>-<file>-explainer`, or `Job:` in the talk); gate
+  window 480-900 s; 2 Shorts; playlist preset `lab-to-prod-ai-engineering` ("Lab to Prod — AI engineering in
+  practice") or `study-notes-explained` for lessons, written into the job's `voices.json`.
+
+**Pilots (2026-11-27).** `en-2026-11-27-ai-eng-p4-explainer` from the lab-to-prod post folder: 189 scenes (127
+cards, 62 illustrated), 7 chapters, 685.7 s; voice 28 s, visuals 434 s, render 252 s, subtitles 23 s. Gate (window
+480-900 s): duration, loudness (-14.1 LUFS, true peak -1.7 dBTP), black frames and drift (median 10 ms, p90 60 ms,
+180 of 189 cues) pass; fact-check waits for Nghiep (36 unchecked claims). 2 Shorts (49.1, 59.6 s).
+`en-2026-11-27-saa-explainer` from the study lesson: 184 scenes, 10 chapters, 795.0 s; visuals 464 s, render 282 s;
+the same gate result (drift median 10 ms, p90 80 ms, 169 of 184 cues); 2 Shorts (57.7, 52.3 s).
+
 ## Work dir and disk (issue 22)
 
 The laptop has about 30 GB free on each Windows drive, and the WSL disk lives
