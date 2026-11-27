@@ -1,0 +1,13 @@
+# A copy of the one lab-to-prod work ledger entry (content/work.yaml) that the post names, so the sample builds
+# without the lab-to-prod checkout. The ledger in lab-to-prod stays the source of truth. The post folder next to
+# this file is a copy of lab-to-prod content/2026-W49/2026-11-30-sim-p3 at commit e96530b (x.md, linkedin.pdf and
+# the short.* files left out), plus test_pfr.py: tests/test_pfr.py of process-sim-lab at the merge commit of PR #6
+# (6c8aa2e00a09c77b616d50f98459d8f443a3a3b6, MIT licence), unchanged, so the explainer can show the test itself.
+entries:
+  - id: psl-pfr-mixer-splitter
+    repo: process-sim-lab
+    ref: https://github.com/nghiep-pham-ecosys/process-sim-lab/pull/6
+    merged: 2026-11-17
+    what: >-
+      An isothermal first-order PFR (X = 1 - exp(-k tau)), a mixer and a splitter, with 17 tests
+      on hand-derived values; 2000 CSTRs in series come within 2e-4 of the PFR.
