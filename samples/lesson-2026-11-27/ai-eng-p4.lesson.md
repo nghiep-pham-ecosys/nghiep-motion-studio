@@ -37,7 +37,7 @@
 
 **5 chỗ khó:** *retrieval* /rɪˈtriː.vəl/ · *calibrating* /ˈkæl.ɪ.breɪ.tɪŋ/ · *chunk* /tʃʌŋk/ · *frequency* /ˈfriː.kwən.si/ · *database* /ˈdeɪ.tə.beɪs/. Âm cuối cần giữ: chunk**s**, rank**ed** /ræŋkt/, page**s** /ˈpeɪ.dʒɪz/, match**es** /ˈmætʃ.ɪz/, cut **it** off (nối âm: /kʌ.tɪ.tɒf/).
 
-**3 bước:**
+**2 bước:**
 
 1. Nghe/đọc theo cả bài 2 lần, ngắt đúng chỗ `/` `//`.
 2. Gấp script, kể lại 60–90 giây bằng lời mình (phần quan trọng nhất).
